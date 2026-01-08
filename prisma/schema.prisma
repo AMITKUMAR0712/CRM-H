@@ -1,0 +1,556 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ============================================
+// CORE PG MANAGEMENT TABLES
+// ============================================
+
+model Sector {
+  id            String   @id @default(cuid())
+  name          String   @unique // e.g., "Sector 51"
+  slug          String   @unique // e.g., "sector-51"
+  description   String?  @db.Text
+  metroStation  String? // Nearest metro station
+  metroDistance Float? // Distance in km
+  highlights    Json? // JSON array of key highlights
+  latitude      Float?
+  longitude     Float?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  pgs   PG[]
+  leads Lead[]
+  faqs  FAQ[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("sectors")
+}
+
+model PG {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  sectorId    String
+  address     String  @db.Text
+  latitude    Float?
+  longitude   Float?
+  description String? @db.Text
+
+  // Room & Pricing Info
+  roomType        RoomType // SINGLE, DOUBLE, TRIPLE, FOUR_SHARING
+  occupancyType   OccupancyType // BOYS, GIRLS, CO_LIVING
+  monthlyRent     Int // in INR
+  securityDeposit Int? // in INR
+
+  // Availability
+  totalRooms     Int     @default(0)
+  availableRooms Int     @default(0)
+  isAvailable    Boolean @default(true)
+
+  // Basic Amenities (Boolean flags)
+  hasAC          Boolean @default(false)
+  hasWifi        Boolean @default(true)
+  hasParking     Boolean @default(false)
+  hasGym         Boolean @default(false)
+  hasPowerBackup Boolean @default(true)
+  hasLaundry     Boolean @default(false)
+  hasTV          Boolean @default(false)
+  hasFridge      Boolean @default(false)
+
+  // Meals
+  mealsIncluded Boolean @default(false)
+  mealsPerDay   Int?    @default(0) // 0, 2, or 3
+
+  // Policies
+  gateClosingTime String? // e.g., "11:00 PM"
+  noticePeriod    Int?    @default(30) // days
+
+  // SEO
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+
+  // Status
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+  viewCount  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sector        Sector         @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  amenities     PGAmenity[]
+  photos        Photo[]
+  leads         Lead[]
+  reviews       Review[]
+  notifications Notification[]
+
+  @@index([slug])
+  @@index([sectorId])
+  @@index([roomType])
+  @@index([occupancyType])
+  @@index([monthlyRent])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@map("pgs")
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  TRIPLE
+  FOUR_SHARING
+}
+
+enum OccupancyType {
+  BOYS
+  GIRLS
+  CO_LIVING
+}
+
+// Master Amenities Table
+model Amenity {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "Attached Bathroom"
+  slug      String   @unique // e.g., "attached-bathroom"
+  icon      String? // Icon name or SVG path
+  category  String? // e.g., "Room", "Common", "Safety", "Services"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pgs PGAmenity[]
+
+  @@index([slug])
+  @@index([category])
+  @@map("amenities")
+}
+
+// Junction Table: PG <-> Amenities (Many-to-Many)
+model PGAmenity {
+  id        String   @id @default(cuid())
+  pgId      String
+  amenityId String
+  createdAt DateTime @default(now())
+
+  pg      PG      @relation(fields: [pgId], references: [id], onDelete: Cascade)
+  amenity Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@unique([pgId, amenityId])
+  @@index([pgId])
+  @@index([amenityId])
+  @@map("pg_amenities")
+}
+
+// Photos for PGs
+model Photo {
+  id           String   @id @default(cuid())
+  pgId         String
+  url          String   @db.Text // Cloudinary/S3 URL
+  altText      String?  @db.VarChar(255)
+  caption      String?  @db.VarChar(255)
+  category     String? // e.g., "Room", "Common Area", "Food", "Exterior"
+  isFeatured   Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  pg PG @relation(fields: [pgId], references: [id], onDelete: Cascade)
+
+  @@index([pgId])
+  @@index([category])
+  @@index([isFeatured])
+  @@map("photos")
+}
+
+// ============================================
+// LEAD MANAGEMENT
+// ============================================
+
+model Lead {
+  id String @id @default(cuid())
+
+  // User Info
+  name  String
+  phone String  @db.VarChar(15)
+  email String?
+
+  // Preferences
+  preferredSectorId String?
+  budgetMin         Int?
+  budgetMax         Int?
+  roomType          RoomType?
+  occupancyType     OccupancyType?
+  moveInDate        DateTime?
+
+  // Visit Request
+  visitSlot String? // e.g., "Morning", "Afternoon", "Evening"
+  message   String? @db.Text
+
+  // Source Tracking
+  source      String? @default("website") // "website", "google", "facebook", etc.
+  referrer    String? @db.Text // Full referrer URL
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
+  // Status & Assignment
+  status       LeadStatus @default(NEW)
+  assignedToId String?
+  priority     Priority   @default(MEDIUM)
+
+  // Related PG (if user inquired about specific PG)
+  pgId String?
+
+  // Notes (internal)
+  notes String? @db.Text
+
+  // Follow-up
+  followUpDate    DateTime?
+  lastContactedAt DateTime?
+
+  // Metadata
+  ipAddress  String? @db.VarChar(45)
+  userAgent  String? @db.Text
+  hasConsent Boolean @default(false) // GDPR/marketing consent
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  preferredSector Sector?        @relation(fields: [preferredSectorId], references: [id], onDelete: SetNull)
+  pg              PG?            @relation(fields: [pgId], references: [id], onDelete: SetNull)
+  assignedTo      User?          @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  activities      LeadActivity[]
+
+  @@index([phone])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([pgId])
+  @@index([preferredSectorId])
+  @@index([assignedToId])
+  @@map("leads")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  VISITED
+  INTERESTED
+  CONVERTED
+  CLOSED
+  LOST
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Lead Activity Log (for tracking interactions)
+model LeadActivity {
+  id            String   @id @default(cuid())
+  leadId        String
+  activityType  String // "CALL", "EMAIL", "WHATSAPP", "VISIT", "NOTE", "STATUS_CHANGE"
+  description   String   @db.Text
+  performedById String?
+  createdAt     DateTime @default(now())
+
+  lead        Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  performedBy User? @relation(fields: [performedById], references: [id], onDelete: SetNull)
+
+  @@index([leadId])
+  @@index([createdAt])
+  @@map("lead_activities")
+}
+
+// ============================================
+// BLOG & CONTENT
+// ============================================
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts BlogPost[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts PostTag[]
+
+  @@index([slug])
+  @@map("tags")
+}
+
+model BlogPost {
+  id            String  @id @default(cuid())
+  title         String  @db.VarChar(255)
+  slug          String  @unique
+  excerpt       String? @db.Text
+  content       String  @db.LongText // Full blog content (Markdown or HTML)
+  featuredImage String? @db.Text // URL
+
+  // SEO
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+  focusKeyword    String? @db.VarChar(100)
+
+  // Categorization
+  categoryId String?
+
+  // Author
+  authorId String
+
+  // Publishing
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+
+  // Engagement
+  viewCount Int  @default(0)
+  readTime  Int? @default(5) // in minutes
+
+  // Featured
+  isFeatured Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags     PostTag[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+  @@fulltext([title, content]) // Full-text search index
+  @@map("blog_posts")
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Junction Table: BlogPost <-> Tags (Many-to-Many)
+model PostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+  @@map("post_tags")
+}
+
+// ============================================
+// USER & AUTHENTICATION
+// ============================================
+
+model User {
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String // Hashed with bcrypt
+  role     UserRole @default(ADMIN)
+  avatar   String?  @db.Text
+  phone    String?  @db.VarChar(15)
+
+  // Status
+  isActive    Boolean   @default(true)
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  blogPosts     BlogPost[]
+  assignedLeads Lead[]
+  activities    LeadActivity[]
+  notifications Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+// ============================================
+// SITE SETTINGS
+// ============================================
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g., "site_name", "contact_email"
+  value     String   @db.Text
+  type      String   @default("text") // "text", "number", "boolean", "json"
+  group     String? // e.g., "general", "contact", "seo", "email"
+  isPublic  Boolean  @default(false) // Can be accessed from frontend
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([group])
+  @@map("settings")
+}
+
+// ============================================
+// ANALYTICS & TRACKING
+// ============================================
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String   @db.VarChar(255)
+  referrer  String?  @db.Text
+  userAgent String?  @db.Text
+  ipAddress String?  @db.VarChar(45)
+  country   String?  @db.VarChar(2) // ISO 2-letter country code
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+// ============================================
+// REVIEWS & TESTIMONIALS
+// ============================================
+
+model Review {
+  id         String   @id @default(cuid())
+  pgId       String?
+  name       String
+  occupation String?
+  rating     Int      @db.TinyInt // 1-5
+  comment    String   @db.Text
+  photo      String?  @db.Text
+  isVerified Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  pg PG? @relation(fields: [pgId], references: [id], onDelete: SetNull)
+
+  @@index([pgId])
+  @@index([rating])
+  @@index([isFeatured])
+  @@index([isApproved])
+  @@map("reviews")
+}
+
+// Add relation to PG model (add this to PG model above)
+// reviews Review[]
+
+// ============================================
+// FAQ MANAGEMENT
+// ============================================
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  category  String? // e.g., "General", "Booking", "Payments", "Facilities"
+  sectorId  String? // Optional - for sector-specific FAQs
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sector Sector? @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@index([sectorId])
+  @@index([order])
+  @@map("faqs")
+}
+
+// ============================================
+// EMAIL TEMPLATES
+// ============================================
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "lead_notification", "welcome_email"
+  subject   String
+  body      String   @db.LongText // HTML content
+  variables Json? // JSON array of available variables
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("email_templates")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  title     String
+  message   String   @db.Text
+  type      String   @default("info") // "info", "success", "warning", "error"
+  link      String?  @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pg   PG?     @relation(fields: [pGId], references: [id])
+  pGId String?
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Add relation to User model (add this to User model above)
+// notifications Notification[]
