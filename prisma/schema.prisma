@@ -554,3 +554,46 @@ model Notification {
 
 // Add relation to User model (add this to User model above)
 // notifications Notification[]
+
+// ============================================
+// GALLERY IMAGES (Non-PG specific)
+// ============================================
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  url          String   @db.Text // Cloudinary/S3 URL
+  altText      String?  @db.VarChar(255)
+  caption      String?  @db.VarChar(255)
+  album        String // "rooms", "common", "food", "neighborhood", "safety", "exterior"
+  sectorSlug   String? // Optional sector association (e.g., "sector-51")
+  pgId         String? // Optional PG association
+  displayOrder Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([album])
+  @@index([sectorSlug])
+  @@index([pgId])
+  @@index([isFeatured])
+  @@map("gallery_images")
+}
+
+// ============================================
+// SMART FINDER COMPARISONS
+// ============================================
+
+model Comparison {
+  id        String   @id @default(cuid())
+  sessionId String? // For anonymous users (cookie-based)
+  pgIds     Json // Array of PG IDs to compare
+  shareCode String?  @unique @db.VarChar(12) // Short code for sharing via WhatsApp
+  createdAt DateTime @default(now())
+  expiresAt DateTime // Auto-expire after 24-48 hours
+
+  @@index([sessionId])
+  @@index([shareCode])
+  @@index([expiresAt])
+  @@map("comparisons")
+}
