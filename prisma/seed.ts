@@ -1,8 +1,9 @@
-import { RoomType, OccupancyType, UserRole, PostStatus } from '@prisma/client'
+import { RoomType, OccupancyType, UserRole, PostStatus, LeadStatus, Priority } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import 'dotenv/config'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 import { PrismaClient } from '@prisma/client'
+
+import 'dotenv/config'
 
 const adapter = new PrismaMariaDb({
     user: process.env.DATABASE_USER,
@@ -15,247 +16,227 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-    console.log('🌱 Seeding database...')
+    console.log('🌱 Seeding database...\n')
 
-    // 1. Create Admin User
-    const adminPassword = await bcrypt.hash('Admin@123', 10)
+    // ========== 1. USER ==========
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sohopg.com' },
         update: {},
         create: {
             name: 'SOHO Admin',
             email: 'admin@sohopg.com',
-            password: adminPassword,
+            password: await bcrypt.hash('Admin@123', 10),
             role: UserRole.SUPER_ADMIN,
+            phone: '+919876543210',
         },
     })
-    console.log('✅ Admin user created')
+    console.log('✅ User')
 
-    // 2. Create Sectors
-    const sectors = await Promise.all([
+    // ========== 2. SECTORS ==========
+    const [sector51, sector62, sector50] = await Promise.all([
         prisma.sector.upsert({
             where: { slug: 'sector-51' },
             update: {},
-            create: {
-                name: 'Sector 51',
-                slug: 'sector-51',
-                description: 'Prime tech hub near Noida City Centre. Close to major IT companies and metro station.',
-                metroStation: 'Sector 51 Metro',
-                metroDistance: 0.5,
-                latitude: 28.4303,
-                longitude: 77.3784,
-                highlights: ['Near Metro', 'IT Hub', 'Markets Nearby'],
-            },
+            create: { name: 'Sector 51', slug: 'sector-51', description: 'Tech hub near metro', metroStation: 'Sector 51 Metro', metroDistance: 0.5, latitude: 28.4303, longitude: 77.3784, highlights: ['Near Metro', 'IT Hub'] },
         }),
         prisma.sector.upsert({
             where: { slug: 'sector-62' },
             update: {},
-            create: {
-                name: 'Sector 62',
-                slug: 'sector-62',
-                description: 'Major corporate hub with excellent connectivity. Home to top IT companies.',
-                metroStation: 'Sector 62 Metro',
-                metroDistance: 0.8,
-                latitude: 28.6279,
-                longitude: 77.3649,
-                highlights: ['Corporate Hub', 'Restaurants', 'Good Transport'],
-            },
+            create: { name: 'Sector 62', slug: 'sector-62', description: 'Corporate hub', metroStation: 'Sector 62 Metro', metroDistance: 0.8, latitude: 28.6279, longitude: 77.3649, highlights: ['Corporate', 'Restaurants'] },
         }),
         prisma.sector.upsert({
             where: { slug: 'sector-50' },
             update: {},
-            create: {
-                name: 'Sector 50',
-                slug: 'sector-50',
-                description: 'Peaceful residential area with good amenities and parks.',
-                metroStation: 'Sector 50 Metro',
-                metroDistance: 1.2,
-                latitude: 28.4285,
-                longitude: 77.3721,
-                highlights: ['Residential', 'Parks', 'Quiet Area'],
-            },
+            create: { name: 'Sector 50', slug: 'sector-50', description: 'Residential area', metroStation: 'Sector 50 Metro', metroDistance: 1.2, latitude: 28.4285, longitude: 77.3721, highlights: ['Quiet', 'Parks'] },
         }),
     ])
-    console.log(`✅ ${sectors.length} sectors created`)
+    console.log('✅ Sectors')
 
-    // 3. Create Amenities
+    // ========== 3. AMENITIES ==========
     const amenitiesData = [
         { name: 'Attached Bathroom', slug: 'attached-bathroom', category: 'Room', icon: 'bath' },
-        { name: 'Air Conditioning', slug: 'ac', category: 'Room', icon: 'snowflake' },
+        { name: 'AC', slug: 'ac', category: 'Room', icon: 'snowflake' },
         { name: 'Wi-Fi', slug: 'wifi', category: 'Room', icon: 'wifi' },
         { name: 'Study Table', slug: 'study-table', category: 'Room', icon: 'desk' },
-        { name: 'Wardrobe', slug: 'wardrobe', category: 'Room', icon: 'archive' },
         { name: 'CCTV', slug: 'cctv', category: 'Safety', icon: 'camera' },
-        { name: 'Biometric Entry', slug: 'biometric', category: 'Safety', icon: 'fingerprint' },
+        { name: 'Biometric', slug: 'biometric', category: 'Safety', icon: 'fingerprint' },
         { name: 'Housekeeping', slug: 'housekeeping', category: 'Services', icon: 'sparkles' },
         { name: 'Laundry', slug: 'laundry', category: 'Services', icon: 'shirt' },
         { name: 'Gym', slug: 'gym', category: 'Common', icon: 'dumbbell' },
-        { name: 'Common Lounge', slug: 'lounge', category: 'Common', icon: 'sofa' },
         { name: 'Parking', slug: 'parking', category: 'Common', icon: 'car' },
     ]
+    const amenities = await Promise.all(amenitiesData.map(a => prisma.amenity.upsert({ where: { slug: a.slug }, update: {}, create: a })))
+    console.log('✅ Amenities')
 
-    for (const amenity of amenitiesData) {
-        await prisma.amenity.upsert({
-            where: { slug: amenity.slug },
-            update: {},
-            create: amenity,
-        })
-    }
-    console.log(`✅ ${amenitiesData.length} amenities created`)
-
-    // 4. Create Sample PGs
+    // ========== 4. PGs ==========
     const pg1 = await prisma.pG.upsert({
-        where: { slug: 'soho-premium-sector-51' },
+        where: { slug: 'soho-premium-51' },
         update: {},
         create: {
-            name: 'SOHO Premium - Sector 51',
-            slug: 'soho-premium-sector-51',
-            sectorId: sectors[0].id,
-            address: 'A-123, Block A, Sector 51, Noida, UP 201301',
-            roomType: RoomType.SINGLE,
-            occupancyType: OccupancyType.BOYS,
-            monthlyRent: 12000,
-            securityDeposit: 12000,
-            totalRooms: 20,
-            availableRooms: 5,
-            hasAC: true,
-            hasWifi: true,
-            hasGym: true,
-            hasPowerBackup: true,
-            mealsIncluded: true,
-            mealsPerDay: 3,
-            gateClosingTime: '11:00 PM',
-            isFeatured: true,
-            metaTitle: 'Premium Single Room PG in Sector 51 Noida',
-            metaDescription: 'Fully furnished AC single room PG with meals, gym & WiFi near Sector 51 Metro.',
+            name: 'SOHO Premium', slug: 'soho-premium-51', sectorId: sector51.id, address: 'A-123, Sector 51, Noida',
+            roomType: RoomType.SINGLE, occupancyType: OccupancyType.BOYS, monthlyRent: 12000, securityDeposit: 12000,
+            totalRooms: 20, availableRooms: 5, hasAC: true, hasWifi: true, hasGym: true, mealsIncluded: true, mealsPerDay: 3, isFeatured: true,
         },
     })
-
     const pg2 = await prisma.pG.upsert({
-        where: { slug: 'soho-comfort-sector-62' },
+        where: { slug: 'soho-comfort-62' },
         update: {},
         create: {
-            name: 'SOHO Comfort - Sector 62',
-            slug: 'soho-comfort-sector-62',
-            sectorId: sectors[1].id,
-            address: 'B-45, Block B, Sector 62, Noida, UP 201309',
-            roomType: RoomType.DOUBLE,
-            occupancyType: OccupancyType.CO_LIVING,
-            monthlyRent: 8000,
-            securityDeposit: 8000,
-            totalRooms: 30,
-            availableRooms: 8,
-            hasAC: true,
-            hasWifi: true,
-            hasPowerBackup: true,
-            mealsIncluded: true,
-            mealsPerDay: 2,
-            gateClosingTime: '10:30 PM',
-            isFeatured: true,
+            name: 'SOHO Comfort', slug: 'soho-comfort-62', sectorId: sector62.id, address: 'B-45, Sector 62, Noida',
+            roomType: RoomType.DOUBLE, occupancyType: OccupancyType.CO_LIVING, monthlyRent: 8000, securityDeposit: 8000,
+            totalRooms: 30, availableRooms: 8, hasAC: true, hasWifi: true, mealsIncluded: true, mealsPerDay: 2, isFeatured: true,
         },
     })
-    console.log('✅ 2 sample PGs created')
+    console.log('✅ PGs')
 
-    // 5. Create Blog Category & Post
+    // ========== 5. PG_AMENITIES (Junction) ==========
+    await prisma.pGAmenity.createMany({
+        data: [
+            { pgId: pg1.id, amenityId: amenities[0].id }, { pgId: pg1.id, amenityId: amenities[1].id },
+            { pgId: pg1.id, amenityId: amenities[2].id }, { pgId: pg1.id, amenityId: amenities[4].id },
+            { pgId: pg2.id, amenityId: amenities[0].id }, { pgId: pg2.id, amenityId: amenities[2].id },
+        ],
+        skipDuplicates: true,
+    })
+    console.log('✅ PG Amenities')
+
+    // ========== 6. PHOTOS ==========
+    await prisma.photo.createMany({
+        data: [
+            { pgId: pg1.id, url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800', altText: 'Room view', category: 'Room', isFeatured: true },
+            { pgId: pg1.id, url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800', altText: 'Common area', category: 'Common' },
+            { pgId: pg2.id, url: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800', altText: 'Double room', category: 'Room', isFeatured: true },
+        ],
+        skipDuplicates: true,
+    })
+    console.log('✅ Photos')
+
+    // ========== 7. LEADS ==========
+    const lead = await prisma.lead.create({
+        data: {
+            name: 'Amit Kumar', phone: '+919123456789', email: 'amit@example.com',
+            preferredSectorId: sector51.id, budgetMin: 8000, budgetMax: 12000,
+            roomType: RoomType.SINGLE, occupancyType: OccupancyType.BOYS, visitSlot: 'Morning',
+            message: 'Looking for PG near metro', source: 'website', status: LeadStatus.NEW, priority: Priority.HIGH, hasConsent: true,
+        },
+    })
+    console.log('✅ Leads')
+
+    // ========== 8. LEAD_ACTIVITIES ==========
+    await prisma.leadActivity.create({
+        data: { leadId: lead.id, activityType: 'NOTE', description: 'Initial inquiry received', performedById: admin.id },
+    })
+    console.log('✅ Lead Activities')
+
+    // ========== 9. CATEGORIES ==========
     const category = await prisma.category.upsert({
         where: { slug: 'pg-tips' },
         update: {},
-        create: { name: 'PG Tips', slug: 'pg-tips', description: 'Tips for finding and living in a PG' },
+        create: { name: 'PG Tips', slug: 'pg-tips', description: 'Tips for PG living' },
     })
+    console.log('✅ Categories')
 
-    await prisma.blogPost.upsert({
-        where: { slug: '10-tips-choosing-pg-noida' },
+    // ========== 10. TAGS ==========
+    const [tag1, tag2] = await Promise.all([
+        prisma.tag.upsert({ where: { slug: 'noida' }, update: {}, create: { name: 'Noida', slug: 'noida' } }),
+        prisma.tag.upsert({ where: { slug: 'tips' }, update: {}, create: { name: 'Tips', slug: 'tips' } }),
+    ])
+    console.log('✅ Tags')
+
+    // ========== 11. BLOG_POSTS ==========
+    const post = await prisma.blogPost.upsert({
+        where: { slug: '10-tips-pg-noida' },
         update: {},
         create: {
-            title: '10 Essential Tips for Choosing a PG in Noida',
-            slug: '10-tips-choosing-pg-noida',
-            excerpt: 'Finding the perfect PG can be overwhelming. Here are 10 tips to help you make the right choice.',
-            content: `# 10 Essential Tips for Choosing a PG in Noida
-
-Finding the right PG accommodation is crucial for your comfort and productivity. Here's what to look for:
-
-## 1. Location & Connectivity
-Choose a PG near your workplace or college. Check metro connectivity and bus routes.
-
-## 2. Safety & Security
-Look for CCTV cameras, biometric entry, and 24/7 security guards.
-
-## 3. Room Quality
-Check ventilation, natural light, and furniture condition before finalizing.
-
-## 4. Food Quality
-If meals are included, taste the food before committing.
-
-## 5. WiFi Speed
-Essential for work-from-home. Test the internet speed during your visit.`,
-            categoryId: category.id,
-            authorId: admin.id,
-            status: PostStatus.PUBLISHED,
-            publishedAt: new Date(),
-            readTime: 5,
-            isFeatured: true,
+            title: '10 Tips for Choosing PG in Noida', slug: '10-tips-pg-noida',
+            excerpt: 'Essential tips for finding perfect PG',
+            content: '# 10 Tips\n\n1. Check location\n2. Verify amenities\n3. Taste food\n4. Check WiFi\n5. Meet residents',
+            categoryId: category.id, authorId: admin.id, status: PostStatus.PUBLISHED, publishedAt: new Date(), readTime: 5, isFeatured: true,
         },
     })
-    console.log('✅ Blog category & post created')
+    console.log('✅ Blog Posts')
 
-    // 6. Create FAQs
-    const faqs = [
-        { question: 'What documents are required for PG admission?', answer: 'You need a valid ID proof (Aadhar/PAN), passport-size photos, and office/college ID.', category: 'General' },
-        { question: 'Is there a lock-in period?', answer: 'Yes, typically 1 month notice period is required before vacating.', category: 'Booking' },
-        { question: 'Are meals included in the rent?', answer: 'It varies by PG. Most of our PGs offer 2-3 meals per day included in rent.', category: 'Facilities' },
-        { question: 'What are the payment options?', answer: 'We accept UPI, bank transfer, and cash. Rent is due by 5th of each month.', category: 'Payments' },
-    ]
+    // ========== 12. POST_TAGS (Junction) ==========
+    await prisma.postTag.createMany({
+        data: [{ postId: post.id, tagId: tag1.id }, { postId: post.id, tagId: tag2.id }],
+        skipDuplicates: true,
+    })
+    console.log('✅ Post Tags')
 
-    for (let i = 0; i < faqs.length; i++) {
-        await prisma.fAQ.create({
-            data: { ...faqs[i], order: i + 1 },
-        })
-    }
-    console.log(`✅ ${faqs.length} FAQs created`)
+    // ========== 13. REVIEWS ==========
+    await prisma.review.create({
+        data: { pgId: pg1.id, name: 'Rahul Sharma', occupation: 'Engineer', rating: 5, comment: 'Great place!', isVerified: true, isFeatured: true, isApproved: true },
+    })
+    console.log('✅ Reviews')
 
-    // 7. Create Settings
+    // ========== 14. FAQs ==========
+    await prisma.fAQ.createMany({
+        data: [
+            { question: 'What documents are required?', answer: 'Aadhar, PAN, and office ID.', category: 'General', order: 1 },
+            { question: 'Is food included?', answer: 'Yes, 2-3 meals per day.', category: 'Facilities', order: 2 },
+            { question: 'What is the notice period?', answer: '1 month notice required.', category: 'Booking', order: 3 },
+        ],
+    })
+    console.log('✅ FAQs')
+
+    // ========== 15. SETTINGS ==========
     const settings = [
         { key: 'site_name', value: 'SOHO PG', type: 'text', group: 'general', isPublic: true },
-        { key: 'site_tagline', value: 'Premium PG Accommodation in Noida', type: 'text', group: 'general', isPublic: true },
         { key: 'contact_phone', value: '+91 98765 43210', type: 'text', group: 'contact', isPublic: true },
         { key: 'contact_email', value: 'info@sohopg.com', type: 'text', group: 'contact', isPublic: true },
-        { key: 'contact_address', value: 'A-123, Sector 51, Noida, UP 201301', type: 'text', group: 'contact', isPublic: true },
-        { key: 'whatsapp_number', value: '+919876543210', type: 'text', group: 'contact', isPublic: true },
+        { key: 'whatsapp', value: '+919876543210', type: 'text', group: 'contact', isPublic: true },
     ]
+    await Promise.all(settings.map(s => prisma.setting.upsert({ where: { key: s.key }, update: {}, create: s })))
+    console.log('✅ Settings')
 
-    for (const setting of settings) {
-        await prisma.setting.upsert({
-            where: { key: setting.key },
-            update: { value: setting.value },
-            create: setting,
-        })
-    }
-    console.log(`✅ ${settings.length} settings created`)
+    // ========== 16. PAGE_VIEWS ==========
+    await prisma.pageView.createMany({
+        data: [
+            { path: '/', referrer: 'https://google.com' },
+            { path: '/pg-locations/sector-51', referrer: 'https://google.com' },
+            { path: '/smart-finder' },
+        ],
+    })
+    console.log('✅ Page Views')
 
-    // 8. Create Sample Review
-    await prisma.review.create({
-        data: {
-            pgId: pg1.id,
-            name: 'Rahul Sharma',
-            occupation: 'Software Engineer',
-            rating: 5,
-            comment: 'Excellent PG with great food and facilities. The rooms are clean and well-maintained. Staff is very helpful.',
-            isVerified: true,
-            isFeatured: true,
-            isApproved: true,
+    // ========== 17. EMAIL_TEMPLATES ==========
+    await prisma.emailTemplate.upsert({
+        where: { name: 'lead_notification' },
+        update: {},
+        create: {
+            name: 'lead_notification', subject: 'New Lead: {{name}}',
+            body: '<h2>New Lead</h2><p>Name: {{name}}</p><p>Phone: {{phone}}</p>',
+            variables: ['name', 'phone', 'email', 'message'],
         },
     })
-    console.log('✅ Sample review created')
+    console.log('✅ Email Templates')
 
-    console.log('\n🎉 Database seeded successfully!')
-    console.log('\n📝 Admin Login:')
-    console.log('   Email: admin@sohopg.com')
-    console.log('   Password: Admin@123')
+    // ========== 18. NOTIFICATIONS ==========
+    await prisma.notification.create({
+        data: { userId: admin.id, title: 'Welcome!', message: 'Your admin account is ready.', type: 'success' },
+    })
+    console.log('✅ Notifications')
+
+    // ========== 19. GALLERY_IMAGES ==========
+    await prisma.galleryImage.createMany({
+        data: [
+            { url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800', album: 'rooms', altText: 'Single room', isFeatured: true },
+            { url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800', album: 'common', altText: 'Lounge' },
+            { url: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800', album: 'food', altText: 'Dining' },
+        ],
+    })
+    console.log('✅ Gallery Images')
+
+    // ========== 20. COMPARISONS ==========
+    await prisma.comparison.create({
+        data: { pgIds: [pg1.id, pg2.id], shareCode: 'abc12345', expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000) },
+    })
+    console.log('✅ Comparisons')
+
+    console.log('\n🎉 All tables seeded!\n')
+    console.log('📝 Admin: admin@sohopg.com / Admin@123')
 }
 
 main()
-    .catch((e) => {
-        console.error('❌ Seed error:', e)
-        process.exit(1)
-    })
+    .catch(e => { console.error('❌ Error:', e); process.exit(1) })
     .finally(() => prisma.$disconnect())
