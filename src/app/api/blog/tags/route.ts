@@ -4,7 +4,8 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { tagCreateSchema, tagUpdateSchema } from '@/validators/blog.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 /**
  * GET /api/blog/tags - List all tags
@@ -28,8 +29,8 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.BLOG_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, tagCreateSchema)
         if (hasValidationError(validation)) return validation.error
@@ -50,8 +51,8 @@ export async function POST(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.BLOG_DELETE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')

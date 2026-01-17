@@ -2,6 +2,8 @@ import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { UserRole } from '@prisma/client'
+import prisma from '@/lib/prisma'
+import { getActiveUserRestriction } from '@/lib/restrictions'
 
 export type AuthSession = {
     user: {
@@ -23,6 +25,76 @@ export async function requireAuth(): Promise<AuthSession | NextResponse> {
         return NextResponse.json(
             { success: false, error: 'Unauthorized. Please login to continue.' },
             { status: 401 }
+        )
+    }
+
+    const userId = session.user.id
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, isActive: true },
+    })
+
+    if (!user || !user.isActive) {
+        return NextResponse.json(
+            { success: false, error: 'Your account has been deactivated.' },
+            { status: 403 }
+        )
+    }
+
+    const restriction = await getActiveUserRestriction(userId)
+    if (restriction) {
+        const message =
+            restriction.type === 'SUSPENSION'
+                ? `Your account is temporarily suspended${restriction.endsAt ? ` until ${restriction.endsAt.toISOString()}` : ''}.`
+                : 'Your account has been blocked.'
+
+        return NextResponse.json(
+            { success: false, error: restriction.reason ? `${message} Reason: ${restriction.reason}` : message },
+            { status: 403 }
+        )
+    }
+
+    return session as AuthSession
+}
+
+/**
+ * Optionally check authentication for a route.
+ * - If not logged in: returns null
+ * - If logged in but inactive/restricted: returns an error response
+ * - If logged in and allowed: returns the session
+ */
+export async function requireOptionalAuth(): Promise<AuthSession | null | NextResponse> {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+        return null
+    }
+
+    const userId = session.user.id
+
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, isActive: true },
+    })
+
+    if (!user || !user.isActive) {
+        return NextResponse.json(
+            { success: false, error: 'Your account has been deactivated.' },
+            { status: 403 }
+        )
+    }
+
+    const restriction = await getActiveUserRestriction(userId)
+    if (restriction) {
+        const message =
+            restriction.type === 'SUSPENSION'
+                ? `Your account is temporarily suspended${restriction.endsAt ? ` until ${restriction.endsAt.toISOString()}` : ''}.`
+                : 'Your account has been blocked.'
+
+        return NextResponse.json(
+            { success: false, error: restriction.reason ? `${message} Reason: ${restriction.reason}` : message },
+            { status: 403 }
         )
     }
 

@@ -4,7 +4,8 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { faqCreateSchema, faqUpdateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { z } from 'zod'
 
 const faqQuerySchema = z.object({
@@ -45,8 +46,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.PAGE_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, faqCreateSchema)
         if (hasValidationError(validation)) {

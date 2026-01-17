@@ -4,8 +4,10 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { reviewCreateSchema, reviewUpdateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { formRateLimiter } from '@/middleware/rateLimit'
+import { requireOptionalAuth } from '@/middleware/auth'
 
 /**
  * GET /api/reviews - List approved reviews
@@ -60,6 +62,9 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
+        const optionalAuth = await requireOptionalAuth()
+        if (optionalAuth instanceof NextResponse) return optionalAuth
+
         const rateLimitResult = formRateLimiter(req)
         if (rateLimitResult) return rateLimitResult
 
@@ -95,8 +100,8 @@ export async function POST(req: NextRequest) {
  */
 export async function PATCH(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.REVIEW_MODERATE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')

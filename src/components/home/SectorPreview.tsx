@@ -72,7 +72,7 @@ export default function SectorPreview() {
                         >
                             <Link
                                 href={`/pg-locations/${sector.slug}`}
-                                className="block p-6 rounded-2xl bg-white border border-[var(--color-border)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group h-full"
+                                className="block p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] card-3d group h-full"
                             >
                                 <div className="flex items-center gap-2 text-[var(--color-clay)] mb-4">
                                     <MapPin className="w-5 h-5" />

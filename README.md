@@ -16,6 +16,22 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Database seed (demo logins)
+
+This project seeds demo users via Prisma (see `prisma/seed.ts`).
+
+- Run seed: `pnpm prisma db seed`
+- Print demo passwords in terminal (DEV):
+	- macOS/Linux: `SEED_PRINT_CREDENTIALS=true pnpm prisma db seed`
+	- Windows (PowerShell): `$env:SEED_PRINT_CREDENTIALS='true'; pnpm prisma db seed`
+- Force a specific password (example):
+	- macOS/Linux: `SEED_SUPER_ADMIN_PASSWORD='MyStrongPass123!' SEED_PRINT_CREDENTIALS=true pnpm prisma db seed`
+	- Windows (PowerShell): `$env:SEED_SUPER_ADMIN_PASSWORD='MyStrongPass123!'; $env:SEED_PRINT_CREDENTIALS='true'; pnpm prisma db seed`
+
+Login URLs:
+- Admin panel: `/admin/login`
+- User panel: `/login`
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

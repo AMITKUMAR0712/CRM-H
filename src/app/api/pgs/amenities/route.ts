@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { z } from 'zod'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 
@@ -38,8 +39,8 @@ export async function GET(req: NextRequest) {
  */
 export async function PUT(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.PG_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, pgAmenitySchema)
         if (hasValidationError(validation)) return validation.error

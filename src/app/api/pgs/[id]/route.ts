@@ -4,7 +4,8 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { pgUpdateSchema } from '@/validators/pg.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -61,8 +62,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.PG_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { id } = await params
 
@@ -114,8 +115,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.PG_DELETE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { id } = await params
 

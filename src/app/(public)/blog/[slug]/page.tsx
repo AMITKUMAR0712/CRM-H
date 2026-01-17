@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Calendar, Clock, User, ArrowLeft, Share2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import PageHero from '@/components/layout/PageHero'
 
 // Sample blog post data
 const postsData: Record<string, {
@@ -28,7 +29,7 @@ const postsData: Record<string, {
       <p>Consider proximity to your workplace, metro stations, and essential services. Sectors 51, 62, and 50 are popular choices for working professionals.</p>
       
       <h2>3. Check the Amenities</h2>
-      <p>Make a list of must-have amenities like AC, WiFi, meals, and parking. Don't compromise on essentials.</p>
+    <p>Make a list of must-have amenities like AC, WiFi, meals, and parking. Don&apos;t compromise on essentials.</p>
       
       <h2>4. Visit Before Booking</h2>
       <p>Always visit the PG in person before making a decision. Photos can be misleading.</p>
@@ -83,70 +84,88 @@ export default async function BlogPostPage({ params }: Props) {
     }
 
     return (
-        <article className="section-padding">
-            <div className="container-custom">
-                <div className="max-w-3xl mx-auto">
-                    {/* Back Link */}
-                    <Link
-                        href="/blog"
-                        className="inline-flex items-center gap-2 text-[var(--color-muted)] hover:text-[var(--color-clay)] mb-8"
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Blog
-                    </Link>
+        <article>
+            <PageHero
+                kicker={post.category}
+                title={post.title}
+                subtitle={post.excerpt}
+                align="left"
+                actions={
+                    <>
+                        <Button variant="outline" asChild>
+                            <Link href="/blog">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to Blog
+                            </Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/smart-finder">Find a PG</Link>
+                        </Button>
+                    </>
+                }
+            />
 
-                    {/* Header */}
-                    <header className="mb-10">
-                        <Badge className="mb-4">{post.category}</Badge>
-                        <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--color-graphite)] mb-6">
-                            {post.title}
-                        </h1>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--color-muted)]">
-                            <div className="flex items-center gap-1">
-                                <User className="w-4 h-4" />
-                                {post.author}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                {new Date(post.publishedAt).toLocaleDateString('en-IN', { month: 'long', day: 'numeric', year: 'numeric' })}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                {post.readTime} min read
-                            </div>
+            <div className="container-custom pb-14">
+                <div className="mx-auto max-w-3xl">
+                    {/* Meta row */}
+                    <div className="mb-6 flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">
+                        <Badge className="mr-1">{post.category}</Badge>
+                        <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            {post.author}
                         </div>
-                    </header>
+                        <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {new Date(post.publishedAt).toLocaleDateString('en-IN', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric',
+                            })}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {post.readTime} min read
+                        </div>
+                    </div>
 
                     {/* Featured Image */}
-                    <div className="aspect-video bg-[var(--color-limestone)] rounded-2xl mb-10 flex items-center justify-center">
-                        <span className="text-[var(--color-muted)]">Featured Image</span>
+                    <div className="relative mb-8 aspect-video overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/26 to-transparent" />
+                        <div className="flex h-full w-full items-center justify-center text-(--color-muted)">Featured Image</div>
                     </div>
 
                     {/* Content */}
-                    <div
-                        className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-[var(--color-graphite)] prose-p:text-[var(--color-muted)] prose-a:text-[var(--color-clay)]"
-                        dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
+                    <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-7 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.10)] md:p-10">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/22 to-transparent" />
+                        <div
+                            className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-(--color-graphite) prose-p:text-(--color-foreground) prose-a:text-(--color-clay) prose-strong:text-(--color-graphite)"
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                        />
+                    </div>
 
                     {/* Share */}
-                    <div className="border-t border-[var(--color-border)] mt-10 pt-8">
+                    <div className="mt-8 overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 px-6 py-5 backdrop-blur-md">
                         <div className="flex items-center justify-between">
-                            <span className="text-[var(--color-muted)]">Share this article</span>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="sm">
-                                    <Share2 className="w-4 h-4" />
-                                </Button>
-                            </div>
+                            <span className="text-sm text-(--color-muted)">Share this article</span>
+                            <Button variant="outline" size="sm" aria-label="Share">
+                                <Share2 className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
 
                     {/* CTA */}
-                    <div className="mt-10 p-8 bg-[var(--color-limestone)] rounded-2xl text-center">
-                        <h3 className="font-serif text-xl font-semibold mb-2">Looking for a PG in Noida?</h3>
-                        <p className="text-[var(--color-muted)] mb-4">Let us help you find the perfect accommodation.</p>
-                        <Button asChild>
-                            <Link href="/smart-finder">Find Your PG</Link>
-                        </Button>
+                    <div className="relative mt-8 overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 text-center backdrop-blur-md">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/22 to-transparent" />
+                        <h3 className="font-serif text-xl font-semibold text-(--color-graphite)">Looking for a PG in Noida?</h3>
+                        <p className="mt-2 text-(--color-muted)">Use Smart Finder to shortlist options in minutes.</p>
+                        <div className="mt-5 flex flex-wrap justify-center gap-3">
+                            <Button asChild>
+                                <Link href="/smart-finder">Find Your PG</Link>
+                            </Button>
+                            <Button variant="outline" asChild>
+                                <Link href="/contact">Book a Visit</Link>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

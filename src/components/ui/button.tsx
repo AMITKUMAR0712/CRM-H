@@ -13,7 +13,7 @@ const buttonVariants = cva(
                 secondary:
                     "bg-[var(--color-olive)] text-white hover:bg-[var(--color-olive)]/90",
                 outline:
-                    "border-2 border-[var(--color-graphite)] bg-transparent hover:bg-[var(--color-graphite)] hover:text-white",
+                    "border-2 border-[var(--color-border)] bg-transparent hover:bg-[var(--color-foreground)] hover:text-[var(--color-background)]",
                 ghost:
                     "hover:bg-[var(--color-limestone)] hover:text-[var(--color-graphite)]",
                 link:

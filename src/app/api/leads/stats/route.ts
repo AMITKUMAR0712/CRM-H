@@ -1,16 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
+import { Prisma } from '@prisma/client'
 
 /**
  * GET /api/leads/stats - Get lead statistics (Admin only)
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_READ)
+        if (authResult instanceof NextResponse) return authResult
+
+        const assignedFilter = {}
+        const assignedSql = Prisma.empty
 
         // Get date ranges
         const now = new Date()
@@ -31,33 +36,35 @@ export async function GET(req: NextRequest) {
             topSectors,
         ] = await Promise.all([
             // Total leads
-            prisma.lead.count(),
+            prisma.lead.count({ where: assignedFilter }),
 
             // This month
             prisma.lead.count({
-                where: { createdAt: { gte: startOfMonth } },
+                where: { ...assignedFilter, createdAt: { gte: startOfMonth } },
             }),
 
             // Last month
             prisma.lead.count({
                 where: {
+                    ...assignedFilter,
                     createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
                 },
             }),
 
             // New (uncontacted)
             prisma.lead.count({
-                where: { status: 'NEW' },
+                where: { ...assignedFilter, status: 'NEW' },
             }),
 
             // Converted
             prisma.lead.count({
-                where: { status: 'CONVERTED' },
+                where: { ...assignedFilter, status: 'CONVERTED' },
             }),
 
             // By status
             prisma.lead.groupBy({
                 by: ['status'],
+                where: assignedFilter,
                 _count: true,
             }),
 
@@ -66,6 +73,7 @@ export async function GET(req: NextRequest) {
         SELECT DATE(createdAt) as date, COUNT(*) as count
         FROM leads
         WHERE createdAt >= ${thirtyDaysAgo}
+                ${assignedSql}
         GROUP BY DATE(createdAt)
         ORDER BY date ASC
       `,
@@ -73,7 +81,7 @@ export async function GET(req: NextRequest) {
             // Top sectors
             prisma.lead.groupBy({
                 by: ['preferredSectorId'],
-                where: { preferredSectorId: { not: null } },
+                where: { ...assignedFilter, preferredSectorId: { not: null } },
                 _count: true,
                 orderBy: { _count: { preferredSectorId: 'desc' } },
                 take: 5,

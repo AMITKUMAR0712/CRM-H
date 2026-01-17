@@ -4,7 +4,8 @@ import { success, paginated, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { blogPostCreateSchema, blogPostQuerySchema } from '@/validators/blog.validator'
 import { validateBody, validateQuery, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { parsePagination, paginationQuery } from '@/utils/pagination'
 import { Prisma, PostStatus } from '@prisma/client'
 
@@ -79,10 +80,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
-
-        const session = authResult
+        const authResult = await requirePermission(PERMISSIONS.BLOG_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, blogPostCreateSchema)
         if (hasValidationError(validation)) {
@@ -115,7 +114,7 @@ export async function POST(req: NextRequest) {
                 metaDescription: data.metaDescription,
                 focusKeyword: data.focusKeyword,
                 categoryId: data.categoryId,
-                authorId: session.user.id,
+                authorId: authResult.user.id,
                 status: data.status,
                 publishedAt: data.status === 'PUBLISHED' ? new Date() : null,
                 readTime: data.readTime,

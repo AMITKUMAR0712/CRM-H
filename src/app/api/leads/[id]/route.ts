@@ -4,7 +4,8 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { leadUpdateSchema } from '@/validators/lead.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -15,8 +16,8 @@ interface RouteParams {
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_READ)
+        if (authResult instanceof NextResponse) return authResult
 
         const { id } = await params
 
@@ -51,11 +52,10 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { id } = await params
-        const session = authResult
 
         const validation = await validateBody(req, leadUpdateSchema)
         if (hasValidationError(validation)) {
@@ -93,7 +93,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
                     leadId: id,
                     activityType: 'STATUS_CHANGE',
                     description: `Status changed from ${existing.status} to ${data.status}`,
-                    performedById: session.user.id,
+                    performedById: authResult.user.id,
                 },
             })
         }
@@ -110,8 +110,8 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_DELETE)
+        if (authResult instanceof NextResponse) return authResult
 
         const { id } = await params
 

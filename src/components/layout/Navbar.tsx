@@ -1,96 +1,63 @@
-'use client'
+import prisma from '@/lib/prisma'
+import NavbarClient, { MenuNode } from './NavbarClient'
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Menu, X, Phone } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import MobileMenu from './MobileMenu'
-
-const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/pg-locations', label: 'Locations' },
-    { href: '/smart-finder', label: 'Smart Finder' },
-    { href: '/gallery', label: 'Gallery' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-    { href: '/blog', label: 'Blog' },
+const FALLBACK_HEADER_MENU: MenuNode[] = [
+  { id: 'home', title: 'Home', href: '/', openInNewTab: false, children: [] },
+  { id: 'about', title: 'About', href: '/about', openInNewTab: false, children: [] },
+  { id: 'locations', title: 'Locations', href: '/pg-locations', openInNewTab: false, children: [] },
+  { id: 'smart-finder', title: 'Smart Finder', href: '/smart-finder', openInNewTab: false, children: [] },
+  { id: 'gallery', title: 'Gallery', href: '/gallery', openInNewTab: false, children: [] },
+  { id: 'blog', title: 'Blog', href: '/blog', openInNewTab: false, children: [] },
+  { id: 'contact', title: 'Contact', href: '/contact', openInNewTab: false, children: [] },
 ]
 
-export default function Navbar() {
-    const [isScrolled, setIsScrolled] = useState(false)
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+function buildTree(rows: Array<{ id: string; parentId: string | null }>, map: Map<string, MenuNode>) {
+  const roots: MenuNode[] = []
+  for (const r of rows) {
+    const node = map.get(r.id)
+    if (!node) continue
+    if (r.parentId && map.has(r.parentId)) {
+      map.get(r.parentId)!.children.push(node)
+    } else {
+      roots.push(node)
+    }
+  }
+  return roots
+}
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50)
-        }
+export default async function Navbar() {
+  const items = await prisma.menuItem.findMany({
+    where: {
+      deletedAt: null,
+      isActive: true,
+      visibility: { in: ['HEADER', 'BOTH'] },
+    },
+    orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
+    include: { page: { select: { slug: true } } },
+  })
 
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
+  if (!items.length) {
+    return <NavbarClient headerMenu={FALLBACK_HEADER_MENU} />
+  }
 
-    return (
-        <>
-            <header
-                className={cn(
-                    'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-                    isScrolled
-                        ? 'py-3 bg-white/80 backdrop-blur-lg shadow-sm'
-                        : 'py-6 bg-transparent'
-                )}
-            >
-                <nav className="container-custom flex items-center justify-between">
-                    {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2">
-                        <span className="font-serif text-2xl font-bold text-[var(--color-graphite)]">
-                            SOHO<span className="text-[var(--color-clay)]">PG</span>
-                        </span>
-                    </Link>
+  const map = new Map<string, MenuNode>()
+  for (const i of items) {
+    const resolvedHref = i.type === 'PAGE' ? (i.page?.slug ? `/p/${i.page.slug}` : '') : (i.href ?? '')
+    if (!resolvedHref) continue
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center gap-8">
-                        {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className="text-sm font-medium text-[var(--color-graphite)] hover:text-[var(--color-clay)] transition-colors underline-animation"
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                    </div>
+    map.set(i.id, {
+      id: i.id,
+      title: i.title,
+      href: resolvedHref,
+      openInNewTab: i.openInNewTab,
+      children: [],
+    })
+  }
 
-                    {/* CTA Buttons */}
-                    <div className="hidden lg:flex items-center gap-4">
-                        <Button variant="outline" size="sm" asChild>
-                            <a href="tel:+919876543210" className="flex items-center gap-2">
-                                <Phone className="w-4 h-4" />
-                                Call Now
-                            </a>
-                        </Button>
-                        <Button size="sm" asChild>
-                            <Link href="/contact">Book a Visit</Link>
-                        </Button>
-                    </div>
+  const headerMenu = buildTree(
+    items.map((i) => ({ id: i.id, parentId: i.parentId })),
+    map
+  )
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        onClick={() => setIsMobileMenuOpen(true)}
-                        className="lg:hidden p-2 hover:bg-[var(--color-limestone)] rounded-lg transition-colors"
-                        aria-label="Open menu"
-                    >
-                        <Menu className="w-6 h-6" />
-                    </button>
-                </nav>
-            </header>
-
-            {/* Mobile Menu */}
-            <MobileMenu
-                isOpen={isMobileMenuOpen}
-                onClose={() => setIsMobileMenuOpen(false)}
-                links={navLinks}
-            />
-        </>
-    )
+  return <NavbarClient headerMenu={headerMenu.length ? headerMenu : FALLBACK_HEADER_MENU} />
 }

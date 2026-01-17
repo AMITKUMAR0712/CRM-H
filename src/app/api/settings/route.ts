@@ -4,7 +4,8 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { settingUpdateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 /**
  * GET /api/settings - Get settings
@@ -18,8 +19,8 @@ export async function GET(req: NextRequest) {
 
         // For public, no auth required
         if (!publicOnly) {
-            const authResult = await requireAdmin()
-            if (isAuthError(authResult)) return authResult
+            const authResult = await requirePermission(PERMISSIONS.SETTINGS_READ)
+            if (authResult instanceof NextResponse) return authResult
         }
 
         const settings = await prisma.setting.findMany({
@@ -59,8 +60,8 @@ export async function GET(req: NextRequest) {
  */
 export async function PUT(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.SETTINGS_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const body = await req.json()
 

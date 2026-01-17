@@ -4,7 +4,8 @@ import { success, paginated, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { sectorCreateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 /**
  * GET /api/sectors - List all sectors
@@ -55,8 +56,8 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.SECTOR_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, sectorCreateSchema)
         if (hasValidationError(validation)) {

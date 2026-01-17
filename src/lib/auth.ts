@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import prisma from './prisma'
 import { UserRole } from '@prisma/client'
+import { getActiveUserRestriction } from '@/lib/restrictions'
 
 // Extend NextAuth types
 declare module 'next-auth' {
@@ -53,6 +54,14 @@ export const authOptions: NextAuthOptions = {
 
                 if (!user.isActive) {
                     throw new Error('Your account has been deactivated')
+                }
+
+                const restriction = await getActiveUserRestriction(user.id)
+                if (restriction) {
+                    if (restriction.type === 'SUSPENSION') {
+                        throw new Error('Your account is temporarily suspended')
+                    }
+                    throw new Error('Your account has been blocked')
                 }
 
                 const isPasswordValid = await bcrypt.compare(

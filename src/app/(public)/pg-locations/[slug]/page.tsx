@@ -1,11 +1,12 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { MapPin, Train, Phone, MessageCircle, Wifi, Snowflake, Utensils, Shield } from 'lucide-react'
+import { Train, Phone, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import PGCard from '@/components/pg/PGCard'
 import LeadForm from '@/components/forms/LeadForm'
+import PageHero from '@/components/layout/PageHero'
 
 // Static sector data (would come from API in production)
 const sectorsData: Record<string, {
@@ -104,92 +105,96 @@ export default async function SectorPage({ params }: Props) {
 
     return (
         <div>
-            {/* Hero */}
-            <section className="bg-[var(--color-limestone)] py-12">
-                <div className="container-custom">
-                    <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] mb-4">
-                        <Link href="/pg-locations" className="hover:text-[var(--color-clay)]">Locations</Link>
-                        <span>/</span>
-                        <span>{sector.name}</span>
+            <PageHero
+                kicker="Location"
+                title={`PG in ${sector.name}, Noida`}
+                subtitle={sector.description}
+                align="left"
+                actions={
+                    <>
+                        <Button variant="outline" asChild>
+                            <Link href="/pg-locations">Back to Locations</Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/smart-finder">Use Smart Finder</Link>
+                        </Button>
+                    </>
+                }
+            />
+
+            <div className="container-custom pb-14">
+                <div className="mb-7 flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">
+                    <div className="flex items-center gap-2 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-2 backdrop-blur-md">
+                        <Train className="h-4 w-4 text-(--color-clay)" />
+                        <span>
+                            {sector.metro} ({sector.distance})
+                        </span>
                     </div>
-
-                    <h1 className="font-serif text-4xl md:text-5xl font-bold text-[var(--color-graphite)] mb-4">
-                        PG in {sector.name}, Noida
-                    </h1>
-
-                    <div className="flex items-center gap-4 text-[var(--color-muted)] mb-6">
-                        <div className="flex items-center gap-2">
-                            <Train className="w-5 h-5 text-[var(--color-clay)]" />
-                            <span>{sector.metro} ({sector.distance})</span>
-                        </div>
-                    </div>
-
-                    <p className="text-[var(--color-muted)] max-w-3xl mb-6">
-                        {sector.description}
-                    </p>
-
                     <div className="flex flex-wrap gap-2">
                         {sector.highlights.map((highlight) => (
-                            <Badge key={highlight} variant="outline">{highlight}</Badge>
+                            <Badge key={highlight} variant="outline">
+                                {highlight}
+                            </Badge>
                         ))}
                     </div>
                 </div>
-            </section>
 
-            {/* Main Content */}
-            <section className="section-padding">
-                <div className="container-custom">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* PG Listings */}
-                        <div className="lg:col-span-2">
-                            <h2 className="font-serif text-2xl font-bold text-[var(--color-graphite)] mb-6">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    {/* PG Listings */}
+                    <div className="lg:col-span-2">
+                        <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.10)]">
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
+                            <h2 className="font-serif text-2xl font-bold text-(--color-graphite)">
                                 Available PGs in {sector.name}
                             </h2>
-
-                            <div className="space-y-6">
-                                {samplePGs.map((pg) => (
-                                    <PGCard key={pg.id} pg={pg} />
-                                ))}
-                            </div>
+                            <p className="mt-2 text-sm text-(--color-muted)">Shortlist your options and book a visit anytime.</p>
                         </div>
 
-                        {/* Sidebar */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-24">
-                                {/* Lead Form */}
-                                <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 mb-6">
-                                    <h3 className="font-serif text-xl font-semibold mb-4">Enquire Now</h3>
-                                    <LeadForm sectorSlug={slug} />
-                                </div>
+                        <div className="mt-6 space-y-6">
+                            {samplePGs.map((pg) => (
+                                <PGCard key={pg.id} pg={pg} />
+                            ))}
+                        </div>
+                    </div>
 
-                                {/* Quick Contact */}
-                                <div className="bg-[var(--color-graphite)] text-white rounded-2xl p-6">
-                                    <h3 className="font-serif text-lg font-semibold mb-4">Need Help?</h3>
-                                    <div className="space-y-3">
-                                        <Button variant="white" className="w-full" asChild>
-                                            <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
-                                                <Phone className="w-4 h-4" />
-                                                Call Now
-                                            </a>
-                                        </Button>
-                                        <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700" asChild>
-                                            <a
-                                                href="https://wa.me/919876543210"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center justify-center gap-2"
-                                            >
-                                                <MessageCircle className="w-4 h-4" />
-                                                WhatsApp
-                                            </a>
-                                        </Button>
-                                    </div>
+                    {/* Sidebar */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 space-y-6">
+                            {/* Lead Form */}
+                            <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
+                                <h3 className="font-serif text-xl font-semibold text-(--color-graphite) mb-4">Enquire Now</h3>
+                                <LeadForm sectorSlug={slug} />
+                            </div>
+
+                            {/* Quick Contact */}
+                            <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-6 shadow-[0_22px_60px_rgba(0,0,0,0.18)]">
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
+                                <h3 className="font-serif text-lg font-semibold mb-4">Need Help?</h3>
+                                <div className="space-y-3">
+                                    <Button variant="white" className="w-full" asChild>
+                                        <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
+                                            <Phone className="w-4 h-4" />
+                                            Call Now
+                                        </a>
+                                    </Button>
+                                    <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700" asChild>
+                                        <a
+                                            href="https://wa.me/919876543210"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center justify-center gap-2"
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            WhatsApp
+                                        </a>
+                                    </Button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     )
 }

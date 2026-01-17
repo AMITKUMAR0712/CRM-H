@@ -4,7 +4,8 @@ import { success, paginated, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { pgCreateSchema, pgQuerySchema } from '@/validators/pg.validator'
 import { validateBody, validateQuery, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { parsePagination, paginationQuery } from '@/utils/pagination'
 import { Prisma } from '@prisma/client'
 
@@ -87,8 +88,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.PG_WRITE)
+        if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, pgCreateSchema)
         if (hasValidationError(validation)) {

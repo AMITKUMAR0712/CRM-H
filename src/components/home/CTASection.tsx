@@ -47,7 +47,7 @@ export default function CTASection() {
                             href="https://wa.me/919876543210"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors glow-whatsapp"
                         >
                             <MessageCircle className="w-5 h-5" />
                             <span>WhatsApp</span>

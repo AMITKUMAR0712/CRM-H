@@ -66,7 +66,7 @@ export default function Testimonials() {
                             <Quote className="w-8 h-8 text-[var(--color-clay)] mb-4 opacity-50" />
 
                             <p className="text-gray-300 mb-6 leading-relaxed">
-                                "{testimonial.text}"
+                                “{testimonial.text}”
                             </p>
 
                             <div className="flex items-center gap-1 mb-4">

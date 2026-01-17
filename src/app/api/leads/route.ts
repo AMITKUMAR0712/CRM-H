@@ -4,19 +4,21 @@ import { success, paginated, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { leadCreateSchema, leadQuerySchema } from '@/validators/lead.validator'
 import { validateBody, validateQuery, hasValidationError } from '@/middleware/validation'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 import { formRateLimiter } from '@/middleware/rateLimit'
 import { parsePagination, paginationQuery } from '@/utils/pagination'
 import { sendLeadNotification, sendLeadConfirmation } from '@/lib/email'
 import { Prisma } from '@prisma/client'
+import { requireOptionalAuth } from '@/middleware/auth'
 
 /**
  * GET /api/leads - List all leads (Admin only)
  */
 export async function GET(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_READ)
+        if (authResult instanceof NextResponse) return authResult
 
         const { searchParams } = new URL(req.url)
         const validation = validateQuery(searchParams, leadQuerySchema)
@@ -82,6 +84,9 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     try {
+        const optionalAuth = await requireOptionalAuth()
+        if (optionalAuth instanceof NextResponse) return optionalAuth
+
         const rateLimitResult = formRateLimiter(req)
         if (rateLimitResult) return rateLimitResult
 

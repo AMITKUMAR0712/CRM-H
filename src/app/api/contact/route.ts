@@ -6,12 +6,16 @@ import { contactFormSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { formRateLimiter } from '@/middleware/rateLimit'
 import { sendLeadNotification, sendLeadConfirmation } from '@/lib/email'
+import { requireOptionalAuth } from '@/middleware/auth'
 
 /**
  * POST /api/contact - Submit contact form
  */
 export async function POST(req: NextRequest) {
     try {
+        const optionalAuth = await requireOptionalAuth()
+        if (optionalAuth instanceof NextResponse) return optionalAuth
+
         // Apply rate limiting
         const rateLimitResult = formRateLimiter(req)
         if (rateLimitResult) return rateLimitResult

@@ -7,9 +7,26 @@
     schema: "prisma/schema.prisma",
     migrations: {
       path: "prisma/migrations",
-      seed: "ts-node prisma/seed.ts",
+      seed: "tsx prisma/seed.ts",
     },
     datasource: {
-      url: process.env["DATABASE_URL"],
+      url:
+        process.env["DATABASE_URL"] ??
+        (() => {
+          const host = process.env["DATABASE_HOST"];
+          const port = process.env["DATABASE_PORT"] ?? "3306";
+          const user = process.env["DATABASE_USER"];
+          const password = process.env["DATABASE_PASSWORD"] ?? "";
+          const database = process.env["DATABASE_DATABASE"];
+
+          if (!host || !user || !database) {
+            return undefined;
+          }
+
+          // mysql://USER:PASSWORD@HOST:PORT/DB
+          const encodedUser = encodeURIComponent(user);
+          const encodedPass = encodeURIComponent(password);
+          return `mysql://${encodedUser}:${encodedPass}@${host}:${port}/${database}`;
+        })(),
     },
   });

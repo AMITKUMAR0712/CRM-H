@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, Train, ArrowRight, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import PageHero from '@/components/layout/PageHero'
 
 export const metadata: Metadata = {
     title: 'PG Locations in Noida',
@@ -63,77 +64,89 @@ const sectors = [
 
 export default function LocationsPage() {
     return (
-        <div className="section-padding">
-            <div className="container-custom">
-                {/* Header */}
-                <div className="text-center mb-12">
-                    <h1 className="font-serif text-4xl md:text-5xl font-bold text-[var(--color-graphite)] mb-4">
-                        PG Locations in Noida
-                    </h1>
-                    <p className="text-[var(--color-muted)] text-lg max-w-2xl mx-auto">
-                        Choose your preferred sector. All our PGs are within walking distance from metro stations.
-                    </p>
-                </div>
+        <div>
+            <PageHero
+                kicker="Locations"
+                title="PG Locations in Noida"
+                subtitle="Choose your preferred sector. Explore metro-friendly areas and compare options in seconds."
+                actions={
+                    <>
+                        <Button asChild>
+                            <Link href="/smart-finder">Use Smart Finder</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/contact">Book a Visit</Link>
+                        </Button>
+                    </>
+                }
+            />
 
+            <div className="container-custom pb-14">
                 {/* Sectors Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {sectors.map((sector) => (
                         <Link
                             key={sector.slug}
                             href={`/pg-locations/${sector.slug}`}
-                            className="group block p-6 rounded-2xl bg-white border border-[var(--color-border)] hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
+                            className="group relative block overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.14)]"
                         >
-                            <div className="flex items-center gap-2 text-[var(--color-clay)] mb-3">
-                                <MapPin className="w-5 h-5" />
-                                <h2 className="font-serif text-xl font-semibold">{sector.name}</h2>
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/30 to-transparent" />
+
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 text-(--color-clay)">
+                                    <MapPin className="h-5 w-5" />
+                                    <h2 className="font-serif text-xl font-semibold text-(--color-graphite)">{sector.name}</h2>
+                                </div>
+                                <div className="inline-flex items-center gap-1 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-semibold text-(--color-graphite) backdrop-blur-md">
+                                    <Building2 className="h-4 w-4 text-(--color-clay)" />
+                                    {sector.available} PGs
+                                </div>
                             </div>
 
-                            <p className="text-[var(--color-muted)] text-sm mb-4 line-clamp-2">
-                                {sector.description}
-                            </p>
+                            <p className="mt-3 line-clamp-2 text-sm text-(--color-muted)">{sector.description}</p>
 
-                            <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] mb-4">
-                                <Train className="w-4 h-4" />
+                            <div className="mt-4 flex items-center gap-2 text-sm text-(--color-muted)">
+                                <Train className="h-4 w-4" />
                                 <span>{sector.metro}</span>
-                                <span className="text-[var(--color-clay)] font-medium">({sector.distance})</span>
+                                <span className="font-medium text-(--color-clay)">({sector.distance})</span>
                             </div>
 
-                            <div className="flex flex-wrap gap-2 mb-4">
+                            <div className="mt-4 flex flex-wrap gap-2">
                                 {sector.highlights.map((highlight) => (
                                     <span
                                         key={highlight}
-                                        className="px-2 py-1 text-xs rounded-full bg-[var(--color-limestone)] text-[var(--color-graphite)]"
+                                        className="rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-medium text-(--color-graphite) backdrop-blur-md"
                                     >
                                         {highlight}
                                     </span>
                                 ))}
                             </div>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
+                            <div className="mt-5 flex items-center justify-between rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-3 backdrop-blur-md">
                                 <div>
-                                    <p className="text-xs text-[var(--color-muted)]">Starting from</p>
-                                    <p className="font-semibold text-[var(--color-graphite)]">{sector.priceRange}</p>
+                                    <p className="text-xs text-(--color-muted)">Typical range</p>
+                                    <p className="font-semibold text-(--color-graphite)">{sector.priceRange}</p>
                                 </div>
-                                <div className="flex items-center gap-1 text-[var(--color-clay)]">
-                                    <Building2 className="w-4 h-4" />
-                                    <span className="font-semibold">{sector.available} PGs</span>
+                                <div className="flex items-center text-(--color-clay) font-medium text-sm">
+                                    View PGs
+                                    <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </div>
-                            </div>
-
-                            <div className="mt-4 flex items-center text-[var(--color-clay)] font-medium text-sm">
-                                View PGs
-                                <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </Link>
                     ))}
                 </div>
 
                 {/* CTA */}
-                <div className="text-center mt-12">
-                    <p className="text-[var(--color-muted)] mb-4">Can't decide? Let us help you find the perfect PG.</p>
-                    <Button asChild>
-                        <Link href="/smart-finder">Use Smart Finder</Link>
-                    </Button>
+                <div className="mt-12 text-center">
+                    <p className="text-(--color-muted)">Can&apos;t decide? We&apos;ll help you shortlist in minutes.</p>
+                    <div className="mt-5 flex flex-wrap justify-center gap-3">
+                        <Button asChild>
+                            <Link href="/smart-finder">Shortlist Now</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/contact">Talk to Support</Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

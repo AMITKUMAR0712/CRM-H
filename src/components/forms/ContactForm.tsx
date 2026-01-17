@@ -84,7 +84,7 @@ export default function ContactForm() {
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
                 <h3 className="font-serif text-2xl font-semibold mb-2">Thank You!</h3>
                 <p className="text-[var(--color-muted)]">
-                    We've received your message and will contact you within 24 hours.
+                    We&apos;ve received your message and will contact you within 24 hours.
                 </p>
             </div>
         )

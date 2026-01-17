@@ -34,6 +34,9 @@ model Sector {
   leads Lead[]
   faqs  FAQ[]
 
+  bannerTargets BannerTarget[]
+  enquiries     Enquiry[]
+
   @@index([slug])
   @@index([isActive])
   @@map("sectors")
@@ -97,6 +100,11 @@ model PG {
   leads         Lead[]
   reviews       Review[]
   notifications Notification[]
+
+  bannerTargets BannerTarget[]
+  enquiries     Enquiry[]
+  chatThreads   ChatThread[]
+  tickets       Ticket[]
 
   @@index([slug])
   @@index([sectorId])
@@ -391,7 +399,7 @@ model User {
   name     String
   email    String   @unique
   password String // Hashed with bcrypt
-  role     UserRole @default(ADMIN)
+  role     UserRole @default(USER)
   avatar   String?  @db.Text
   phone    String?  @db.VarChar(15)
 
@@ -408,16 +416,509 @@ model User {
   activities    LeadActivity[]
   notifications Notification[]
 
+  bannersCreated Banner[] @relation("banner_created_by")
+  bannersUpdated Banner[] @relation("banner_updated_by")
+  bannerEvents   BannerEvent[]
+
+  enquiries         Enquiry[]
+  enquiriesAssigned Enquiry[]     @relation("enquiry_assigned_to")
+  enquiryNotes      EnquiryNote[] @relation("enquiry_note_created_by")
+
+  restrictions        UserRestriction[]
+  restrictionsCreated UserRestriction[] @relation("restriction_created_by")
+  restrictionsRevoked UserRestriction[] @relation("restriction_revoked_by")
+
+  chatThreads ChatThread[]      @relation("chat_thread_user")
+  chatThreadsAssigned ChatThread[] @relation("chat_thread_assigned_to")
+  chatMessages ChatMessage[]    @relation("chat_message_sender")
+  chatReads ChatReadReceipt[]   @relation("chat_read_user")
+
+  tickets         Ticket[]        @relation("ticket_user")
+  ticketsAssigned Ticket[]        @relation("ticket_assigned_to")
+  ticketMessages  TicketMessage[] @relation("ticket_message_author")
+
+  auditLogs AuditLog[] @relation("audit_actor")
+
+  passwordResetTokens PasswordResetToken[]
+
+  // CMS: Menus & Pages
+  menuItemsCreated MenuItem[] @relation("menu_created_by")
+  menuItemsUpdated MenuItem[] @relation("menu_updated_by")
+  pagesCreated     Page[]     @relation("page_created_by")
+  pagesUpdated     Page[]     @relation("page_updated_by")
+
   @@index([email])
   @@index([role])
   @@map("users")
 }
 
 enum UserRole {
+  USER
   SUPER_ADMIN
   ADMIN
   MANAGER
   VIEWER
+}
+
+// ============================================
+// HOME PAGE BANNERS & DISCOUNTS
+// ============================================
+
+enum BannerType {
+  HERO
+  OFFER
+  POPUP
+}
+
+enum DiscountType {
+  PERCENT
+  FLAT
+}
+
+enum BannerTargetScope {
+  HOME
+  SECTOR
+  PG
+}
+
+model Banner {
+  id String @id @default(cuid())
+
+  type     BannerType
+  title    String   @db.VarChar(120)
+  subtitle String?  @db.VarChar(255)
+  imageUrl String?  @db.Text
+  ctaLabel String?  @db.VarChar(60)
+  ctaHref  String?  @db.Text
+
+  discountType  DiscountType?
+  discountValue Int?
+
+  validFrom DateTime?
+  validTill DateTime?
+
+  isActive     Boolean @default(true)
+  priority     Int     @default(0)
+  displayOrder Int     @default(0)
+
+  createdById String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User? @relation("banner_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("banner_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  targets BannerTarget[]
+  events  BannerEvent[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([priority, displayOrder])
+  @@index([validFrom])
+  @@index([validTill])
+  @@map("banners")
+}
+
+model BannerTarget {
+  id       String           @id @default(cuid())
+  bannerId String
+  scope    BannerTargetScope
+  sectorId String?
+  pgId     String?
+  createdAt DateTime @default(now())
+
+  banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  sector Sector? @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  pg     PG?     @relation(fields: [pgId], references: [id], onDelete: Cascade)
+
+  @@unique([bannerId, scope, sectorId, pgId])
+  @@index([bannerId])
+  @@index([scope])
+  @@index([sectorId])
+  @@index([pgId])
+  @@map("banner_targets")
+}
+
+enum BannerEventType {
+  IMPRESSION
+  CLICK
+  CONVERSION
+}
+
+model BannerEvent {
+  id       String          @id @default(cuid())
+  bannerId String
+  type     BannerEventType
+  path     String?         @db.VarChar(255)
+  userId   String?
+  sessionId String?        @db.VarChar(64)
+  ipAddress String?        @db.VarChar(45)
+  userAgent String?        @db.Text
+  metadata Json?
+  createdAt DateTime @default(now())
+
+  banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([bannerId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("banner_events")
+}
+
+// ============================================
+// CONTACT / ENQUIRY MANAGEMENT
+// ============================================
+
+enum EnquiryType {
+  CONTACT_US
+  GENERAL
+  PG
+}
+
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model Enquiry {
+  id String @id @default(cuid())
+
+  type EnquiryType @default(CONTACT_US)
+
+  name    String
+  email   String?
+  phone   String? @db.VarChar(15)
+  subject String? @db.VarChar(255)
+  message String  @db.Text
+
+  pgId     String?
+  sectorId String?
+  userId   String?
+
+  status       EnquiryStatus @default(NEW)
+  assignedToId String?
+
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  source      String? @default("website")
+  referrer    String? @db.Text
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
+  ipAddress String? @db.VarChar(45)
+  userAgent String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pg         PG?     @relation(fields: [pgId], references: [id], onDelete: SetNull)
+  sector     Sector? @relation(fields: [sectorId], references: [id], onDelete: SetNull)
+  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignedTo User?   @relation("enquiry_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  notes EnquiryNote[]
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@index([pgId])
+  @@index([sectorId])
+  @@index([assignedToId])
+  @@map("enquiries")
+}
+
+model EnquiryNote {
+  id        String   @id @default(cuid())
+  enquiryId String
+  body      String   @db.Text
+  isInternal Boolean @default(true)
+  createdById String?
+  createdAt DateTime @default(now())
+
+  enquiry Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  createdBy User? @relation("enquiry_note_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([enquiryId])
+  @@index([createdAt])
+  @@map("enquiry_notes")
+}
+
+// ============================================
+// USER RESTRICTIONS (BLOCK / SUSPEND)
+// ============================================
+
+enum RestrictionType {
+  SOFT_BLOCK
+  HARD_BLOCK
+  SUSPENSION
+}
+
+model UserRestriction {
+  id     String @id @default(cuid())
+  userId String
+
+  type   RestrictionType
+  reason String? @db.Text
+
+  startsAt DateTime @default(now())
+  endsAt   DateTime?
+
+  isActive Boolean @default(true)
+
+  createdById String?
+  revokedAt   DateTime?
+  revokedById String?
+  revokedReason String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBy User? @relation("restriction_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+  revokedBy User? @relation("restriction_revoked_by", fields: [revokedById], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([type])
+  @@index([isActive])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@map("user_restrictions")
+}
+
+// ============================================
+// USER CHAT (USER ↔ ADMIN)
+// ============================================
+
+enum ChatThreadStatus {
+  OPEN
+  MUTED
+  CLOSED
+}
+
+model ChatThread {
+  id     String @id @default(cuid())
+
+  userId String
+  pgId   String?
+
+  assignedToId String?
+
+  status     ChatThreadStatus @default(OPEN)
+  mutedUntil DateTime?
+  closedAt   DateTime?
+
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation("chat_thread_user", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo User? @relation("chat_thread_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
+  pg   PG?  @relation(fields: [pgId], references: [id], onDelete: SetNull)
+
+  messages ChatMessage[]
+  reads    ChatReadReceipt[]
+
+  @@index([userId])
+  @@index([pgId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([lastMessageAt])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id        String @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String @db.Text
+  isSystem  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender User       @relation("chat_message_sender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model ChatReadReceipt {
+  id       String @id @default(cuid())
+  threadId String
+  userId   String
+  lastReadAt DateTime @default(now())
+
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user   User       @relation("chat_read_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([threadId])
+  @@index([userId])
+  @@map("chat_read_receipts")
+}
+
+// ============================================
+// SUPPORT TICKETS
+// ============================================
+
+enum TicketCategory {
+  ELECTRICITY
+  FOOD
+  ROOM
+  SECURITY
+  OTHER
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING
+  RESOLVED
+  CLOSED
+}
+
+model Ticket {
+  id String @id @default(cuid())
+
+  userId String
+  pgId   String?
+
+  category TicketCategory
+  priority TicketPriority @default(MEDIUM)
+  status   TicketStatus   @default(OPEN)
+
+  subject     String @db.VarChar(255)
+  description String @db.Text
+
+  assignedToId String?
+
+  slaDueAt   DateTime?
+  resolvedAt DateTime?
+  closedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user       User @relation("ticket_user", fields: [userId], references: [id], onDelete: Cascade)
+  pg         PG?  @relation(fields: [pgId], references: [id], onDelete: SetNull)
+  assignedTo User? @relation("ticket_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  messages TicketMessage[]
+
+  @@index([userId])
+  @@index([pgId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([assignedToId])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id       String @id @default(cuid())
+  ticketId String
+  authorId String
+
+  body       String  @db.Text
+  isInternal Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation("ticket_message_author", fields: [authorId], references: [id], onDelete: Cascade)
+
+  attachments TicketAttachment[]
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_messages")
+}
+
+model TicketAttachment {
+  id        String @id @default(cuid())
+  messageId String
+  url       String @db.Text
+  mimeType  String? @db.VarChar(120)
+  sizeBytes Int?
+  createdAt DateTime @default(now())
+
+  message TicketMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("ticket_attachments")
+}
+
+// ============================================
+// SECURITY & AUDIT LOGS
+// ============================================
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  actorId   String?
+  actorRole UserRole?
+
+  action     String @db.VarChar(100)
+  entityType String @db.VarChar(60)
+  entityId   String? @db.VarChar(64)
+
+  summary  String? @db.VarChar(255)
+  metadata Json?
+
+  ipAddress String? @db.VarChar(45)
+  userAgent String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  actor User? @relation("audit_actor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================
+// PASSWORD RESET (OTP OVER EMAIL)
+// ============================================
+
+model PasswordResetToken {
+  id     String @id @default(cuid())
+  userId String
+
+  otpHash  String @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  attempts Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([usedAt])
+  @@map("password_reset_tokens")
 }
 
 // ============================================
@@ -596,4 +1097,101 @@ model Comparison {
   @@index([shareCode])
   @@index([expiresAt])
   @@map("comparisons")
+}
+
+// ============================================
+// CMS: DYNAMIC MENUS & PAGES
+// ============================================
+
+enum MenuVisibility {
+  HEADER
+  FOOTER
+  BOTH
+}
+
+enum MenuItemType {
+  PAGE
+  URL
+}
+
+model MenuItem {
+  id          String         @id @default(cuid())
+  title       String         @db.VarChar(80)
+  type        MenuItemType   @default(URL)
+
+  // If type=URL, href is the full URL/path. If type=PAGE, href is optional and derived from the Page slug.
+  href        String?        @db.Text
+  pageId      String?
+
+  parentId    String?
+  order       Int            @default(0)
+  visibility  MenuVisibility @default(HEADER)
+  isActive    Boolean        @default(true)
+  openInNewTab Boolean       @default(false)
+
+  createdById String?
+  updatedById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  // Relations
+  page      Page?     @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  parent    MenuItem? @relation("menu_parent", fields: [parentId], references: [id], onDelete: SetNull)
+  children  MenuItem[] @relation("menu_parent")
+
+  createdBy User? @relation("menu_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("menu_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([visibility])
+  @@index([isActive])
+  @@index([parentId, order])
+  @@index([pageId])
+  @@index([deletedAt])
+  @@map("menu_items")
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Page {
+  id              String     @id @default(cuid())
+  title           String     @db.VarChar(120)
+  slug            String     @unique @db.VarChar(160)
+  status          PageStatus @default(DRAFT)
+
+  // Page Builder JSON: sections/blocks structure.
+  content          Json
+
+  // SEO
+  metaTitle        String?   @db.VarChar(60)
+  metaDescription  String?   @db.VarChar(160)
+  ogImageUrl       String?   @db.Text
+
+  // Visibility
+  isActive         Boolean   @default(true)
+  showOnHome       Boolean   @default(false)
+
+  publishedAt      DateTime?
+  createdById      String?
+  updatedById      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  menuItems MenuItem[]
+
+  createdBy User? @relation("page_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("page_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@index([status])
+  @@index([isActive])
+  @@index([showOnHome])
+  @@index([publishedAt])
+  @@index([deletedAt])
+  @@map("pages")
 }

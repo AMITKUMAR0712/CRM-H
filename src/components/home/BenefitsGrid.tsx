@@ -75,7 +75,7 @@ export default function BenefitsGrid() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.05 }}
-                            className="p-6 rounded-2xl bg-white hover:shadow-lg transition-all duration-300 group"
+                            className="p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] card-3d group"
                         >
                             <div className="w-12 h-12 rounded-xl bg-[var(--color-clay)]/10 flex items-center justify-center mb-4 group-hover:bg-[var(--color-clay)] group-hover:text-white transition-colors">
                                 <benefit.icon className="w-6 h-6 text-[var(--color-clay)] group-hover:text-white transition-colors" />

@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { error } from '@/utils/apiResponse'
-import { requireAdmin, isAuthError } from '@/middleware/auth'
+import { requirePermission } from '@/middleware/permissions'
+import { PERMISSIONS } from '@/lib/rbac'
 
 /**
  * GET /api/leads/export - Export leads as CSV (Admin only)
  */
 export async function GET(req: NextRequest) {
     try {
-        const authResult = await requireAdmin()
-        if (isAuthError(authResult)) return authResult
+        const authResult = await requirePermission(PERMISSIONS.LEAD_EXPORT)
+        if (authResult instanceof NextResponse) return authResult
 
         const { searchParams } = new URL(req.url)
         const startDate = searchParams.get('startDate')
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest) {
 
         // Build where clause
         const where: Record<string, unknown> = {}
+
         if (startDate || endDate) {
             where.createdAt = {}
             if (startDate) (where.createdAt as Record<string, Date>).gte = new Date(startDate)

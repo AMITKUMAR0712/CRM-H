@@ -74,7 +74,7 @@ export default function LeadForm({ sectorSlug, pgSlug }: LeadFormProps) {
                 <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
                 <h3 className="font-serif text-xl font-semibold mb-2">Thank You!</h3>
                 <p className="text-[var(--color-muted)]">
-                    We'll contact you within 24 hours.
+                    We&apos;ll contact you within 24 hours.
                 </p>
             </div>
         )
