@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Wifi, Snowflake, Utensils, ArrowRight, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,6 +18,16 @@ interface PGCardProps {
         mealsIncluded: boolean
         isFeatured: boolean
         availableRooms: number
+        photos?: {
+            id: string
+            url: string
+            altText?: string | null
+            isFeatured: boolean
+        }[]
+        sector?: {
+            name: string
+            slug: string
+        }
     }
 }
 
@@ -34,12 +45,24 @@ const occupancyLabels: Record<string, string> = {
 }
 
 export default function PGCard({ pg }: PGCardProps) {
+    const featuredPhoto = pg.photos?.find(p => p.isFeatured) || pg.photos?.[0]
+
     return (
         <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
             <div className="flex flex-col md:flex-row gap-6">
-                {/* Image Placeholder */}
-                <div className="w-full md:w-48 h-40 bg-[var(--color-limestone)] rounded-xl flex items-center justify-center">
-                    <span className="text-[var(--color-muted)]">Photo</span>
+                {/* Image */}
+                <div className="relative w-full md:w-48 h-40 bg-[var(--color-limestone)] rounded-xl overflow-hidden flex items-center justify-center">
+                    {featuredPhoto ? (
+                        <Image
+                            src={featuredPhoto.url}
+                            alt={featuredPhoto.altText || pg.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, 192px"
+                        />
+                    ) : (
+                        <span className="text-[var(--color-muted)]">Photo</span>
+                    )}
                 </div>
 
                 {/* Content */}
@@ -56,6 +79,12 @@ export default function PGCard({ pg }: PGCardProps) {
                                 <span>{roomTypeLabels[pg.roomType] || pg.roomType}</span>
                                 <span>•</span>
                                 <span>{occupancyLabels[pg.occupancyType] || pg.occupancyType}</span>
+                                {pg.sector && (
+                                    <>
+                                        <span>•</span>
+                                        <span>{pg.sector.name}</span>
+                                    </>
+                                )}
                             </div>
                         </div>
                         <div className="text-right">

@@ -1,89 +1,43 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Train, Phone, MessageCircle } from 'lucide-react'
+import { Train, Phone, MessageCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import PGCard from '@/components/pg/PGCard'
 import LeadForm from '@/components/forms/LeadForm'
 import PageHero from '@/components/layout/PageHero'
-
-// Static sector data (would come from API in production)
-const sectorsData: Record<string, {
-    name: string
-    description: string
-    metro: string
-    distance: string
-    latitude: number
-    longitude: number
-    highlights: string[]
-}> = {
-    'sector-51': {
-        name: 'Sector 51',
-        description: 'Sector 51 is a premium tech hub location in Noida, home to major IT companies. It offers excellent metro connectivity via Sector 51 Metro Station and has a vibrant commercial area with restaurants, cafes, and shopping options.',
-        metro: 'Sector 51 Metro',
-        distance: '0.5 km',
-        latitude: 28.4303,
-        longitude: 77.3784,
-        highlights: ['Near IT Companies', 'Metro Access', 'Markets Nearby', 'Good Food Options'],
-    },
-    'sector-62': {
-        name: 'Sector 62',
-        description: 'Sector 62 is a major corporate hub in Noida with excellent connectivity. Many multinational companies have offices here, making it ideal for working professionals.',
-        metro: 'Sector 62 Metro',
-        distance: '0.8 km',
-        latitude: 28.6279,
-        longitude: 77.3649,
-        highlights: ['Corporate Hub', 'Good Transport', 'Restaurants', 'Shopping Malls'],
-    },
-    'sector-50': {
-        name: 'Sector 50',
-        description: 'Sector 50 is a peaceful residential area with good amenities and parks. Ideal for those seeking a quiet living environment away from the hustle.',
-        metro: 'Sector 50 Metro',
-        distance: '1.2 km',
-        latitude: 28.4285,
-        longitude: 77.3721,
-        highlights: ['Quiet Area', 'Parks', 'Family-friendly', 'Schools Nearby'],
-    },
-}
-
-// Sample PG data
-const samplePGs = [
-    {
-        id: '1',
-        name: 'SOHO Premium',
-        slug: 'soho-premium-51',
-        monthlyRent: 12000,
-        roomType: 'SINGLE',
-        occupancyType: 'BOYS',
-        hasAC: true,
-        hasWifi: true,
-        mealsIncluded: true,
-        isFeatured: true,
-        availableRooms: 3,
-    },
-    {
-        id: '2',
-        name: 'SOHO Comfort',
-        slug: 'soho-comfort-51',
-        monthlyRent: 8000,
-        roomType: 'DOUBLE',
-        occupancyType: 'CO_LIVING',
-        hasAC: true,
-        hasWifi: true,
-        mealsIncluded: true,
-        isFeatured: false,
-        availableRooms: 5,
-    },
-]
+import prisma from '@/lib/prisma'
 
 type Props = {
     params: Promise<{ slug: string }>
 }
 
+async function getSector(slug: string) {
+    const sector = await prisma.sector.findUnique({
+        where: { slug, isActive: true },
+        include: {
+            pgs: {
+                where: { isActive: true },
+                include: {
+                    photos: { where: { isFeatured: true }, take: 1 },
+                    amenities: { include: { amenity: true } },
+                },
+                orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+            },
+            faqs: {
+                where: { isActive: true },
+                orderBy: { order: 'asc' },
+            },
+        },
+    })
+
+    return sector
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
-    const sector = sectorsData[slug]
+    const sector = await getSector(slug)
 
     if (!sector) {
         return { title: 'Sector Not Found' }
@@ -91,24 +45,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     return {
         title: `PG in Noida ${sector.name} | Best Paying Guest`,
-        description: sector.description,
+        description: sector.description || `Find the best PG accommodations in ${sector.name}, Noida. Near ${sector.metroStation || 'metro'} with excellent amenities.`,
+        openGraph: {
+            title: `PG in ${sector.name}, Noida`,
+            description: sector.description || `Premium PG accommodations in ${sector.name}`,
+        },
     }
+}
+
+export async function generateStaticParams() {
+    const sectors = await prisma.sector.findMany({
+        where: { isActive: true },
+        select: { slug: true },
+    })
+
+    return sectors.map((sector) => ({
+        slug: sector.slug,
+    }))
 }
 
 export default async function SectorPage({ params }: Props) {
     const { slug } = await params
-    const sector = sectorsData[slug]
+    const sector = await getSector(slug)
 
     if (!sector) {
         notFound()
     }
+
+    const highlights = (sector.highlights as string[] | null) || []
 
     return (
         <div>
             <PageHero
                 kicker="Location"
                 title={`PG in ${sector.name}, Noida`}
-                subtitle={sector.description}
+                subtitle={sector.description || `Find your perfect PG in ${sector.name} with excellent metro connectivity and modern amenities.`}
                 align="left"
                 actions={
                     <>
@@ -123,15 +94,18 @@ export default async function SectorPage({ params }: Props) {
             />
 
             <div className="container-custom pb-14">
+                {/* Sector Info */}
                 <div className="mb-7 flex flex-wrap items-center gap-3 text-sm text-(--color-muted)">
-                    <div className="flex items-center gap-2 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-2 backdrop-blur-md">
-                        <Train className="h-4 w-4 text-(--color-clay)" />
-                        <span>
-                            {sector.metro} ({sector.distance})
-                        </span>
-                    </div>
+                    {sector.metroStation && (
+                        <div className="flex items-center gap-2 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-2 backdrop-blur-md">
+                            <Train className="h-4 w-4 text-(--color-clay)" />
+                            <span>
+                                {sector.metroStation} {sector.metroDistance && `(${sector.metroDistance} km)`}
+                            </span>
+                        </div>
+                    )}
                     <div className="flex flex-wrap gap-2">
-                        {sector.highlights.map((highlight) => (
+                        {highlights.map((highlight) => (
                             <Badge key={highlight} variant="outline">
                                 {highlight}
                             </Badge>
@@ -147,14 +121,73 @@ export default async function SectorPage({ params }: Props) {
                             <h2 className="font-serif text-2xl font-bold text-(--color-graphite)">
                                 Available PGs in {sector.name}
                             </h2>
-                            <p className="mt-2 text-sm text-(--color-muted)">Shortlist your options and book a visit anytime.</p>
+                            <p className="mt-2 text-sm text-(--color-muted)">
+                                {sector.pgs.length > 0
+                                    ? `${sector.pgs.length} PG${sector.pgs.length > 1 ? 's' : ''} found. Shortlist your options and book a visit anytime.`
+                                    : 'No PGs available in this sector yet. Check back soon!'}
+                            </p>
                         </div>
 
                         <div className="mt-6 space-y-6">
-                            {samplePGs.map((pg) => (
-                                <PGCard key={pg.id} pg={pg} />
-                            ))}
+                            {sector.pgs.length > 0 ? (
+                                sector.pgs.map((pg) => (
+                                    <PGCard key={pg.id} pg={pg} />
+                                ))
+                            ) : (
+                                <div className="rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 p-8 text-center">
+                                    <p className="text-(--color-muted)">No PGs available yet.</p>
+                                    <Button asChild className="mt-4">
+                                        <Link href="/contact">Contact Us for Availability</Link>
+                                    </Button>
+                                </div>
+                            )}
                         </div>
+
+                        {/* FAQs */}
+                        {sector.faqs.length > 0 && (
+                            <div className="mt-10">
+                                <h2 className="font-serif text-2xl font-bold text-(--color-graphite) mb-6">
+                                    FAQs about {sector.name}
+                                </h2>
+                                <div className="space-y-4">
+                                    {sector.faqs.map((faq) => (
+                                        <details
+                                            key={faq.id}
+                                            className="group rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 overflow-hidden"
+                                        >
+                                            <summary className="flex cursor-pointer items-center justify-between p-5 font-medium text-(--color-graphite) hover:bg-(--color-surface)/50">
+                                                {faq.question}
+                                                <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
+                                            </summary>
+                                            <div className="px-5 pb-5 text-sm text-(--color-muted)">
+                                                {faq.answer}
+                                            </div>
+                                        </details>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Google Maps Placeholder */}
+                        {sector.latitude && sector.longitude && (
+                            <div className="mt-10">
+                                <h2 className="font-serif text-2xl font-bold text-(--color-graphite) mb-6">
+                                    Location
+                                </h2>
+                                <div className="rounded-2xl border border-(--color-border)/70 overflow-hidden h-80">
+                                    <iframe
+                                        src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d${sector.longitude}!3d${sector.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${sector.latitude}N+${sector.longitude}E!5e0!3m2!1sen!2sin!4v1629000000000!5m2!1sen!2sin`}
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0 }}
+                                        allowFullScreen
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        title={`Map of ${sector.name}`}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sidebar */}

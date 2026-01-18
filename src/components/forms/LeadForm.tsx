@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, Loader2 } from 'lucide-react'
+import { useSectors } from '@/lib/hooks'
 
 const schema = z.object({
     name: z.string().min(2, 'Name is required'),
@@ -27,6 +28,19 @@ interface LeadFormProps {
 export default function LeadForm({ sectorSlug, pgSlug }: LeadFormProps) {
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [sectorId, setSectorId] = useState<string | undefined>(undefined)
+
+    // Fetch sectors to get the ID from slug
+    const { data: sectorsData } = useSectors()
+
+    useEffect(() => {
+        if (sectorSlug && sectorsData?.data) {
+            const sector = sectorsData.data.find(s => s.slug === sectorSlug)
+            if (sector) {
+                setSectorId(sector.id)
+            }
+        }
+    }, [sectorSlug, sectorsData])
 
     const {
         register,
@@ -47,9 +61,12 @@ export default function LeadForm({ sectorSlug, pgSlug }: LeadFormProps) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...data,
-                    preferredSectorId: sectorSlug,
-                    pgId: pgSlug,
+                    name: data.name,
+                    phone: data.phone,
+                    email: data.email || undefined,
+                    message: data.message,
+                    hasConsent: data.hasConsent,
+                    preferredSectorId: sectorId,
                     source: 'website',
                 }),
             })
@@ -130,10 +147,10 @@ export default function LeadForm({ sectorSlug, pgSlug }: LeadFormProps) {
                 <input
                     type="checkbox"
                     {...register('hasConsent')}
-                    id="consent"
+                    id="lead-consent"
                     className="mt-1"
                 />
-                <label htmlFor="consent" className="text-xs text-[var(--color-muted)]">
+                <label htmlFor="lead-consent" className="text-xs text-[var(--color-muted)]">
                     I agree to receive communications and accept the privacy policy. *
                 </label>
             </div>

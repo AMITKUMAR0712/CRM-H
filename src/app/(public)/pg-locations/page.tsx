@@ -3,66 +3,58 @@ import Link from 'next/link'
 import { MapPin, Train, ArrowRight, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PageHero from '@/components/layout/PageHero'
+import prisma from '@/lib/prisma'
 
 export const metadata: Metadata = {
     title: 'PG Locations in Noida',
     description: 'Find PG accommodation in popular Noida sectors - 50, 51, 52, 62, 76. Near metro stations with great connectivity.',
 }
 
-const sectors = [
-    {
-        name: 'Sector 51',
-        slug: 'sector-51',
-        description: 'Premium tech hub location near Noida City Centre. Home to major IT companies with excellent metro connectivity.',
-        metro: 'Sector 51 Metro',
-        distance: '0.5 km',
-        priceRange: '₹8,000 - ₹15,000',
-        available: 5,
-        highlights: ['Near IT Companies', 'Metro Access', 'Markets Nearby'],
-    },
-    {
-        name: 'Sector 62',
-        slug: 'sector-62',
-        description: 'Major corporate hub with excellent connectivity. Perfect for professionals working in the area.',
-        metro: 'Sector 62 Metro',
-        distance: '0.8 km',
-        priceRange: '₹7,000 - ₹12,000',
-        available: 8,
-        highlights: ['Corporate Hub', 'Good Transport', 'Restaurants'],
-    },
-    {
-        name: 'Sector 50',
-        slug: 'sector-50',
-        description: 'Peaceful residential area with good amenities. Ideal for those seeking a quiet living environment.',
-        metro: 'Sector 50 Metro',
-        distance: '1.2 km',
-        priceRange: '₹6,000 - ₹10,000',
-        available: 3,
-        highlights: ['Quiet Area', 'Parks', 'Family-friendly'],
-    },
-    {
-        name: 'Sector 52',
-        slug: 'sector-52',
-        description: 'Well-connected residential sector with mix of commercial and residential spaces.',
-        metro: 'Sector 52 Metro',
-        distance: '1.0 km',
-        priceRange: '₹6,500 - ₹11,000',
-        available: 4,
-        highlights: ['Shopping Malls', 'Hospitals', 'Schools'],
-    },
-    {
-        name: 'Sector 76',
-        slug: 'sector-76',
-        description: 'Developing area with affordable options and growing infrastructure.',
-        metro: 'Sector 76 Metro',
-        distance: '0.6 km',
-        priceRange: '₹5,000 - ₹9,000',
-        available: 6,
-        highlights: ['Affordable', 'New Buildings', 'Metro Nearby'],
-    },
-]
+async function getSectors() {
+    const sectors = await prisma.sector.findMany({
+        where: { isActive: true },
+        include: {
+            _count: {
+                select: {
+                    pgs: { where: { isActive: true } },
+                },
+            },
+        },
+        orderBy: { name: 'asc' },
+    })
 
-export default function LocationsPage() {
+    // Get price ranges for each sector
+    const sectorsWithStats = await Promise.all(
+        sectors.map(async (sector) => {
+            const priceRange = await prisma.pG.aggregate({
+                where: { sectorId: sector.id, isActive: true },
+                _min: { monthlyRent: true },
+                _max: { monthlyRent: true },
+            })
+
+            return {
+                ...sector,
+                pgCount: sector._count.pgs,
+                priceRange: {
+                    min: priceRange._min.monthlyRent,
+                    max: priceRange._max.monthlyRent,
+                },
+            }
+        })
+    )
+
+    return sectorsWithStats
+}
+
+function formatPriceRange(min: number | null, max: number | null) {
+    if (!min && !max) return 'Contact for pricing'
+    if (min === max) return `₹${min?.toLocaleString('en-IN')}`
+    return `₹${min?.toLocaleString('en-IN') || '5,000'} - ₹${max?.toLocaleString('en-IN') || '15,000'}`
+}
+
+export default async function LocationsPage() {
+    const sectors = await getSectors()
+
     return (
         <div>
             <PageHero
@@ -83,58 +75,74 @@ export default function LocationsPage() {
 
             <div className="container-custom pb-14">
                 {/* Sectors Grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {sectors.map((sector) => (
-                        <Link
-                            key={sector.slug}
-                            href={`/pg-locations/${sector.slug}`}
-                            className="group relative block overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.14)]"
-                        >
-                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/30 to-transparent" />
+                {sectors.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {sectors.map((sector) => (
+                            <Link
+                                key={sector.slug}
+                                href={`/pg-locations/${sector.slug}`}
+                                className="group relative block overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.14)]"
+                            >
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/30 to-transparent" />
 
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2 text-(--color-clay)">
-                                    <MapPin className="h-5 w-5" />
-                                    <h2 className="font-serif text-xl font-semibold text-(--color-graphite)">{sector.name}</h2>
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2 text-(--color-clay)">
+                                        <MapPin className="h-5 w-5" />
+                                        <h2 className="font-serif text-xl font-semibold text-(--color-graphite)">{sector.name}</h2>
+                                    </div>
+                                    <div className="inline-flex items-center gap-1 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-semibold text-(--color-graphite) backdrop-blur-md">
+                                        <Building2 className="h-4 w-4 text-(--color-clay)" />
+                                        {sector.pgCount} PGs
+                                    </div>
                                 </div>
-                                <div className="inline-flex items-center gap-1 rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-semibold text-(--color-graphite) backdrop-blur-md">
-                                    <Building2 className="h-4 w-4 text-(--color-clay)" />
-                                    {sector.available} PGs
+
+                                <p className="mt-3 line-clamp-2 text-sm text-(--color-muted)">
+                                    {sector.description || `Premium PG accommodations in ${sector.name}, Noida.`}
+                                </p>
+
+                                {sector.metroStation && (
+                                    <div className="mt-4 flex items-center gap-2 text-sm text-(--color-muted)">
+                                        <Train className="h-4 w-4" />
+                                        <span>{sector.metroStation}</span>
+                                        {sector.metroDistance && (
+                                            <span className="font-medium text-(--color-clay)">({sector.metroDistance} km)</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {sector.highlights && Array.isArray(sector.highlights) && sector.highlights.length > 0 && (
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {(sector.highlights as string[]).slice(0, 3).map((highlight) => (
+                                            <span
+                                                key={highlight}
+                                                className="rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-medium text-(--color-graphite) backdrop-blur-md"
+                                            >
+                                                {highlight}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="mt-5 flex items-center justify-between rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-3 backdrop-blur-md">
+                                    <div>
+                                        <p className="text-xs text-(--color-muted)">Typical range</p>
+                                        <p className="font-semibold text-(--color-graphite)">
+                                            {formatPriceRange(sector.priceRange.min, sector.priceRange.max)}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center text-(--color-clay) font-medium text-sm">
+                                        View PGs
+                                        <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
                                 </div>
-                            </div>
-
-                            <p className="mt-3 line-clamp-2 text-sm text-(--color-muted)">{sector.description}</p>
-
-                            <div className="mt-4 flex items-center gap-2 text-sm text-(--color-muted)">
-                                <Train className="h-4 w-4" />
-                                <span>{sector.metro}</span>
-                                <span className="font-medium text-(--color-clay)">({sector.distance})</span>
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap gap-2">
-                                {sector.highlights.map((highlight) => (
-                                    <span
-                                        key={highlight}
-                                        className="rounded-full border border-(--color-border)/70 bg-(--color-surface)/70 px-3 py-1 text-xs font-medium text-(--color-graphite) backdrop-blur-md"
-                                    >
-                                        {highlight}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="mt-5 flex items-center justify-between rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 px-4 py-3 backdrop-blur-md">
-                                <div>
-                                    <p className="text-xs text-(--color-muted)">Typical range</p>
-                                    <p className="font-semibold text-(--color-graphite)">{sector.priceRange}</p>
-                                </div>
-                                <div className="flex items-center text-(--color-clay) font-medium text-sm">
-                                    View PGs
-                                    <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <p className="text-(--color-muted)">No sectors available yet. Check back soon!</p>
+                    </div>
+                )}
 
                 {/* CTA */}
                 <div className="mt-12 text-center">

@@ -2,40 +2,21 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { MapPin, Train, ArrowRight } from 'lucide-react'
+import { MapPin, Train, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useSectors } from '@/lib/hooks'
 
-const sectors = [
-    {
-        name: 'Sector 51',
-        slug: 'sector-51',
-        description: 'Tech hub, near metro station',
-        metro: 'Sector 51 Metro',
-        distance: '0.5 km',
-        priceRange: '₹8,000 - ₹15,000',
-        available: 5,
-    },
-    {
-        name: 'Sector 62',
-        slug: 'sector-62',
-        description: 'Corporate hub, excellent connectivity',
-        metro: 'Sector 62 Metro',
-        distance: '0.8 km',
-        priceRange: '₹7,000 - ₹12,000',
-        available: 8,
-    },
-    {
-        name: 'Sector 50',
-        slug: 'sector-50',
-        description: 'Peaceful residential area',
-        metro: 'Sector 50 Metro',
-        distance: '1.2 km',
-        priceRange: '₹6,000 - ₹10,000',
-        available: 3,
-    },
-]
+function formatPriceRange(min: number | null, max: number | null) {
+    if (!min && !max) return 'Contact for pricing'
+    if (min === max) return `₹${min?.toLocaleString('en-IN')}`
+    return `₹${min?.toLocaleString('en-IN') || '5,000'} - ₹${max?.toLocaleString('en-IN') || '15,000'}`
+}
 
 export default function SectorPreview() {
+    const { data, isLoading, error } = useSectors()
+
+    const sectors = data?.data?.slice(0, 3) || []
+
     return (
         <section className="section-padding bg-[var(--color-background)]">
             <div className="container-custom">
@@ -61,53 +42,73 @@ export default function SectorPreview() {
                     </Button>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {sectors.map((sector, index) => (
-                        <motion.div
-                            key={sector.slug}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                        >
-                            <Link
-                                href={`/pg-locations/${sector.slug}`}
-                                className="block p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] card-3d group h-full"
+                {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-clay)]" />
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-12">
+                        <p className="text-[var(--color-muted)]">Unable to load sectors. Please try again later.</p>
+                    </div>
+                ) : sectors.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-[var(--color-muted)]">No sectors available yet.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {sectors.map((sector, index) => (
+                            <motion.div
+                                key={sector.slug}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
                             >
-                                <div className="flex items-center gap-2 text-[var(--color-clay)] mb-4">
-                                    <MapPin className="w-5 h-5" />
-                                    <span className="font-serif text-xl font-semibold">{sector.name}</span>
-                                </div>
-
-                                <p className="text-[var(--color-muted)] mb-4">
-                                    {sector.description}
-                                </p>
-
-                                <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] mb-4">
-                                    <Train className="w-4 h-4" />
-                                    <span>{sector.metro}</span>
-                                    <span className="text-[var(--color-clay)]">({sector.distance})</span>
-                                </div>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
-                                    <div>
-                                        <p className="text-sm text-[var(--color-muted)]">Starting from</p>
-                                        <p className="font-semibold text-[var(--color-graphite)]">{sector.priceRange}</p>
+                                <Link
+                                    href={`/pg-locations/${sector.slug}`}
+                                    className="block p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] card-3d group h-full"
+                                >
+                                    <div className="flex items-center gap-2 text-[var(--color-clay)] mb-4">
+                                        <MapPin className="w-5 h-5" />
+                                        <span className="font-serif text-xl font-semibold">{sector.name}</span>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-[var(--color-muted)]">Available</p>
-                                        <p className="font-semibold text-[var(--color-clay)]">{sector.available} PGs</p>
-                                    </div>
-                                </div>
 
-                                <div className="mt-4 flex items-center text-[var(--color-clay)] font-medium text-sm group-hover:gap-2 transition-all">
-                                    Explore Sector
-                                    <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </div>
+                                    <p className="text-[var(--color-muted)] mb-4 line-clamp-2">
+                                        {sector.description || `Premium PG accommodations in ${sector.name}, Noida.`}
+                                    </p>
+
+                                    {sector.metroStation && (
+                                        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)] mb-4">
+                                            <Train className="w-4 h-4" />
+                                            <span>{sector.metroStation}</span>
+                                            {sector.metroDistance && (
+                                                <span className="text-[var(--color-clay)]">({sector.metroDistance} km)</span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between pt-4 border-t border-[var(--color-border)]">
+                                        <div>
+                                            <p className="text-sm text-[var(--color-muted)]">Starting from</p>
+                                            <p className="font-semibold text-[var(--color-graphite)]">
+                                                {formatPriceRange(sector.priceRange?.min, sector.priceRange?.max)}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm text-[var(--color-muted)]">Available</p>
+                                            <p className="font-semibold text-[var(--color-clay)]">{sector.pgCount || 0} PGs</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 flex items-center text-[var(--color-clay)] font-medium text-sm group-hover:gap-2 transition-all">
+                                        Explore Sector
+                                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                                    </div>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
             </div>
         </section>
     )

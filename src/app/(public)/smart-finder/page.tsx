@@ -1,52 +1,14 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Search, SlidersHorizontal } from 'lucide-react'
+import { Search, SlidersHorizontal, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import PGCard from '@/components/pg/PGCard'
 import PageHero from '@/components/layout/PageHero'
-
-const filters = {
-    sectors: [
-        { value: '', label: 'All Sectors' },
-        { value: 'sector-50', label: 'Sector 50' },
-        { value: 'sector-51', label: 'Sector 51' },
-        { value: 'sector-52', label: 'Sector 52' },
-        { value: 'sector-62', label: 'Sector 62' },
-        { value: 'sector-76', label: 'Sector 76' },
-    ],
-    roomTypes: [
-        { value: '', label: 'All Room Types' },
-        { value: 'SINGLE', label: 'Single' },
-        { value: 'DOUBLE', label: 'Double' },
-        { value: 'TRIPLE', label: 'Triple' },
-        { value: 'FOUR_SHARING', label: '4-Sharing' },
-    ],
-    occupancy: [
-        { value: '', label: 'All' },
-        { value: 'BOYS', label: 'Boys Only' },
-        { value: 'GIRLS', label: 'Girls Only' },
-        { value: 'CO_LIVING', label: 'Co-Living' },
-    ],
-    budgets: [
-        { value: '', label: 'Any Budget' },
-        { value: '0-8000', label: 'Under ₹8,000' },
-        { value: '8000-12000', label: '₹8,000 - ₹12,000' },
-        { value: '12000-15000', label: '₹12,000 - ₹15,000' },
-        { value: '15000-50000', label: 'Above ₹15,000' },
-    ],
-}
-
-// Sample PGs
-const allPGs = [
-    { id: '1', name: 'SOHO Premium', slug: 'soho-premium-51', sectorSlug: 'sector-51', monthlyRent: 12000, roomType: 'SINGLE', occupancyType: 'BOYS', hasAC: true, hasWifi: true, mealsIncluded: true, isFeatured: true, availableRooms: 3 },
-    { id: '2', name: 'SOHO Comfort', slug: 'soho-comfort-51', sectorSlug: 'sector-51', monthlyRent: 8000, roomType: 'DOUBLE', occupancyType: 'CO_LIVING', hasAC: true, hasWifi: true, mealsIncluded: true, isFeatured: false, availableRooms: 5 },
-    { id: '3', name: 'SOHO Budget', slug: 'soho-budget-62', sectorSlug: 'sector-62', monthlyRent: 6500, roomType: 'TRIPLE', occupancyType: 'BOYS', hasAC: false, hasWifi: true, mealsIncluded: true, isFeatured: false, availableRooms: 2 },
-    { id: '4', name: 'SOHO Elite', slug: 'soho-elite-51', sectorSlug: 'sector-51', monthlyRent: 15000, roomType: 'SINGLE', occupancyType: 'GIRLS', hasAC: true, hasWifi: true, mealsIncluded: true, isFeatured: true, availableRooms: 1 },
-]
+import { usePGs, useSectors } from '@/lib/hooks'
 
 export default function SmartFinderPage() {
     const [showFilters, setShowFilters] = useState(false)
@@ -61,37 +23,80 @@ export default function SmartFinderPage() {
         mealsIncluded: false,
     })
 
+    // Build API params from filters
+    const apiParams = useMemo(() => {
+        const params: Record<string, string> = {}
+
+        if (selectedFilters.sector) params.sector = selectedFilters.sector
+        if (selectedFilters.roomType) params.roomType = selectedFilters.roomType
+        if (selectedFilters.occupancy) params.occupancyType = selectedFilters.occupancy
+        if (selectedFilters.hasAC) params.hasAC = 'true'
+        if (selectedFilters.hasWifi) params.hasWifi = 'true'
+        if (selectedFilters.mealsIncluded) params.mealsIncluded = 'true'
+        if (search.trim()) params.search = search.trim()
+
+        // Budget parsing
+        if (selectedFilters.budget) {
+            const [min, max] = selectedFilters.budget.split('-').map(n => n.trim())
+            if (min) params.minRent = min
+            if (max) params.maxRent = max
+        }
+
+        return params
+    }, [selectedFilters, search])
+
+    // Fetch PGs from API
+    const { data: pgsData, isLoading: pgsLoading, error: pgsError } = usePGs(apiParams)
+
+    // Fetch sectors for the filter dropdown
+    const { data: sectorsData } = useSectors()
+
     const updateFilter = (key: string, value: string | boolean) => {
         setSelectedFilters((prev) => ({ ...prev, [key]: value }))
     }
 
-    const filteredPGs = useMemo(() => {
-        const q = search.trim().toLowerCase()
-
-        let budgetMin: number | null = null
-        let budgetMax: number | null = null
-        if (selectedFilters.budget) {
-            const [min, max] = selectedFilters.budget.split('-').map((n) => Number(n))
-            if (Number.isFinite(min)) budgetMin = min
-            if (Number.isFinite(max)) budgetMax = max
-        }
-
-        return allPGs.filter((pg) => {
-            if (q) {
-                const haystack = `${pg.name} ${pg.slug}`.toLowerCase()
-                if (!haystack.includes(q)) return false
-            }
-            if (selectedFilters.sector && pg.sectorSlug !== selectedFilters.sector) return false
-            if (selectedFilters.roomType && pg.roomType !== selectedFilters.roomType) return false
-            if (selectedFilters.occupancy && pg.occupancyType !== selectedFilters.occupancy) return false
-            if (budgetMin !== null && pg.monthlyRent < budgetMin) return false
-            if (budgetMax !== null && pg.monthlyRent > budgetMax) return false
-            if (selectedFilters.hasAC && !pg.hasAC) return false
-            if (selectedFilters.hasWifi && !pg.hasWifi) return false
-            if (selectedFilters.mealsIncluded && !pg.mealsIncluded) return false
-            return true
+    const clearFilters = () => {
+        setSelectedFilters({
+            sector: '',
+            roomType: '',
+            occupancy: '',
+            budget: '',
+            hasAC: false,
+            hasWifi: false,
+            mealsIncluded: false,
         })
-    }, [search, selectedFilters])
+        setSearch('')
+    }
+
+    const pgs = pgsData?.data || []
+    const sectors = sectorsData?.data || []
+
+    const filters = {
+        sectors: [
+            { value: '', label: 'All Sectors' },
+            ...sectors.map(s => ({ value: s.slug, label: s.name }))
+        ],
+        roomTypes: [
+            { value: '', label: 'All Room Types' },
+            { value: 'SINGLE', label: 'Single' },
+            { value: 'DOUBLE', label: 'Double' },
+            { value: 'TRIPLE', label: 'Triple' },
+            { value: 'FOUR_SHARING', label: '4-Sharing' },
+        ],
+        occupancy: [
+            { value: '', label: 'All' },
+            { value: 'BOYS', label: 'Boys Only' },
+            { value: 'GIRLS', label: 'Girls Only' },
+            { value: 'CO_LIVING', label: 'Co-Living' },
+        ],
+        budgets: [
+            { value: '', label: 'Any Budget' },
+            { value: '0-8000', label: 'Under ₹8,000' },
+            { value: '8000-12000', label: '₹8,000 - ₹12,000' },
+            { value: '12000-15000', label: '₹12,000 - ₹15,000' },
+            { value: '15000-50000', label: 'Above ₹15,000' },
+        ],
+    }
 
     return (
         <div>
@@ -120,7 +125,7 @@ export default function SmartFinderPage() {
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="font-serif text-lg font-semibold">Filters</h2>
                                 <button
-                                    onClick={() => setSelectedFilters({ sector: '', roomType: '', occupancy: '', budget: '', hasAC: false, hasWifi: false, mealsIncluded: false })}
+                                    onClick={clearFilters}
                                     className="text-sm text-[var(--color-clay)] hover:underline"
                                 >
                                     Clear All
@@ -136,7 +141,7 @@ export default function SmartFinderPage() {
                                         <Input
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
-                                            placeholder="Search by PG name (e.g. SOHO Premium)"
+                                            placeholder="Search by PG name"
                                             className="pl-11 h-12"
                                         />
                                     </div>
@@ -240,30 +245,78 @@ export default function SmartFinderPage() {
                         {/* Results Count */}
                         <div className="flex items-center justify-between mb-6">
                             <p className="text-[var(--color-muted)]">
-                                <span className="font-semibold text-[var(--color-graphite)]">{filteredPGs.length}</span> PGs found
+                                {pgsLoading ? (
+                                    <span className="flex items-center gap-2">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Searching...
+                                    </span>
+                                ) : (
+                                    <>
+                                        <span className="font-semibold text-[var(--color-graphite)]">{pgs.length}</span> PGs found
+                                    </>
+                                )}
                             </p>
                         </div>
 
                         {/* PG List */}
                         <div className="space-y-6">
-                            {filteredPGs.map((pg, index) => (
-                                <motion.div
-                                    key={pg.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                >
-                                    <PGCard pg={pg} />
-                                </motion.div>
-                            ))}
-
-                            {!filteredPGs.length && (
+                            {pgsLoading ? (
+                                // Loading skeletons
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="bg-white rounded-2xl border border-[var(--color-border)] p-6 animate-pulse">
+                                        <div className="flex flex-col md:flex-row gap-6">
+                                            <div className="w-full md:w-48 h-40 bg-gray-200 rounded-xl" />
+                                            <div className="flex-1 space-y-4">
+                                                <div className="h-6 bg-gray-200 rounded w-1/3" />
+                                                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                                                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : pgsError ? (
+                                <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+                                    <p className="text-red-600 font-medium">Error loading PGs</p>
+                                    <p className="mt-1 text-sm text-red-500">Please try again later.</p>
+                                </div>
+                            ) : pgs.length > 0 ? (
+                                pgs.map((pg, index) => (
+                                    <motion.div
+                                        key={pg.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                    >
+                                        <PGCard pg={pg} />
+                                    </motion.div>
+                                ))
+                            ) : (
                                 <div className="rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 text-center backdrop-blur-md">
                                     <p className="text-(--color-graphite) font-medium">No PGs match these filters.</p>
                                     <p className="mt-1 text-sm text-(--color-muted)">Try clearing a few filters or searching with fewer keywords.</p>
+                                    <Button onClick={clearFilters} className="mt-4" variant="outline">
+                                        Clear Filters
+                                    </Button>
                                 </div>
                             )}
                         </div>
+
+                        {/* Can't find CTA */}
+                        {!pgsLoading && pgs.length > 0 && (
+                            <div className="mt-10 text-center">
+                                <p className="text-(--color-muted)">Can&apos;t find what you&apos;re looking for?</p>
+                                <div className="mt-4 flex flex-wrap justify-center gap-3">
+                                    <Button asChild>
+                                        <Link href="/contact">Talk to Support</Link>
+                                    </Button>
+                                    <Button variant="outline" asChild>
+                                        <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                                            WhatsApp Us
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
