@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
-import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, MessageCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import ContactForm from '@/components/forms/ContactForm'
+import FullLeadForm from '@/components/forms/FullLeadForm'
 import PageHero from '@/components/layout/PageHero'
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
@@ -24,15 +24,26 @@ async function getSettings() {
     return settingsMap
 }
 
+async function getFAQs() {
+    const faqs = await prisma.fAQ.findMany({
+        where: { isActive: true, sectorId: null },
+        orderBy: { order: 'asc' },
+        take: 5,
+    })
+    return faqs
+}
+
 export default async function ContactPage() {
-    const settings = await getSettings()
+    const [settings, faqs] = await Promise.all([
+        getSettings(),
+        getFAQs(),
+    ])
 
     const phone = settings.contact_phone || '+919876543210'
     const email = settings.contact_email || 'info@sohopg.com'
     const address = settings.contact_address || 'A-123, Sector 51, Noida, Uttar Pradesh 201301'
     const whatsapp = settings.whatsapp_number || '919876543210'
 
-    // Parse address for display
     const [addressLine1, ...rest] = address.split(',')
     const addressLine2 = rest.join(',').trim()
 
@@ -58,15 +69,25 @@ export default async function ContactPage() {
 
             <div className="container-custom pb-14">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
+                    {/* Lead Form - Primary */}
+                    <div className="order-2 lg:order-1 relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/28 to-transparent" />
+                        <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-2">Book a Visit</h2>
+                        <p className="text-sm text-(--color-muted) mb-6">
+                            Fill out the form below and we&apos;ll get back to you within 24 hours.
+                        </p>
+                        <FullLeadForm />
+                    </div>
+
                     {/* Contact Info */}
-                    <div>
+                    <div className="order-1 lg:order-2">
                         <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)] mb-8">
                             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/28 to-transparent" />
                             <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-6">Get in Touch</h2>
 
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center flex-shrink-0 backdrop-blur-md">
+                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center shrink-0 backdrop-blur-md">
                                         <MapPin className="w-6 h-6 text-(--color-clay)" />
                                     </div>
                                     <div>
@@ -79,7 +100,7 @@ export default async function ContactPage() {
                                 </div>
 
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center flex-shrink-0 backdrop-blur-md">
+                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center shrink-0 backdrop-blur-md">
                                         <Phone className="w-6 h-6 text-(--color-clay)" />
                                     </div>
                                     <div>
@@ -91,7 +112,7 @@ export default async function ContactPage() {
                                 </div>
 
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center flex-shrink-0 backdrop-blur-md">
+                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center shrink-0 backdrop-blur-md">
                                         <Mail className="w-6 h-6 text-(--color-clay)" />
                                     </div>
                                     <div>
@@ -103,7 +124,7 @@ export default async function ContactPage() {
                                 </div>
 
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center flex-shrink-0 backdrop-blur-md">
+                                    <div className="w-12 h-12 rounded-2xl border border-(--color-border)/70 bg-(--color-surface)/70 flex items-center justify-center shrink-0 backdrop-blur-md">
                                         <Clock className="w-6 h-6 text-(--color-clay)" />
                                     </div>
                                     <div>
@@ -142,13 +163,6 @@ export default async function ContactPage() {
                             Prefer exploring first? Try <Link href="/smart-finder" className="text-(--color-clay) font-semibold hover:underline">Smart Finder</Link>.
                         </div>
                     </div>
-
-                    {/* Contact Form */}
-                    <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/28 to-transparent" />
-                        <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-6">Send us a Message</h2>
-                        <ContactForm />
-                    </div>
                 </div>
 
                 {/* Map */}
@@ -168,11 +182,36 @@ export default async function ContactPage() {
                     </div>
                 </div>
 
-                {/* FAQs Quick Link */}
+                {/* FAQs */}
+                {faqs.length > 0 && (
+                    <div className="mt-12">
+                        <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-6">
+                            Frequently Asked Questions
+                        </h2>
+                        <div className="space-y-4">
+                            {faqs.map((faq) => (
+                                <details
+                                    key={faq.id}
+                                    className="group rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 overflow-hidden"
+                                >
+                                    <summary className="flex cursor-pointer items-center justify-between p-5 font-medium text-(--color-graphite) hover:bg-(--color-surface)/50">
+                                        {faq.question}
+                                        <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
+                                    </summary>
+                                    <div className="px-5 pb-5 text-sm text-(--color-muted)">
+                                        {faq.answer}
+                                    </div>
+                                </details>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* CTA */}
                 <div className="mt-12 relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md text-center">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/22 to-transparent" />
-                    <h3 className="font-serif text-xl font-semibold text-(--color-graphite)">Have more questions?</h3>
-                    <p className="mt-2 text-(--color-muted)">Check our frequently asked questions or explore our PG options.</p>
+                    <h3 className="font-serif text-xl font-semibold text-(--color-graphite)">Want to explore PG options first?</h3>
+                    <p className="mt-2 text-(--color-muted)">Use our Smart Finder to filter and compare PGs based on your preferences.</p>
                     <div className="mt-5 flex flex-wrap justify-center gap-3">
                         <Button asChild>
                             <Link href="/smart-finder">Find Your PG</Link>

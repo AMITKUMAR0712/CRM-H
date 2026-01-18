@@ -2,6 +2,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Hero from '@/components/home/Hero'
 import HomeBanners from '@/components/home/HomeBanners'
+import AboutPreview from '@/components/home/AboutPreview'
 import QuickFilters from '@/components/home/QuickFilters'
 import BenefitsGrid from '@/components/home/BenefitsGrid'
 import SectorPreview from '@/components/home/SectorPreview'
@@ -17,6 +18,7 @@ export default function HomePage() {
       <main>
         <HomeBanners />
         <Hero />
+        <AboutPreview />
         <QuickFilters />
         <BenefitsGrid />
         <SectorPreview />

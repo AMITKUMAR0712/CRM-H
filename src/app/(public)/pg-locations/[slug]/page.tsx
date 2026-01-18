@@ -1,12 +1,13 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Train, Phone, MessageCircle, ChevronDown } from 'lucide-react'
+import { Train, Phone, MessageCircle, ChevronDown, Wifi, Snowflake, Utensils, Car, Dumbbell, Shield, Clock, Building2, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import PGCard from '@/components/pg/PGCard'
-import LeadForm from '@/components/forms/LeadForm'
+import FullLeadForm from '@/components/forms/FullLeadForm'
 import PageHero from '@/components/layout/PageHero'
+import StickyCtaBar from '@/components/layout/StickyCtaBar'
 import prisma from '@/lib/prisma'
 
 type Props = {
@@ -64,6 +65,16 @@ export async function generateStaticParams() {
     }))
 }
 
+// Amenity Icon mapping
+const amenityIcons: Record<string, typeof Wifi> = {
+    wifi: Wifi,
+    ac: Snowflake,
+    meals: Utensils,
+    parking: Car,
+    gym: Dumbbell,
+    security: Shield,
+}
+
 export default async function SectorPage({ params }: Props) {
     const { slug } = await params
     const sector = await getSector(slug)
@@ -74,8 +85,21 @@ export default async function SectorPage({ params }: Props) {
 
     const highlights = (sector.highlights as string[] | null) || []
 
+    // Collect unique amenities from all PGs
+    const allAmenities = new Set<string>()
+    sector.pgs.forEach(pg => {
+        pg.amenities.forEach(a => allAmenities.add(a.amenity.name))
+    })
+
+    // Commute information (could be from DB in future)
+    const commuteInfo = [
+        { icon: Train, label: sector.metroStation || 'Metro Station', distance: sector.metroDistance ? `${sector.metroDistance} km` : 'Nearby' },
+        { icon: Building2, label: 'IT Parks & Offices', distance: '2-5 km' },
+        { icon: MapPin, label: 'City Centre', distance: '10 km' },
+    ]
+
     return (
-        <div>
+        <div className="pb-20 md:pb-0">
             <PageHero
                 kicker="Location"
                 title={`PG in ${sector.name}, Noida`}
@@ -114,9 +138,60 @@ export default async function SectorPage({ params }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    {/* PG Listings */}
-                    <div className="lg:col-span-2">
-                        <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.10)]">
+                    {/* Main Content */}
+                    <div className="lg:col-span-2 space-y-10">
+                        {/* Amenities Section */}
+                        {allAmenities.size > 0 && (
+                            <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
+                                <h2 className="font-serif text-xl font-bold text-(--color-graphite) mb-4">
+                                    Amenities Available
+                                </h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {Array.from(allAmenities).map((amenity) => {
+                                        const IconComponent = amenityIcons[amenity.toLowerCase()] || Shield
+                                        return (
+                                            <div
+                                                key={amenity}
+                                                className="flex items-center gap-3 p-3 rounded-xl border border-(--color-border)/50 bg-(--color-surface)/50"
+                                            >
+                                                <div className="w-10 h-10 rounded-lg bg-(--color-clay)/10 flex items-center justify-center">
+                                                    <IconComponent className="w-5 h-5 text-(--color-clay)" />
+                                                </div>
+                                                <span className="text-sm font-medium text-(--color-graphite)">{amenity}</span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Commute Information */}
+                        <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
+                            <h2 className="font-serif text-xl font-bold text-(--color-graphite) mb-4">
+                                Commute Information
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                {commuteInfo.map((info, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="flex items-center gap-4 p-4 rounded-xl border border-(--color-border)/50 bg-(--color-surface)/50"
+                                    >
+                                        <div className="w-12 h-12 rounded-xl bg-(--color-clay)/10 flex items-center justify-center">
+                                            <info.icon className="w-6 h-6 text-(--color-clay)" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-(--color-muted)">{info.label}</p>
+                                            <p className="font-semibold text-(--color-graphite)">{info.distance}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* PG Listings */}
+                        <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
                             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
                             <h2 className="font-serif text-2xl font-bold text-(--color-graphite)">
                                 Available PGs in {sector.name}
@@ -128,7 +203,7 @@ export default async function SectorPage({ params }: Props) {
                             </p>
                         </div>
 
-                        <div className="mt-6 space-y-6">
+                        <div className="space-y-6">
                             {sector.pgs.length > 0 ? (
                                 sector.pgs.map((pg) => (
                                     <PGCard key={pg.id} pg={pg} />
@@ -145,7 +220,7 @@ export default async function SectorPage({ params }: Props) {
 
                         {/* FAQs */}
                         {sector.faqs.length > 0 && (
-                            <div className="mt-10">
+                            <div>
                                 <h2 className="font-serif text-2xl font-bold text-(--color-graphite) mb-6">
                                     FAQs about {sector.name}
                                 </h2>
@@ -168,9 +243,9 @@ export default async function SectorPage({ params }: Props) {
                             </div>
                         )}
 
-                        {/* Google Maps Placeholder */}
+                        {/* Google Maps */}
                         {sector.latitude && sector.longitude && (
-                            <div className="mt-10">
+                            <div>
                                 <h2 className="font-serif text-2xl font-bold text-(--color-graphite) mb-6">
                                     Location
                                 </h2>
@@ -197,21 +272,21 @@ export default async function SectorPage({ params }: Props) {
                             <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
                                 <h3 className="font-serif text-xl font-semibold text-(--color-graphite) mb-4">Enquire Now</h3>
-                                <LeadForm sectorSlug={slug} />
+                                <FullLeadForm sectorSlug={slug} />
                             </div>
 
-                            {/* Quick Contact */}
-                            <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-6 shadow-[0_22px_60px_rgba(0,0,0,0.18)]">
+                            {/* Quick Contact - Desktop */}
+                            <div className="hidden md:block relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-6 shadow-lg">
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
                                 <h3 className="font-serif text-lg font-semibold mb-4">Need Help?</h3>
                                 <div className="space-y-3">
-                                    <Button variant="white" className="w-full" asChild>
+                                    <Button variant="secondary" className="w-full bg-white text-(--color-graphite) hover:bg-gray-100" asChild>
                                         <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
                                             <Phone className="w-4 h-4" />
                                             Call Now
                                         </a>
                                     </Button>
-                                    <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700" asChild>
+                                    <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                                         <a
                                             href="https://wa.me/919876543210"
                                             target="_blank"
@@ -228,6 +303,9 @@ export default async function SectorPage({ params }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Sticky CTA for Mobile */}
+            <StickyCtaBar />
         </div>
     )
 }
