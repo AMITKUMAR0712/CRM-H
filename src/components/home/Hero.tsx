@@ -22,7 +22,12 @@ import {
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
-const headlines = [{ main: 'Find Your', accent: 'Perfect PG', sub: 'in Noida' }]
+const headlines = [
+    { main: 'Find Your', accent: 'Perfect PG', sub: 'in Noida' },
+    { main: 'Premium', accent: 'Accommodation', sub: 'for Professionals' },
+    { main: 'Safe &', accent: 'Comfortable', sub: 'Living Spaces' },
+    { main: 'Metro-Connected', accent: 'Modern PGs', sub: 'in Every Sector' },
+]
 
 type TypewriterPart = { text: string; className?: string }
 
@@ -439,14 +444,24 @@ function HeroBackgroundAnimation({
 export default function Hero() {
     const sectionRef = useRef<HTMLElement | null>(null)
     const prefersReducedMotion = useReducedMotion()
+    const [headlineIndex, setHeadlineIndex] = useState(0)
+
+    // Cycle through headlines
+    useEffect(() => {
+        if (prefersReducedMotion) return
+        const interval = setInterval(() => {
+            setHeadlineIndex((prev) => (prev + 1) % headlines.length)
+        }, 6000) // Change every 6 seconds
+        return () => clearInterval(interval)
+    }, [prefersReducedMotion])
 
     const headlineParts = useMemo(
         () => [
-            { text: `${headlines[0].main} ` },
-            { text: headlines[0].accent, className: 'text-gradient' },
-            { text: `\n${headlines[0].sub}` },
+            { text: `${headlines[headlineIndex].main} ` },
+            { text: headlines[headlineIndex].accent, className: 'text-gradient' },
+            { text: `\n${headlines[headlineIndex].sub}` },
         ],
-        []
+        [headlineIndex]
     )
 
     const scrollToContent = () => {

@@ -100,24 +100,24 @@ async function main() {
 
         const user = existing
             ? await prisma.user.update({
-                  where: { email: params.email },
-                  data: {
-                      name: params.name,
-                      role: params.role,
-                      phone: params.phone,
-                      isActive: true,
-                      ...(passwordHash ? { password: passwordHash } : {}),
-                  },
-              })
+                where: { email: params.email },
+                data: {
+                    name: params.name,
+                    role: params.role,
+                    phone: params.phone,
+                    isActive: true,
+                    ...(passwordHash ? { password: passwordHash } : {}),
+                },
+            })
             : await prisma.user.create({
-                  data: {
-                      name: params.name,
-                      email: params.email,
-                      password: passwordHash!,
-                      role: params.role,
-                      phone: params.phone,
-                  },
-              })
+                data: {
+                    name: params.name,
+                    email: params.email,
+                    password: passwordHash!,
+                    role: params.role,
+                    phone: params.phone,
+                },
+            })
 
         return { user, passwordPlain: resolvedPasswordPlain }
     }
@@ -319,7 +319,7 @@ async function main() {
 
     // ========== 10. TAGS ==========
     const [tag1, tag2] = await Promise.all([
-            prisma.tag.upsert({ where: { slug: 'noida' }, update: {}, create: { name: 'Noida', slug: 'noida' } }),
+        prisma.tag.upsert({ where: { slug: 'noida' }, update: {}, create: { name: 'Noida', slug: 'noida' } }),
         prisma.tag.upsert({ where: { slug: 'tips' }, update: {}, create: { name: 'Tips', slug: 'tips' } }),
     ])
     console.log('✅ Tags')
@@ -549,9 +549,9 @@ async function main() {
 
     // ========== 18. NOTIFICATIONS ==========
     await prisma.notification.createMany({
-            data: [
-                { userId: superAdminUser.id, title: 'Welcome!', message: 'Your admin account is ready.', type: 'success' },
-                { userId: endUser.id, title: 'Welcome to SOHO PG', message: 'Your user panel is ready.', type: 'success' },
+        data: [
+            { userId: superAdminUser.id, title: 'Welcome!', message: 'Your admin account is ready.', type: 'success' },
+            { userId: endUser.id, title: 'Welcome to SOHO PG', message: 'Your user panel is ready.', type: 'success' },
         ],
         skipDuplicates: true,
     })
@@ -586,6 +586,253 @@ async function main() {
     if (!printCreds) {
         console.log('ℹ️ To print demo login passwords, re-run seed with SEED_PRINT_CREDENTIALS=true')
     }
+
+
+    // ========== 21. BLOG_POSTS ==========
+    console.log('🌱 Seeding blog posts...')
+
+    // First, ensure we have an admin user as author
+    let blogAuthor = await prisma.user.findFirst({
+        where: { role: 'ADMIN' },
+    })
+
+    if (!blogAuthor) {
+        blogAuthor = await prisma.user.create({
+            data: {
+                email: 'admin@sohopg.com',
+                name: 'SOHO PG Team',
+                role: 'ADMIN',
+                password: 'hashed_password_placeholder',
+            },
+        })
+        console.log('  ✅ Created admin author')
+    }
+
+    // Create or find a category for blog posts
+    let blogCategory = await prisma.category.findFirst({
+        where: { slug: 'pg-tips' },
+    })
+
+    if (!blogCategory) {
+        blogCategory = await prisma.category.create({
+            data: {
+                name: 'PG Tips',
+                slug: 'pg-tips',
+                description: 'Tips and guides for finding and living in PG accommodation',
+                isActive: true,
+            },
+        })
+        console.log('  ✅ Created category: PG Tips')
+    }
+
+    // Blog Post 1: 10 Tips for Finding Best PG in Noida
+    const post1Slug = '10-tips-for-finding-best-pg-in-noida'
+    const existingPost1 = await prisma.blogPost.findUnique({
+        where: { slug: post1Slug },
+    })
+
+    if (!existingPost1) {
+        await prisma.blogPost.create({
+            data: {
+                slug: post1Slug,
+                title: '10 Tips for Finding the Best PG in Noida',
+                excerpt: 'Looking for a PG in Noida? Here are 10 practical tips to help you find the perfect paying guest accommodation that fits your budget, location preferences, and lifestyle.',
+                content: `
+<h2>Finding the Right PG in Noida: A Complete Guide</h2>
+
+<p>Moving to Noida for work or studies? Finding the right PG (paying guest) accommodation can feel overwhelming with so many options available. Here's our comprehensive guide to help you make the best choice.</p>
+
+<h3>1. Define Your Budget Clearly</h3>
+<p>Before you start searching, set a realistic budget. In Noida, PG rentals typically range from ₹6,000 to ₹15,000 per month depending on the sector, room type, and amenities. Factor in additional costs like security deposit (usually 1-2 months' rent), meals, and utilities.</p>
+
+<h3>2. Choose the Right Sector</h3>
+<p>Noida's sectors vary significantly in terms of connectivity, safety, and amenities:</p>
+<ul>
+<li><strong>Sector 62:</strong> IT hub with excellent connectivity to Noida City Centre Metro</li>
+<li><strong>Sector 51:</strong> Residential area with good markets and metro access</li>
+<li><strong>Sector 18:</strong> Commercial hub with nightlife and shopping</li>
+<li><strong>Sector 137:</strong> Near Expressway, ideal for Gurgaon commuters</li>
+</ul>
+
+<h3>3. Check Metro Connectivity</h3>
+<p>If you're working in IT parks or need to commute frequently, prioritize PGs near Aqua Line or Blue Line metro stations. This can save you significant time and money on daily commutes.</p>
+
+<h3>4. Visit Before Committing</h3>
+<p>Always schedule a physical visit before booking. Photos can be deceiving. During your visit:</p>
+<ul>
+<li>Check room sizes and natural lighting</li>
+<li>Inspect bathroom cleanliness</li>
+<li>Meet your potential roommates if it's shared</li>
+<li>Test Wi-Fi speed</li>
+<li>Check power backup availability</li>
+</ul>
+
+<h3>5. Understand the Food Situation</h3>
+<p>PGs offering meals can save you ₹3,000-5,000 monthly eating out. Ask about:</p>
+<ul>
+<li>Meal timings and flexibility</li>
+<li>Menu variety (veg/non-veg options)</li>
+<li>Kitchen hygiene standards</li>
+<li>Guest meal policies</li>
+</ul>
+
+<h3>6. Verify Security Measures</h3>
+<p>Your safety is paramount. Look for:</p>
+<ul>
+<li>CCTV cameras at entry points</li>
+<li>Biometric or key card access</li>
+<li>Security guards (especially important for women's PGs)</li>
+<li>Visitor registration system</li>
+</ul>
+
+<h3>7. Read the Agreement Carefully</h3>
+<p>Before signing, understand:</p>
+<ul>
+<li>Lock-in period and notice requirements</li>
+<li>Deposit refund policy</li>
+<li>Rules about guests and overnight stays</li>
+<li>Maintenance responsibilities</li>
+</ul>
+
+<h3>8. Check Reviews and References</h3>
+<p>Search online for reviews. Ask the PG owner for references from current or past residents. Genuine PGs will have no problem connecting you with residents.</p>
+
+<h3>9. Assess Housekeeping Standards</h3>
+<p>A clean PG indicates good management. During your visit, check:</p>
+<ul>
+<li>Common area cleanliness</li>
+<li>Bathroom maintenance frequency</li>
+<li>Room cleaning schedule</li>
+<li>Laundry facilities available</li>
+</ul>
+
+<h3>10. Trust Your Instincts</h3>
+<p>Finally, trust your gut feeling. If something feels off during your visit—unfriendly staff, hidden costs, or evasive answers—it's better to keep looking. The right PG should feel welcoming from day one.</p>
+
+<h3>Ready to Find Your Perfect PG?</h3>
+<p>At SOHO PG, we've done the hard work for you. All our properties are verified for safety, cleanliness, and quality amenities. Use our Smart Finder tool to filter options based on your specific requirements and book a visit today!</p>
+`,
+                featuredImage: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200',
+                status: 'PUBLISHED',
+                publishedAt: new Date(),
+                metaTitle: '10 Tips for Finding Best PG in Noida | SOHO PG Guide',
+                metaDescription: 'Expert tips for finding the perfect PG accommodation in Noida. Learn about budgeting, location selection, safety checks, and more.',
+                readTime: 8,
+                isFeatured: true,
+                authorId: blogAuthor.id,
+                categoryId: blogCategory.id,
+            },
+        })
+        console.log('  ✅ Created blog post: 10 Tips for Finding Best PG in Noida')
+    }
+
+    // Blog Post 2: Living in Noida Sector 51: Complete Guide
+    const post2Slug = 'living-in-noida-sector-51-complete-guide'
+    const existingPost2 = await prisma.blogPost.findUnique({
+        where: { slug: post2Slug },
+    })
+
+    if (!existingPost2) {
+        await prisma.blogPost.create({
+            data: {
+                slug: post2Slug,
+                title: 'Living in Noida Sector 51: A Complete Guide for PG Residents',
+                excerpt: 'Everything you need to know about living in Sector 51, Noida—from metro connectivity and nearby amenities to the best places to eat and work.',
+                content: `
+<h2>Your Complete Guide to Living in Sector 51, Noida</h2>
+
+<p>Sector 51 is one of the most sought-after residential areas in Noida, especially popular among working professionals and students. Here's everything you need to know about living in this vibrant sector.</p>
+
+<h3>Location & Connectivity</h3>
+<p>Sector 51 enjoys excellent connectivity to major areas:</p>
+<ul>
+<li><strong>Metro Access:</strong> Sector 51 Metro Station (Aqua Line) is within walking distance</li>
+<li><strong>Road Connectivity:</strong> Easy access to Noida Expressway and DND Flyway</li>
+<li><strong>Delhi:</strong> 35-40 minutes to Connaught Place via metro</li>
+<li><strong>Noida City Centre:</strong> Just 3 stations away on Blue Line</li>
+</ul>
+
+<h3>Nearby IT Parks & Offices</h3>
+<p>Sector 51 is perfectly positioned for IT professionals:</p>
+<ul>
+<li>Sector 62 IT Hub: 15 minutes by metro</li>
+<li>Sector 125-135 Tech Park: 20 minutes via expressway</li>
+<li>Noida SEZ: 25 minutes commute</li>
+</ul>
+
+<h3>Essential Amenities</h3>
+<p>Everything you need is within reach:</p>
+
+<h4>Shopping</h4>
+<ul>
+<li>Atta Market (Sector 18): 10 minutes</li>
+<li>DLF Mall of India: 15 minutes</li>
+<li>Local markets within the sector for daily needs</li>
+</ul>
+
+<h4>Food & Dining</h4>
+<ul>
+<li>Multiple restaurants and cafes along main roads</li>
+<li>Street food corners for budget meals</li>
+<li>Swiggy/Zomato highly active in the area</li>
+</ul>
+
+<h4>Healthcare</h4>
+<ul>
+<li>Yatharth Hospital: 5 minutes</li>
+<li>Max Hospital Ghaziabad: 20 minutes</li>
+<li>Multiple clinics and pharmacies in sector</li>
+</ul>
+
+<h3>Why PG Residents Love Sector 51</h3>
+
+<h4>1. Peaceful Environment</h4>
+<p>Unlike commercial sectors, Sector 51 maintains a quiet, residential vibe. It's ideal for those who want to escape the hustle after work while still being connected to it.</p>
+
+<h4>2. Safety</h4>
+<p>The sector has active RWA (Resident Welfare Association) and regular police patrolling. Women's safety is particularly good here.</p>
+
+<h4>3. Green Spaces</h4>
+<p>Well-maintained parks and green belts throughout the sector make morning jogs and evening walks pleasant.</p>
+
+<h4>4. Affordability</h4>
+<p>Compared to sectors like 18 or 62, Sector 51 offers better value for money while maintaining quality living standards.</p>
+
+<h3>PG Rent Guide for Sector 51</h3>
+<table>
+<tr><th>Room Type</th><th>Average Rent</th></tr>
+<tr><td>Single Sharing</td><td>₹12,000 - ₹15,000</td></tr>
+<tr><td>Double Sharing</td><td>₹8,000 - ₹10,000</td></tr>
+<tr><td>Triple Sharing</td><td>₹6,000 - ₹8,000</td></tr>
+</table>
+<p><em>Prices include basic amenities. Meals may be additional.</em></p>
+
+<h3>Tips for New Residents</h3>
+<ol>
+<li><strong>Download metro apps:</strong> DMRC and Delhi Metro Rail apps help plan commutes</li>
+<li><strong>Join local groups:</strong> Facebook and WhatsApp groups for Sector 51 residents</li>
+<li><strong>Explore on weekends:</strong> Take time to discover local gems and shortcuts</li>
+<li><strong>Register with RWA:</strong> Important for security and community involvement</li>
+</ol>
+
+<h3>Find Your PG in Sector 51</h3>
+<p>Ready to make Sector 51 your new home? SOHO PG has verified, premium PG accommodations in Sector 51 with excellent amenities, security, and community vibes. Use our Smart Finder to explore available options!</p>
+`,
+                featuredImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200',
+                status: 'PUBLISHED',
+                publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+                metaTitle: 'Living in Noida Sector 51: Complete Guide | SOHO PG',
+                metaDescription: 'Everything about living in Sector 51 Noida - metro connectivity, nearby amenities, safety, and PG rent guide for working professionals.',
+                readTime: 6,
+                isFeatured: false,
+                authorId: blogAuthor.id,
+                categoryId: blogCategory.id,
+            },
+        })
+        console.log('  ✅ Created blog post: Living in Noida Sector 51: Complete Guide')
+    }
+
+    console.log('✅ Blog posts seeding complete!')
 }
 
 main()

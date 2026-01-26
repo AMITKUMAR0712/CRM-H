@@ -7,7 +7,7 @@ const ADMIN_LOGIN = '/admin/login'
 const USER_PREFIX = '/user'
 const USER_LOGIN = '/login'
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   const isAdminRoute = pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`)
