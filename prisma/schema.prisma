@@ -416,8 +416,8 @@ model User {
   activities    LeadActivity[]
   notifications Notification[]
 
-  bannersCreated Banner[] @relation("banner_created_by")
-  bannersUpdated Banner[] @relation("banner_updated_by")
+  bannersCreated Banner[]      @relation("banner_created_by")
+  bannersUpdated Banner[]      @relation("banner_updated_by")
   bannerEvents   BannerEvent[]
 
   enquiries         Enquiry[]
@@ -428,10 +428,10 @@ model User {
   restrictionsCreated UserRestriction[] @relation("restriction_created_by")
   restrictionsRevoked UserRestriction[] @relation("restriction_revoked_by")
 
-  chatThreads ChatThread[]      @relation("chat_thread_user")
-  chatThreadsAssigned ChatThread[] @relation("chat_thread_assigned_to")
-  chatMessages ChatMessage[]    @relation("chat_message_sender")
-  chatReads ChatReadReceipt[]   @relation("chat_read_user")
+  chatThreads         ChatThread[]      @relation("chat_thread_user")
+  chatThreadsAssigned ChatThread[]      @relation("chat_thread_assigned_to")
+  chatMessages        ChatMessage[]     @relation("chat_message_sender")
+  chatReads           ChatReadReceipt[] @relation("chat_read_user")
 
   tickets         Ticket[]        @relation("ticket_user")
   ticketsAssigned Ticket[]        @relation("ticket_assigned_to")
@@ -485,11 +485,11 @@ model Banner {
   id String @id @default(cuid())
 
   type     BannerType
-  title    String   @db.VarChar(120)
-  subtitle String?  @db.VarChar(255)
-  imageUrl String?  @db.Text
-  ctaLabel String?  @db.VarChar(60)
-  ctaHref  String?  @db.Text
+  title    String     @db.VarChar(120)
+  subtitle String?    @db.VarChar(255)
+  imageUrl String?    @db.Text
+  ctaLabel String?    @db.VarChar(60)
+  ctaHref  String?    @db.Text
 
   discountType  DiscountType?
   discountValue Int?
@@ -521,14 +521,14 @@ model Banner {
 }
 
 model BannerTarget {
-  id       String           @id @default(cuid())
-  bannerId String
-  scope    BannerTargetScope
-  sectorId String?
-  pgId     String?
-  createdAt DateTime @default(now())
+  id        String            @id @default(cuid())
+  bannerId  String
+  scope     BannerTargetScope
+  sectorId  String?
+  pgId      String?
+  createdAt DateTime          @default(now())
 
-  banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  banner Banner  @relation(fields: [bannerId], references: [id], onDelete: Cascade)
   sector Sector? @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   pg     PG?     @relation(fields: [pgId], references: [id], onDelete: Cascade)
 
@@ -547,16 +547,16 @@ enum BannerEventType {
 }
 
 model BannerEvent {
-  id       String          @id @default(cuid())
-  bannerId String
-  type     BannerEventType
-  path     String?         @db.VarChar(255)
-  userId   String?
-  sessionId String?        @db.VarChar(64)
-  ipAddress String?        @db.VarChar(45)
-  userAgent String?        @db.Text
-  metadata Json?
-  createdAt DateTime @default(now())
+  id        String          @id @default(cuid())
+  bannerId  String
+  type      BannerEventType
+  path      String?         @db.VarChar(255)
+  userId    String?
+  sessionId String?         @db.VarChar(64)
+  ipAddress String?         @db.VarChar(45)
+  userAgent String?         @db.Text
+  metadata  Json?
+  createdAt DateTime        @default(now())
 
   banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
   user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -634,15 +634,15 @@ model Enquiry {
 }
 
 model EnquiryNote {
-  id        String   @id @default(cuid())
-  enquiryId String
-  body      String   @db.Text
-  isInternal Boolean @default(true)
+  id          String   @id @default(cuid())
+  enquiryId   String
+  body        String   @db.Text
+  isInternal  Boolean  @default(true)
   createdById String?
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
-  enquiry Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
-  createdBy User? @relation("enquiry_note_created_by", fields: [createdById], references: [id], onDelete: SetNull)
+  enquiry   Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("enquiry_note_created_by", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([enquiryId])
   @@index([createdAt])
@@ -664,17 +664,17 @@ model UserRestriction {
   userId String
 
   type   RestrictionType
-  reason String? @db.Text
+  reason String?         @db.Text
 
-  startsAt DateTime @default(now())
+  startsAt DateTime  @default(now())
   endsAt   DateTime?
 
   isActive Boolean @default(true)
 
-  createdById String?
-  revokedAt   DateTime?
-  revokedById String?
-  revokedReason String? @db.Text
+  createdById   String?
+  revokedAt     DateTime?
+  revokedById   String?
+  revokedReason String?   @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -702,7 +702,7 @@ enum ChatThreadStatus {
 }
 
 model ChatThread {
-  id     String @id @default(cuid())
+  id String @id @default(cuid())
 
   userId String
   pgId   String?
@@ -718,9 +718,9 @@ model ChatThread {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation("chat_thread_user", fields: [userId], references: [id], onDelete: Cascade)
+  user       User  @relation("chat_thread_user", fields: [userId], references: [id], onDelete: Cascade)
   assignedTo User? @relation("chat_thread_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
-  pg   PG?  @relation(fields: [pgId], references: [id], onDelete: SetNull)
+  pg         PG?   @relation(fields: [pgId], references: [id], onDelete: SetNull)
 
   messages ChatMessage[]
   reads    ChatReadReceipt[]
@@ -734,11 +734,11 @@ model ChatThread {
 }
 
 model ChatMessage {
-  id        String @id @default(cuid())
-  threadId  String
-  senderId  String
-  body      String @db.Text
-  isSystem  Boolean @default(false)
+  id       String  @id @default(cuid())
+  threadId String
+  senderId String
+  body     String  @db.Text
+  isSystem Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -752,9 +752,9 @@ model ChatMessage {
 }
 
 model ChatReadReceipt {
-  id       String @id @default(cuid())
-  threadId String
-  userId   String
+  id         String   @id @default(cuid())
+  threadId   String
+  userId     String
   lastReadAt DateTime @default(now())
 
   thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
@@ -815,8 +815,8 @@ model Ticket {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user       User @relation("ticket_user", fields: [userId], references: [id], onDelete: Cascade)
-  pg         PG?  @relation(fields: [pgId], references: [id], onDelete: SetNull)
+  user       User  @relation("ticket_user", fields: [userId], references: [id], onDelete: Cascade)
+  pg         PG?   @relation(fields: [pgId], references: [id], onDelete: SetNull)
   assignedTo User? @relation("ticket_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   messages TicketMessage[]
@@ -853,10 +853,10 @@ model TicketMessage {
 }
 
 model TicketAttachment {
-  id        String @id @default(cuid())
+  id        String   @id @default(cuid())
   messageId String
-  url       String @db.Text
-  mimeType  String? @db.VarChar(120)
+  url       String   @db.Text
+  mimeType  String?  @db.VarChar(120)
   sizeBytes Int?
   createdAt DateTime @default(now())
 
@@ -876,8 +876,8 @@ model AuditLog {
   actorId   String?
   actorRole UserRole?
 
-  action     String @db.VarChar(100)
-  entityType String @db.VarChar(60)
+  action     String  @db.VarChar(100)
+  entityType String  @db.VarChar(60)
   entityId   String? @db.VarChar(64)
 
   summary  String? @db.VarChar(255)
@@ -905,7 +905,7 @@ model PasswordResetToken {
   id     String @id @default(cuid())
   userId String
 
-  otpHash  String @db.VarChar(255)
+  otpHash   String    @db.VarChar(255)
   expiresAt DateTime
   usedAt    DateTime?
 
@@ -1115,30 +1115,30 @@ enum MenuItemType {
 }
 
 model MenuItem {
-  id          String         @id @default(cuid())
-  title       String         @db.VarChar(80)
-  type        MenuItemType   @default(URL)
+  id    String       @id @default(cuid())
+  title String       @db.VarChar(80)
+  type  MenuItemType @default(URL)
 
   // If type=URL, href is the full URL/path. If type=PAGE, href is optional and derived from the Page slug.
-  href        String?        @db.Text
-  pageId      String?
+  href   String? @db.Text
+  pageId String?
 
-  parentId    String?
-  order       Int            @default(0)
-  visibility  MenuVisibility @default(HEADER)
-  isActive    Boolean        @default(true)
-  openInNewTab Boolean       @default(false)
+  parentId     String?
+  order        Int            @default(0)
+  visibility   MenuVisibility @default(HEADER)
+  isActive     Boolean        @default(true)
+  openInNewTab Boolean        @default(false)
 
   createdById String?
   updatedById String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   // Relations
-  page      Page?     @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  parent    MenuItem? @relation("menu_parent", fields: [parentId], references: [id], onDelete: SetNull)
-  children  MenuItem[] @relation("menu_parent")
+  page     Page?      @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  parent   MenuItem?  @relation("menu_parent", fields: [parentId], references: [id], onDelete: SetNull)
+  children MenuItem[] @relation("menu_parent")
 
   createdBy User? @relation("menu_created_by", fields: [createdById], references: [id], onDelete: SetNull)
   updatedBy User? @relation("menu_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
@@ -1158,29 +1158,29 @@ enum PageStatus {
 }
 
 model Page {
-  id              String     @id @default(cuid())
-  title           String     @db.VarChar(120)
-  slug            String     @unique @db.VarChar(160)
-  status          PageStatus @default(DRAFT)
+  id     String     @id @default(cuid())
+  title  String     @db.VarChar(120)
+  slug   String     @unique @db.VarChar(160)
+  status PageStatus @default(DRAFT)
 
   // Page Builder JSON: sections/blocks structure.
-  content          Json
+  content Json
 
   // SEO
-  metaTitle        String?   @db.VarChar(60)
-  metaDescription  String?   @db.VarChar(160)
-  ogImageUrl       String?   @db.Text
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+  ogImageUrl      String? @db.Text
 
   // Visibility
-  isActive         Boolean   @default(true)
-  showOnHome       Boolean   @default(false)
+  isActive   Boolean @default(true)
+  showOnHome Boolean @default(false)
 
-  publishedAt      DateTime?
-  createdById      String?
-  updatedById      String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
+  publishedAt DateTime?
+  createdById String?
+  updatedById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   menuItems MenuItem[]
 
