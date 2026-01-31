@@ -63,10 +63,15 @@ export const galleryImageCreateSchema = z.object({
     album: z.enum(['rooms', 'common', 'food', 'neighborhood', 'safety', 'exterior']),
     sectorSlug: z.string().optional(),
     pgId: z.string().cuid().optional(),
+    roomType: z.enum(['SINGLE', 'DOUBLE', 'TRIPLE', 'FOUR_SHARING']).optional(),
+    floor: z.number().int().min(0).optional(),
+    availability: z.string().max(60).optional(),
     displayOrder: z.number().min(0).default(0),
     isFeatured: z.boolean().default(false),
     isActive: z.boolean().default(true),
 })
+
+export const galleryImageUpdateSchema = galleryImageCreateSchema.partial()
 
 export const galleryQuerySchema = z.object({
     page: z.string().optional().default('1'),
@@ -74,7 +79,10 @@ export const galleryQuerySchema = z.object({
     album: z.string().optional(),
     sectorSlug: z.string().optional(),
     pgId: z.string().optional(),
+    roomType: z.enum(['SINGLE', 'DOUBLE', 'TRIPLE', 'FOUR_SHARING']).optional(),
+    availability: z.string().optional(),
     isFeatured: z.string().optional(),
+    includeInactive: z.string().optional(),
 })
 
 // ============================================

@@ -6,6 +6,7 @@ import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
 import { uploadPGPhoto } from '@/lib/upload'
 import { z } from 'zod'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 const photoSchema = z.object({
     pgId: z.string().cuid(),
@@ -21,6 +22,9 @@ const photoSchema = z.object({
  */
 export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { searchParams } = new URL(req.url)
         const pgId = searchParams.get('pgId')
 
@@ -57,9 +61,21 @@ export async function POST(req: NextRequest) {
         if (!file) return NextResponse.json(error('File is required'), { status: 400 })
         if (!pgId) return NextResponse.json(error('PG ID is required'), { status: 400 })
 
-        // Verify PG exists
-        const pg = await prisma.pG.findUnique({ where: { id: pgId } })
-        if (!pg) return NextResponse.json(error('PG not found'), { status: 404 })
+        // Verify PG exists and manager assignment
+        const pg = await prisma.pG.findFirst({
+            where: {
+                id: pgId,
+                ...(authResult.user.role === 'MANAGER'
+                    ? { assignments: { some: { userId: authResult.user.id } } }
+                    : {}),
+            },
+        })
+        if (!pg) {
+            return NextResponse.json(
+                error(authResult.user.role === 'MANAGER' ? 'Insufficient permissions to upload for this PG' : 'PG not found'),
+                { status: authResult.user.role === 'MANAGER' ? 403 : 404 }
+            )
+        }
 
         // Upload to Cloudinary
         const uploadResult = await uploadPGPhoto(file, pg.slug)
@@ -91,7 +107,7 @@ export async function POST(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     try {
-        const authResult = await requirePermission(PERMISSIONS.MEDIA_WRITE)
+        const authResult = await requirePermission(PERMISSIONS.MEDIA_DELETE)
         if (authResult instanceof NextResponse) return authResult
 
         const { searchParams } = new URL(req.url)

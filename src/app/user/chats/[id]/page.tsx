@@ -22,8 +22,8 @@ type ChatThreadDetail = {
 }
 
 export default function ChatThreadPage() {
-  const params = useParams<{ id: string }>()
-  const threadId = params.id
+  const params = useParams<{ id?: string }>()
+  const threadId = params?.id ?? ''
 
   const [thread, setThread] = React.useState<ChatThreadDetail | null>(null)
   const [messages, setMessages] = React.useState<ChatMessage[]>([])
@@ -52,6 +52,7 @@ export default function ChatThreadPage() {
   }
 
   React.useEffect(() => {
+    if (!threadId) return
     void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId])
@@ -79,6 +80,14 @@ export default function ChatThreadPage() {
 
     setText('')
     await load()
+  }
+
+  if (!threadId) {
+    return (
+      <Card className="p-5">
+        <div className="text-sm text-muted">Chat thread not found.</div>
+      </Card>
+    )
   }
 
   return (

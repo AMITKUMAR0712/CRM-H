@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
     if (hasValidationError(validation)) return validation.error
 
     const query = validation.data
+    const role = authResult.user.role
+    const userId = authResult.user.id
     const { page, limit, skip } = parsePagination(searchParams)
 
     const where: Prisma.LeadWhereInput = {}
@@ -28,6 +30,7 @@ export async function GET(req: NextRequest) {
     if (query.sectorId) where.preferredSectorId = query.sectorId
     if (query.pgId) where.pgId = query.pgId
     if (query.assignedToId) where.assignedToId = query.assignedToId
+    if (role === 'MANAGER') where.assignedToId = userId
 
     if (query.startDate || query.endDate) {
       where.createdAt = {}

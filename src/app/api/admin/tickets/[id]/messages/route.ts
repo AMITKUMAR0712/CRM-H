@@ -19,7 +19,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const ticket = await prisma.ticket.findUnique({ where: { id } })
+    const ticket = await prisma.ticket.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
+    })
     if (!ticket) return NextResponse.json(error('Ticket not found'), { status: 404 })
 
     const validation = await validateBody(req, ticketMessageCreateSchema)

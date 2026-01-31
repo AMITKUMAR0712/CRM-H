@@ -3,11 +3,14 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 type Post = {
   id: string
@@ -25,6 +28,9 @@ type ApiResponse<T> =
 
 export default function AdminBlogPostsPage() {
   const [search, setSearch] = React.useState('')
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canWrite = role ? hasPermission(role, PERMISSIONS.BLOG_WRITE) : false
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-blog-posts', search],
@@ -45,13 +51,15 @@ export default function AdminBlogPostsPage() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Blog Posts</h1>
-          <p className="text-sm text-[var(--color-muted)]">Draft, publish, and optimize SEO.</p>
+          <p className="text-sm text-muted">Draft, publish, and optimize SEO.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => refetch()}>Refresh</Button>
-          <Button asChild>
-            <Link href="/admin/blog/posts/new">New Post</Link>
-          </Button>
+          {canWrite ? (
+            <Button asChild>
+              <Link href="/admin/blog/posts/new">New Post</Link>
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -78,12 +86,12 @@ export default function AdminBlogPostsPage() {
           ) : error ? (
             <p className="text-sm text-red-600">{(error as Error).message}</p>
           ) : !data?.length ? (
-            <p className="text-sm text-[var(--color-muted)]">No posts found.</p>
+            <p className="text-sm text-muted">No posts found.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left border-b border-[var(--color-border)]">
+                  <tr className="text-left border-b border-(--color-border)">
                     <th className="py-2">Title</th>
                     <th className="py-2">Status</th>
                     <th className="py-2">Views</th>
@@ -92,17 +100,21 @@ export default function AdminBlogPostsPage() {
                 </thead>
                 <tbody>
                   {data.map((p) => (
-                    <tr key={p.id} className="border-b border-[var(--color-border)]">
+                    <tr key={p.id} className="border-b border-(--color-border)">
                       <td className="py-2">
                         <div className="font-medium">{p.title}</div>
-                        <div className="text-xs text-[var(--color-muted)]">{p.slug}</div>
+                        <div className="text-xs text-muted">{p.slug}</div>
                       </td>
                       <td className="py-2">{p.status}</td>
                       <td className="py-2">{p.viewCount}</td>
                       <td className="py-2">
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={`/admin/blog/posts/${p.id}`}>Edit</Link>
-                        </Button>
+                        {canWrite ? (
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={`/admin/blog/posts/${p.id}`}>Edit</Link>
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted">Read only</span>
+                        )}
                       </td>
                     </tr>
                   ))}

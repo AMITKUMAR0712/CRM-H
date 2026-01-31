@@ -7,47 +7,58 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import PageHero from '@/components/layout/PageHero'
 import prisma from '@/lib/prisma'
+import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 
 type Props = {
     params: Promise<{ slug: string }>
 }
 
 async function getPost(slug: string) {
-    const post = await prisma.blogPost.findUnique({
-        where: { slug },
-        include: {
-            author: { select: { name: true, avatar: true } },
-            category: { select: { name: true, slug: true } },
-            tags: { include: { tag: true } },
-        },
-    })
+    try {
+        const post = await prisma.blogPost.findUnique({
+            where: { slug },
+            include: {
+                author: { select: { name: true, avatar: true } },
+                category: { select: { name: true, slug: true } },
+                tags: { include: { tag: true } },
+            },
+        })
 
-    return post
+        return post
+    } catch (err) {
+        console.error('[Blog] Failed to load post', err)
+        return null
+    }
 }
 
 async function getRelatedPosts(categoryId: string | null, currentSlug: string) {
     if (!categoryId) return []
 
-    const posts = await prisma.blogPost.findMany({
-        where: {
-            status: 'PUBLISHED',
-            categoryId,
-            slug: { not: currentSlug },
-        },
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            excerpt: true,
-            featuredImage: true,
-            publishedAt: true,
-            readTime: true,
-        },
-        take: 3,
-        orderBy: { publishedAt: 'desc' },
-    })
+    try {
+        const posts = await prisma.blogPost.findMany({
+            where: {
+                status: 'PUBLISHED',
+                categoryId,
+                slug: { not: currentSlug },
+            },
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                excerpt: true,
+                featuredImage: true,
+                publishedAt: true,
+                readTime: true,
+            },
+            take: 3,
+            orderBy: { publishedAt: 'desc' },
+        })
 
-    return posts
+        return posts
+    } catch (err) {
+        console.error('[Blog] Failed to load related posts', err)
+        return []
+    }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -70,12 +81,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-    const posts = await prisma.blogPost.findMany({
-        where: { status: 'PUBLISHED' },
-        select: { slug: true },
-    })
+    try {
+        const posts = await prisma.blogPost.findMany({
+            where: { status: 'PUBLISHED' },
+            select: { slug: true },
+        })
 
-    return posts.map((post) => ({ slug: post.slug }))
+        return posts.map((post) => ({ slug: post.slug }))
+    } catch (err) {
+        console.error('[Blog] Failed to build static params', err)
+        return []
+    }
 }
 
 function formatDate(date: Date | null) {
@@ -95,11 +111,16 @@ export default async function BlogPostPage({ params }: Props) {
         notFound()
     }
 
-    // Increment view count
-    await prisma.blogPost.update({
-        where: { id: post.id },
-        data: { viewCount: { increment: 1 } },
-    })
+    if (process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD) {
+        try {
+            await prisma.blogPost.update({
+                where: { id: post.id },
+                data: { viewCount: { increment: 1 } },
+            })
+        } catch (err) {
+            console.error('[Blog] Failed to increment view count', err)
+        }
+    }
 
     const relatedPosts = await getRelatedPosts(post.categoryId, slug)
 

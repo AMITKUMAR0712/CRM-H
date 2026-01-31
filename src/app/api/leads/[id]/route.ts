@@ -21,8 +21,11 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
         const { id } = await params
 
-        const lead = await prisma.lead.findUnique({
-            where: { id },
+        const lead = await prisma.lead.findFirst({
+            where: {
+                id,
+                ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+            },
             include: {
                 preferredSector: true,
                 pg: { select: { name: true, slug: true, sectorId: true } },
@@ -62,8 +65,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
             return validation.error
         }
 
-        const existing = await prisma.lead.findUnique({
-            where: { id },
+        const existing = await prisma.lead.findFirst({
+            where: {
+                id,
+                ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+            },
         })
 
         if (!existing) {
@@ -115,8 +121,11 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
         const { id } = await params
 
-        const existing = await prisma.lead.findUnique({
-            where: { id },
+        const existing = await prisma.lead.findFirst({
+            where: {
+                id,
+                ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+            },
         })
 
         if (!existing) {

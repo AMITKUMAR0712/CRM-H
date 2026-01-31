@@ -19,13 +19,14 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const thread = await prisma.chatThread.findUnique({
-      where: { id },
+    const thread = await prisma.chatThread.findFirst({
+      where: {
+        id,
+      },
       select: {
         id: true,
         userId: true,
         pgId: true,
-        assignedToId: true,
         status: true,
         mutedUntil: true,
         closedAt: true,
@@ -34,7 +35,6 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
         updatedAt: true,
         user: { select: { id: true, name: true, email: true, role: true } },
         pg: { select: { id: true, name: true, slug: true } },
-        assignedTo: { select: { id: true, name: true, email: true, role: true } },
         messages: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -66,7 +66,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const existing = await prisma.chatThread.findUnique({ where: { id } })
+    const existing = await prisma.chatThread.findFirst({
+      where: {
+        id,
+      },
+    })
     if (!existing) return NextResponse.json(error('Chat thread not found'), { status: 404 })
 
     const validation = await validateBody(req, chatThreadUpdateSchema)
@@ -80,7 +84,6 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         status: data.status,
         mutedUntil: data.mutedUntil === undefined ? undefined : data.mutedUntil ? new Date(data.mutedUntil) : null,
         closedAt: data.status === 'CLOSED' ? existing.closedAt ?? new Date() : existing.closedAt,
-        assignedToId: data.assignedToId === undefined ? undefined : data.assignedToId,
       },
     })
 
@@ -91,7 +94,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       entityType: 'ChatThread',
       entityId: id,
       summary: `Updated chat thread ${id}`,
-      metadata: { from: { status: existing.status, assignedToId: existing.assignedToId }, to: data },
+      metadata: { from: { status: existing.status }, to: data },
     })
 
     return NextResponse.json(success(updated, 'Chat updated'))

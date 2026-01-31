@@ -8,12 +8,16 @@ import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
 import { parsePagination, paginationQuery } from '@/utils/pagination'
 import { Prisma, PostStatus } from '@prisma/client'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 /**
  * GET /api/blog/posts - List blog posts
  */
 export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { searchParams } = new URL(req.url)
         const validation = validateQuery(searchParams, blogPostQuerySchema)
 

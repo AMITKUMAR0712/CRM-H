@@ -17,25 +17,35 @@ export const metadata: Metadata = generatePageMetadata(
 )
 
 async function getSettings() {
-    const settings = await prisma.setting.findMany({
-        where: { isPublic: true },
-    })
+    try {
+        const settings = await prisma.setting.findMany({
+            where: { isPublic: true },
+        })
 
-    const settingsMap: Record<string, string> = {}
-    settings.forEach((s) => {
-        settingsMap[s.key] = s.value
-    })
+        const settingsMap: Record<string, string> = {}
+        settings.forEach((s) => {
+            settingsMap[s.key] = s.value
+        })
 
-    return settingsMap
+        return settingsMap
+    } catch (err) {
+        console.error('[Contact] Failed to load settings', err)
+        return {}
+    }
 }
 
 async function getFAQs() {
-    const faqs = await prisma.fAQ.findMany({
-        where: { isActive: true, sectorId: null },
-        orderBy: { order: 'asc' },
-        take: 5,
-    })
-    return faqs
+    try {
+        const faqs = await prisma.fAQ.findMany({
+            where: { isActive: true, sectorId: null },
+            orderBy: { order: 'asc' },
+            take: 5,
+        })
+        return faqs
+    } catch (err) {
+        console.error('[Contact] Failed to load FAQs', err)
+        return []
+    }
 }
 
 export default async function ContactPage() {

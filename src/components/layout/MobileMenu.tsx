@@ -19,7 +19,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ isOpen, onClose, links, user = null }: MobileMenuProps) {
-    const pathname = usePathname()
+    const pathname = usePathname() ?? ''
     const prefersReducedMotion = useReducedMotion()
 
     // Lock body scroll when open

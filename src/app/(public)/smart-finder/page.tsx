@@ -11,7 +11,7 @@ import PGCard from '@/components/pg/PGCard'
 import PageHero from '@/components/layout/PageHero'
 import CompareDrawer from '@/components/smart-finder/CompareDrawer'
 import LeadForm from '@/components/forms/LeadForm'
-import { usePGs, useSectors } from '@/lib/hooks'
+import { usePGs, useSectors, useSmartCategories } from '@/lib/hooks'
 
 interface PGData {
     id: string
@@ -25,7 +25,10 @@ interface PGData {
     mealsIncluded: boolean
     hasParking?: boolean
     hasGym?: boolean
-    hasHousekeeping?: boolean
+    hasPowerBackup?: boolean
+    hasLaundry?: boolean
+    hasTV?: boolean
+    hasFridge?: boolean
     isFeatured: boolean
     availableRooms: number
     photos?: { url: string; altText?: string | null; isFeatured: boolean }[]
@@ -39,6 +42,7 @@ export default function SmartFinderPage() {
     const [compareItems, setCompareItems] = useState<PGData[]>([])
     const [showCompare, setShowCompare] = useState(false)
     const [selectedFilters, setSelectedFilters] = useState({
+        category: '',
         sector: '',
         roomType: '',
         occupancy: '',
@@ -48,7 +52,10 @@ export default function SmartFinderPage() {
         mealsIncluded: false,
         hasParking: false,
         hasGym: false,
-        hasHousekeeping: false,
+        hasPowerBackup: false,
+        hasLaundry: false,
+        hasTV: false,
+        hasFridge: false,
         metroDistance: '',
     })
 
@@ -57,6 +64,7 @@ export default function SmartFinderPage() {
         const params: Record<string, string> = {}
 
         if (selectedFilters.sector) params.sector = selectedFilters.sector
+        if (selectedFilters.category) params.category = selectedFilters.category
         if (selectedFilters.roomType) params.roomType = selectedFilters.roomType
         if (selectedFilters.occupancy) params.occupancyType = selectedFilters.occupancy
         if (selectedFilters.hasAC) params.hasAC = 'true'
@@ -64,7 +72,11 @@ export default function SmartFinderPage() {
         if (selectedFilters.mealsIncluded) params.mealsIncluded = 'true'
         if (selectedFilters.hasParking) params.hasParking = 'true'
         if (selectedFilters.hasGym) params.hasGym = 'true'
-        if (selectedFilters.hasHousekeeping) params.hasHousekeeping = 'true'
+        if (selectedFilters.hasPowerBackup) params.hasPowerBackup = 'true'
+        if (selectedFilters.hasLaundry) params.hasLaundry = 'true'
+        if (selectedFilters.hasTV) params.hasTV = 'true'
+        if (selectedFilters.hasFridge) params.hasFridge = 'true'
+        if (selectedFilters.metroDistance) params.metroDistance = selectedFilters.metroDistance
         if (search.trim()) params.search = search.trim()
 
         if (selectedFilters.budget) {
@@ -78,6 +90,7 @@ export default function SmartFinderPage() {
 
     const { data: pgsData, isLoading: pgsLoading, error: pgsError } = usePGs(apiParams)
     const { data: sectorsData } = useSectors()
+    const { data: categoriesData } = useSmartCategories()
 
     const updateFilter = (key: string, value: string | boolean) => {
         setSelectedFilters((prev) => ({ ...prev, [key]: value }))
@@ -85,6 +98,7 @@ export default function SmartFinderPage() {
 
     const clearFilters = () => {
         setSelectedFilters({
+            category: '',
             sector: '',
             roomType: '',
             occupancy: '',
@@ -94,7 +108,10 @@ export default function SmartFinderPage() {
             mealsIncluded: false,
             hasParking: false,
             hasGym: false,
-            hasHousekeeping: false,
+            hasPowerBackup: false,
+            hasLaundry: false,
+            hasTV: false,
+            hasFridge: false,
             metroDistance: '',
         })
         setSearch('')
@@ -119,8 +136,13 @@ export default function SmartFinderPage() {
 
     const pgs = pgsData?.data || []
     const sectors = sectorsData?.data || []
+    const categories = categoriesData?.data || []
 
     const filters = {
+        categories: [
+            { value: '', label: 'All Categories' },
+            ...categories.map(c => ({ value: c.slug, label: c.name }))
+        ],
         sectors: [
             { value: '', label: 'All Sectors' },
             ...sectors.map(s => ({ value: s.slug, label: s.name }))
@@ -192,12 +214,25 @@ export default function SmartFinderPage() {
                                 </button>
                             </div>
 
-                            <div className="space-y-5">
+                            <div className="space-y-3">
+                                <label className="block text-sm font-medium">Category</label>
+                                <select
+                                    className="w-full rounded-xl border border-(--color-border)/70 bg-white px-3 py-2 text-sm"
+                                    value={selectedFilters.category}
+                                    onChange={(e) => updateFilter('category', e.target.value)}
+                                >
+                                    {filters.categories.map((item) => (
+                                        <option key={item.value} value={item.value}>{item.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="space-y-3">
                                 {/* Search */}
                                 <div>
                                     <label className="text-sm font-medium mb-2 block">Search</label>
                                     <div className="relative">
-                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-(--color-muted)" />
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                                         <Input
                                             value={search}
                                             onChange={(e) => setSearch(e.target.value)}
@@ -277,7 +312,10 @@ export default function SmartFinderPage() {
                                             { key: 'mealsIncluded', label: 'Meals' },
                                             { key: 'hasParking', label: 'Parking' },
                                             { key: 'hasGym', label: 'Gym' },
-                                            { key: 'hasHousekeeping', label: 'Housekeeping' },
+                                            { key: 'hasPowerBackup', label: 'Power Backup' },
+                                            { key: 'hasLaundry', label: 'Laundry' },
+                                            { key: 'hasTV', label: 'TV' },
+                                            { key: 'hasFridge', label: 'Fridge' },
                                         ].map((amenity) => (
                                             <label key={amenity.key} className="flex items-center gap-2 cursor-pointer text-sm">
                                                 <input
@@ -319,7 +357,7 @@ export default function SmartFinderPage() {
 
                         {/* Results Count */}
                         <div className="flex items-center justify-between mb-6">
-                            <p className="text-(--color-muted)">
+                            <p className="text-muted">
                                 {pgsLoading ? (
                                     <span className="flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -377,7 +415,7 @@ export default function SmartFinderPage() {
                                                 onClick={() => toggleCompare(pg)}
                                                 className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isInCompare(pg.id)
                                                         ? 'bg-(--color-clay) text-white'
-                                                        : 'bg-white/90 border border-(--color-border) text-(--color-muted) hover:border-(--color-clay)'
+                                                        : 'bg-white/90 border border-(--color-border) text-muted hover:border-(--color-clay)'
                                                     }`}
                                                 title={isInCompare(pg.id) ? 'Remove from compare' : 'Add to compare'}
                                             >
@@ -391,7 +429,7 @@ export default function SmartFinderPage() {
                             ) : (
                                 <div className="rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 text-center backdrop-blur-md">
                                     <p className="text-(--color-graphite) font-medium">No PGs match these filters.</p>
-                                    <p className="mt-1 text-sm text-(--color-muted)">Try clearing a few filters or searching with fewer keywords.</p>
+                                    <p className="mt-1 text-sm text-muted">Try clearing a few filters or searching with fewer keywords.</p>
                                     <Button onClick={clearFilters} className="mt-4" variant="outline">
                                         Clear Filters
                                     </Button>
@@ -408,7 +446,7 @@ export default function SmartFinderPage() {
                                         <h3 className="font-serif text-2xl font-bold text-(--color-graphite) mb-3">
                                             Can&apos;t find what you&apos;re looking for?
                                         </h3>
-                                        <p className="text-(--color-muted)">
+                                        <p className="text-muted">
                                             Tell us your requirements and we&apos;ll help you find the perfect PG. Our team will get back to you within 24 hours.
                                         </p>
                                     </div>

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { RoomType, OccupancyType } from '@prisma/client'
+import { RoomType, OccupancyType, PGApprovalStatus } from '@prisma/client'
 
 // ============================================
 // PG VALIDATORS
@@ -50,6 +50,12 @@ export const pgCreateSchema = z.object({
     // Status
     isFeatured: z.boolean().default(false),
     isActive: z.boolean().default(true),
+    approvalStatus: z.nativeEnum(PGApprovalStatus).optional(),
+    blockedReason: z.string().max(2000).optional(),
+
+    // Smart Finder
+    categoryIds: z.array(z.string().cuid()).optional(),
+    assignedManagerIds: z.array(z.string().cuid()).optional(),
 })
 
 export const pgUpdateSchema = pgCreateSchema.partial()
@@ -58,6 +64,8 @@ export const pgQuerySchema = z.object({
     page: z.string().optional().default('1'),
     limit: z.string().optional().default('10'),
     sector: z.string().optional(),
+    category: z.string().optional(),
+    approvalStatus: z.nativeEnum(PGApprovalStatus).optional(),
     roomType: z.nativeEnum(RoomType).optional(),
     occupancyType: z.nativeEnum(OccupancyType).optional(),
     minRent: z.string().optional(),
@@ -66,10 +74,15 @@ export const pgQuerySchema = z.object({
     hasWifi: z.string().optional(),
     hasParking: z.string().optional(),
     hasGym: z.string().optional(),
+    hasPowerBackup: z.string().optional(),
+    hasLaundry: z.string().optional(),
+    hasTV: z.string().optional(),
+    hasFridge: z.string().optional(),
     mealsIncluded: z.string().optional(),
     isFeatured: z.string().optional(),
     isActive: z.string().optional(),
     search: z.string().optional(),
+    metroDistance: z.string().optional(),
     sortBy: z.enum(['createdAt', 'monthlyRent', 'name']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional(),
 })

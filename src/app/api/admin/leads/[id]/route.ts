@@ -21,7 +21,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const validation = await validateBody(req, leadUpdateSchema)
     if (hasValidationError(validation)) return validation.error
 
-    const existing = await prisma.lead.findUnique({ where: { id } })
+    const existing = await prisma.lead.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
+    })
     if (!existing) return NextResponse.json(error('Lead not found'), { status: 404 })
 
     const data = validation.data

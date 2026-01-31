@@ -56,58 +56,62 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
     ]
 
-    // PG detail pages
-    const pgs = await prisma.pG.findMany({
-        where: { isActive: true },
-        select: {
-            slug: true,
-            updatedAt: true,
-            isFeatured: true,
-        },
-        orderBy: { updatedAt: 'desc' },
-    })
+    try {
+        // PG detail pages
+        const pgs = await prisma.pG.findMany({
+            where: { isActive: true, approvalStatus: 'APPROVED' },
+            select: {
+                slug: true,
+                updatedAt: true,
+                isFeatured: true,
+            },
+            orderBy: { updatedAt: 'desc' },
+        })
 
-    const pgPages: MetadataRoute.Sitemap = pgs.map((pg) => ({
-        url: `${baseUrl}/pg/${pg.slug}`,
-        lastModified: pg.updatedAt,
-        changeFrequency: 'weekly' as const,
-        priority: pg.isFeatured ? 0.9 : 0.7,
-    }))
+        const pgPages: MetadataRoute.Sitemap = pgs.map((pg) => ({
+            url: `${baseUrl}/pg/${pg.slug}`,
+            lastModified: pg.updatedAt,
+            changeFrequency: 'weekly' as const,
+            priority: pg.isFeatured ? 0.9 : 0.7,
+        }))
 
-    // Location pages
-    const sectors = await prisma.sector.findMany({
-        where: { isActive: true },
-        select: {
-            slug: true,
-            updatedAt: true,
-        },
-        // orderBy: { displayOrder: 'asc' },
-    })
+        // Location pages
+        const sectors = await prisma.sector.findMany({
+            where: { isActive: true },
+            select: {
+                slug: true,
+                updatedAt: true,
+            },
+        })
 
-    const locationPages: MetadataRoute.Sitemap = sectors.map((sector) => ({
-        url: `${baseUrl}/pg-locations/${sector.slug}`,
-        lastModified: sector.updatedAt,
-        changeFrequency: 'daily' as const,
-        priority: 0.8,
-    }))
+        const locationPages: MetadataRoute.Sitemap = sectors.map((sector) => ({
+            url: `${baseUrl}/pg-locations/${sector.slug}`,
+            lastModified: sector.updatedAt,
+            changeFrequency: 'daily' as const,
+            priority: 0.8,
+        }))
 
-    // Blog posts
-    const posts = await prisma.blogPost.findMany({
-        where: { status: 'PUBLISHED' },
-        select: {
-            slug: true,
-            updatedAt: true,
-            publishedAt: true,
-        },
-        orderBy: { publishedAt: 'desc' },
-    })
+        // Blog posts
+        const posts = await prisma.blogPost.findMany({
+            where: { status: 'PUBLISHED' },
+            select: {
+                slug: true,
+                updatedAt: true,
+                publishedAt: true,
+            },
+            orderBy: { publishedAt: 'desc' },
+        })
 
-    const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
-        url: `${baseUrl}/blog/${post.slug}`,
-        lastModified: post.updatedAt,
-        changeFrequency: 'monthly' as const,
-        priority: 0.6,
-    }))
+        const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
+            url: `${baseUrl}/blog/${post.slug}`,
+            lastModified: post.updatedAt,
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+        }))
 
-    return [...staticPages, ...pgPages, ...locationPages, ...blogPages]
+        return [...staticPages, ...pgPages, ...locationPages, ...blogPages]
+    } catch (err) {
+        console.error('[Sitemap] Failed to build dynamic entries', err)
+        return staticPages
+    }
 }

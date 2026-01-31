@@ -19,7 +19,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const thread = await prisma.chatThread.findUnique({ where: { id } })
+    const thread = await prisma.chatThread.findFirst({
+      where: {
+        id,
+      },
+    })
     if (!thread) return NextResponse.json(error('Chat thread not found'), { status: 404 })
     if (thread.status === 'CLOSED') return NextResponse.json(error('Chat is closed'), { status: 400 })
 

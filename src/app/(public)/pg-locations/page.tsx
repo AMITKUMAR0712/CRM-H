@@ -16,39 +16,44 @@ export const metadata: Metadata = generatePageMetadata(
 )
 
 async function getSectors() {
-    const sectors = await prisma.sector.findMany({
-        where: { isActive: true },
-        include: {
-            _count: {
-                select: {
-                    pgs: { where: { isActive: true } },
+    try {
+        const sectors = await prisma.sector.findMany({
+            where: { isActive: true },
+            include: {
+                _count: {
+                    select: {
+                        pgs: { where: { isActive: true, approvalStatus: 'APPROVED' } },
+                    },
                 },
             },
-        },
-        orderBy: { name: 'asc' },
-    })
-
-    // Get price ranges for each sector
-    const sectorsWithStats = await Promise.all(
-        sectors.map(async (sector) => {
-            const priceRange = await prisma.pG.aggregate({
-                where: { sectorId: sector.id, isActive: true },
-                _min: { monthlyRent: true },
-                _max: { monthlyRent: true },
-            })
-
-            return {
-                ...sector,
-                pgCount: sector._count.pgs,
-                priceRange: {
-                    min: priceRange._min.monthlyRent,
-                    max: priceRange._max.monthlyRent,
-                },
-            }
+            orderBy: { name: 'asc' },
         })
-    )
 
-    return sectorsWithStats
+        // Get price ranges for each sector
+        const sectorsWithStats = await Promise.all(
+            sectors.map(async (sector) => {
+                const priceRange = await prisma.pG.aggregate({
+                    where: { sectorId: sector.id, isActive: true, approvalStatus: 'APPROVED' },
+                    _min: { monthlyRent: true },
+                    _max: { monthlyRent: true },
+                })
+
+                return {
+                    ...sector,
+                    pgCount: sector._count.pgs,
+                    priceRange: {
+                        min: priceRange._min.monthlyRent,
+                        max: priceRange._max.monthlyRent,
+                    },
+                }
+            })
+        )
+
+        return sectorsWithStats
+    } catch (err) {
+        console.error('[Locations] Failed to load sectors', err)
+        return []
+    }
 }
 
 function formatPriceRange(min: number | null, max: number | null) {

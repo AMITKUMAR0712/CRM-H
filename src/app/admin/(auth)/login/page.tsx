@@ -7,7 +7,7 @@ export default function AdminLoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="h-64 w-full max-w-md rounded-2xl border border-(--color-border) bg-(--color-surface)" />
+          <div className="h-64 w-full max-w-md rounded-2xl border border-(--color-border) bg-surface" />
         </div>
       }
     >

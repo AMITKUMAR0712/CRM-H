@@ -5,9 +5,13 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { resetPasswordSchema } from '@/validators/passwordReset.validator'
+import { authRateLimiter } from '@/middleware/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResult = authRateLimiter(req)
+    if (rateLimitResult) return rateLimitResult
+
     const validation = await validateBody(req, resetPasswordSchema)
     if (hasValidationError(validation)) return validation.error
 

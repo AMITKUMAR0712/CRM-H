@@ -12,6 +12,10 @@ export interface PG {
     hasWifi: boolean
     hasParking: boolean
     hasGym: boolean
+    hasPowerBackup?: boolean
+    hasLaundry?: boolean
+    hasTV?: boolean
+    hasFridge?: boolean
     mealsIncluded: boolean
     isFeatured: boolean
     availableRooms: number
@@ -39,10 +43,18 @@ export interface PG {
     _count?: {
         reviews: number
     }
+    categories?: {
+        category: {
+            id: string
+            name: string
+            slug: string
+        }
+    }[]
 }
 
 export interface PGFilters {
     sector?: string
+    category?: string
     roomType?: string
     occupancyType?: string
     minRent?: string
@@ -51,9 +63,14 @@ export interface PGFilters {
     hasWifi?: string
     hasParking?: string
     hasGym?: string
+    hasPowerBackup?: string
+    hasLaundry?: string
+    hasTV?: string
+    hasFridge?: string
     mealsIncluded?: string
     isFeatured?: string
     search?: string
+    metroDistance?: string
     sortBy?: string
     sortOrder?: string
     page?: string

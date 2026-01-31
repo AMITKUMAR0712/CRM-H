@@ -9,6 +9,9 @@ export interface GalleryImage {
     album: string
     sectorSlug?: string
     pgId?: string
+    roomType?: string
+    floor?: number
+    availability?: string
     isFeatured: boolean
     isActive: boolean
     displayOrder: number

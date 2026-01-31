@@ -5,9 +5,13 @@ import { handleError } from '@/utils/errors'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { bannerEventCreateSchema } from '@/validators/banner.validator'
 import { requireOptionalAuth } from '@/middleware/auth'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimitResult = apiRateLimiter(req)
+    if (rateLimitResult) return rateLimitResult
+
     const validation = await validateBody(req, bannerEventCreateSchema)
     if (hasValidationError(validation)) return validation.error
 

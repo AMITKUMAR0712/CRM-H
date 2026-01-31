@@ -36,7 +36,7 @@ export default function NavbarClient({ headerMenu }: { headerMenu: MenuNode[] })
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { data: session, status } = useSession()
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const prefersReducedMotion = useReducedMotion()
 
   const user = session?.user

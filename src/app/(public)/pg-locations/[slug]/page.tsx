@@ -19,25 +19,30 @@ type Props = {
 }
 
 async function getSector(slug: string) {
-    const sector = await prisma.sector.findUnique({
-        where: { slug, isActive: true },
-        include: {
-            pgs: {
-                where: { isActive: true },
-                include: {
-                    photos: { where: { isFeatured: true }, take: 1 },
-                    amenities: { include: { amenity: true } },
+    try {
+        const sector = await prisma.sector.findFirst({
+            where: { slug, isActive: true },
+            include: {
+                pgs: {
+                    where: { isActive: true, approvalStatus: 'APPROVED' },
+                    include: {
+                        photos: { where: { isFeatured: true }, take: 1 },
+                        amenities: { include: { amenity: true } },
+                    },
+                    orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
                 },
-                orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+                faqs: {
+                    where: { isActive: true },
+                    orderBy: { order: 'asc' },
+                },
             },
-            faqs: {
-                where: { isActive: true },
-                orderBy: { order: 'asc' },
-            },
-        },
-    })
+        })
 
-    return sector
+        return sector
+    } catch (err) {
+        console.error('[Locations] Failed to load sector', err)
+        return null
+    }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -52,14 +57,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-    const sectors = await prisma.sector.findMany({
-        where: { isActive: true },
-        select: { slug: true },
-    })
+    try {
+        const sectors = await prisma.sector.findMany({
+            where: { isActive: true },
+            select: { slug: true },
+        })
 
-    return sectors.map((sector) => ({
-        slug: sector.slug,
-    }))
+        return sectors.map((sector) => ({
+            slug: sector.slug,
+        }))
+    } catch (err) {
+        console.error('[Locations] Failed to build static params', err)
+        return []
+    }
 }
 
 // Amenity Icon mapping

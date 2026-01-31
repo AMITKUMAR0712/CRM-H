@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 interface RouteParams {
     params: Promise<{ code: string }>
@@ -12,6 +13,9 @@ interface RouteParams {
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { code } = await params
 
         const comparison = await prisma.comparison.findFirst({

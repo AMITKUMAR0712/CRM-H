@@ -4,6 +4,7 @@ import { success, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { z } from 'zod'
 import { validateBody, hasValidationError } from '@/middleware/validation'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 const pageViewSchema = z.object({
     path: z.string().min(1).max(255),
@@ -15,6 +16,9 @@ const pageViewSchema = z.object({
  */
 export async function POST(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const validation = await validateBody(req, pageViewSchema)
         if (hasValidationError(validation)) {
             return validation.error

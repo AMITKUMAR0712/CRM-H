@@ -21,7 +21,7 @@ type FormValues = z.infer<typeof schema>
 export default function AdminLoginClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const callbackUrl = searchParams.get('callbackUrl') || '/admin'
+  const callbackUrl = searchParams?.get('callbackUrl') || '/admin'
 
   const {
     register,

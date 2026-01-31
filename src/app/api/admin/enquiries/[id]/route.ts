@@ -19,8 +19,11 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const enquiry = await prisma.enquiry.findUnique({
-      where: { id },
+    const enquiry = await prisma.enquiry.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
       include: {
         assignedTo: { select: { id: true, name: true, email: true, role: true } },
         notes: {
@@ -49,7 +52,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const validation = await validateBody(req, enquiryUpdateSchema)
     if (hasValidationError(validation)) return validation.error
 
-    const existing = await prisma.enquiry.findUnique({ where: { id } })
+    const existing = await prisma.enquiry.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
+    })
     if (!existing) return NextResponse.json(error('Enquiry not found'), { status: 404 })
 
     const data = validation.data
@@ -60,6 +68,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       !hasPermission(authResult.user.role, PERMISSIONS.ENQUIRY_ASSIGN)
     ) {
       return NextResponse.json(error('Insufficient permissions to assign enquiry'), { status: 403 })
+    }
+
+    if (data.status === 'CLOSED' && !hasPermission(authResult.user.role, PERMISSIONS.ENQUIRY_CLOSE)) {
+      return NextResponse.json(error('Insufficient permissions to close enquiry'), { status: 403 })
     }
 
     const updated = await prisma.enquiry.update({
@@ -101,7 +113,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const existing = await prisma.enquiry.findUnique({ where: { id } })
+    const existing = await prisma.enquiry.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
+    })
     if (!existing) return NextResponse.json(error('Enquiry not found'), { status: 404 })
 
     const validation = await validateBody(req, enquiryNoteCreateSchema)

@@ -15,7 +15,7 @@ export default function LoginClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const callbackUrl = searchParams.get('callbackUrl') || '/user'
+  const callbackUrl = searchParams?.get('callbackUrl') || '/user'
 
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')

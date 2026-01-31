@@ -2,10 +2,13 @@
 
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 type ApiResponse<T> =
   | { success: true; data: T; message?: string }
@@ -31,6 +34,11 @@ export default function AdminMenusPage() {
   const [visibility, setVisibility] = React.useState<'HEADER' | 'FOOTER' | 'BOTH'>('HEADER')
   const [isActive, setIsActive] = React.useState(true)
 
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canWrite = role ? hasPermission(role, PERMISSIONS.MENU_WRITE) : false
+  const canDelete = role ? hasPermission(role, PERMISSIONS.MENU_DELETE) : false
+
   const menuQuery = useQuery({
     queryKey: ['admin-menus'],
     queryFn: async () => {
@@ -42,6 +50,7 @@ export default function AdminMenusPage() {
   })
 
   async function createItem() {
+    if (!canWrite) return
     const res = await fetch('/api/admin/menus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -63,6 +72,7 @@ export default function AdminMenusPage() {
   }
 
   async function toggleActive(item: MenuItemRow) {
+    if (!canWrite) return
     const res = await fetch(`/api/admin/menus/${item.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -76,6 +86,7 @@ export default function AdminMenusPage() {
   }
 
   async function deleteItem(item: MenuItemRow) {
+    if (!canDelete) return
     const ok = confirm(`Delete menu item "${item.title}"?`)
     if (!ok) return
 
@@ -90,7 +101,7 @@ export default function AdminMenusPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">Menu Manager</h1>
-        <p className="text-sm text-[var(--color-muted)]">Create, enable/disable, and reorder navigation links.</p>
+        <p className="text-sm text-muted">Create, enable/disable, and reorder navigation links.</p>
       </div>
 
       <Card>
@@ -110,7 +121,7 @@ export default function AdminMenusPage() {
             <div>
               <label className="text-sm font-medium">Visibility</label>
               <select
-                className="h-10 w-full rounded-md border border-[var(--color-border)] bg-white px-3 text-sm"
+                className="h-10 w-full rounded-md border border-(--color-border) bg-white px-3 text-sm"
                 value={visibility}
                 onChange={(e) => setVisibility(e.target.value as 'HEADER' | 'FOOTER' | 'BOTH')}
               >
@@ -126,9 +137,13 @@ export default function AdminMenusPage() {
               <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />
               Active
             </label>
-            <Button onClick={() => createItem()} disabled={!title || !href || menuQuery.isFetching}>
-              Create
-            </Button>
+            {canWrite ? (
+              <Button onClick={() => createItem()} disabled={!title || !href || menuQuery.isFetching}>
+                Create
+              </Button>
+            ) : (
+              <span className="text-xs text-muted">Read only</span>
+            )}
             <Button variant="outline" onClick={() => menuQuery.refetch()}>
               Refresh
             </Button>
@@ -142,16 +157,16 @@ export default function AdminMenusPage() {
         </CardHeader>
         <CardContent>
           {menuQuery.isLoading ? (
-            <p className="text-sm text-[var(--color-muted)]">Loading…</p>
+            <p className="text-sm text-muted">Loading…</p>
           ) : menuQuery.error ? (
             <p className="text-sm text-red-600">{(menuQuery.error as Error).message}</p>
           ) : !menuQuery.data?.length ? (
-            <p className="text-sm text-[var(--color-muted)]">No menu items yet.</p>
+            <p className="text-sm text-muted">No menu items yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left border-b border-[var(--color-border)]">
+                  <tr className="text-left border-b border-(--color-border)">
                     <th className="py-2">Title</th>
                     <th className="py-2">Type</th>
                     <th className="py-2">Href</th>
@@ -163,7 +178,7 @@ export default function AdminMenusPage() {
                 </thead>
                 <tbody>
                   {menuQuery.data.map((item) => (
-                    <tr key={item.id} className="border-b border-[var(--color-border)]">
+                    <tr key={item.id} className="border-b border-(--color-border)">
                       <td className="py-2 font-medium">{item.title}</td>
                       <td className="py-2">{item.type}</td>
                       <td className="py-2">{item.type === 'URL' ? item.href : item.page?.slug ? `/${item.page.slug}` : '—'}</td>
@@ -171,12 +186,20 @@ export default function AdminMenusPage() {
                       <td className="py-2">{item.order}</td>
                       <td className="py-2">{item.isActive ? 'Active' : 'Inactive'}</td>
                       <td className="py-2 flex gap-2">
-                        <Button size="sm" variant="outline" onClick={() => toggleActive(item)}>
-                          {item.isActive ? 'Disable' : 'Enable'}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => deleteItem(item)}>
-                          Delete
-                        </Button>
+                        {canWrite ? (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => toggleActive(item)}>
+                              {item.isActive ? 'Disable' : 'Enable'}
+                            </Button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted">Read only</span>
+                        )}
+                        {canDelete ? (
+                          <Button size="sm" variant="outline" onClick={() => deleteItem(item)}>
+                            Delete
+                          </Button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}

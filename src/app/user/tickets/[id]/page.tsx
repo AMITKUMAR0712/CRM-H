@@ -28,8 +28,8 @@ type TicketDetail = {
 }
 
 export default function TicketDetailPage() {
-  const params = useParams<{ id: string }>()
-  const ticketId = params.id
+  const params = useParams<{ id?: string }>()
+  const ticketId = params?.id ?? ''
 
   const [ticket, setTicket] = React.useState<TicketDetail | null>(null)
   const [loading, setLoading] = React.useState(true)
@@ -53,6 +53,7 @@ export default function TicketDetailPage() {
   }
 
   React.useEffect(() => {
+    if (!ticketId) return
     void load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId])
@@ -78,6 +79,14 @@ export default function TicketDetailPage() {
 
     setReply('')
     await load()
+  }
+
+  if (!ticketId) {
+    return (
+      <Card className="p-5">
+        <div className="text-sm text-muted">Ticket not found.</div>
+      </Card>
+    )
   }
 
   return (

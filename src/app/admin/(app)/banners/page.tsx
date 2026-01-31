@@ -1,10 +1,13 @@
 'use client'
 
 import * as React from 'react'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string; meta?: unknown }
 
@@ -30,11 +33,15 @@ type Banner = {
 }
 
 export default function AdminBannersPage() {
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canManage = role ? hasPermission(role, PERMISSIONS.BANNERS_MANAGE) : false
   const [rows, setRows] = React.useState<Banner[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
   const [pending, setPending] = React.useState(false)
+  const [uploading, setUploading] = React.useState(false)
   const [title, setTitle] = React.useState('')
   const [subtitle, setSubtitle] = React.useState('')
   const [imageUrl, setImageUrl] = React.useState('')
@@ -42,6 +49,7 @@ export default function AdminBannersPage() {
   const [ctaHref, setCtaHref] = React.useState('')
   const [type, setType] = React.useState('HERO')
   const [scope, setScope] = React.useState('HOME')
+  const [uploadError, setUploadError] = React.useState<string | null>(null)
 
   async function load() {
     setLoading(true)
@@ -63,6 +71,7 @@ export default function AdminBannersPage() {
 
   async function createBanner(e: React.FormEvent) {
     e.preventDefault()
+    if (!canManage) return
     setPending(true)
     setError(null)
 
@@ -97,7 +106,35 @@ export default function AdminBannersPage() {
     await load()
   }
 
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!canManage) return
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    setUploadError(null)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const resp = await fetch('/api/admin/banners/upload', {
+      method: 'POST',
+      body: formData,
+    })
+
+    const json = (await resp.json()) as ApiEnvelope<{ url: string }>
+    setUploading(false)
+
+    if (!resp.ok || !json.success || !json.data?.url) {
+      setUploadError(json.error || json.message || 'Failed to upload image')
+      return
+    }
+
+    setImageUrl(json.data.url)
+  }
+
   async function toggleActive(banner: Banner) {
+    if (!canManage) return
     setError(null)
     const resp = await fetch(`/api/admin/banners/${banner.id}`, {
       method: 'PATCH',
@@ -116,17 +153,18 @@ export default function AdminBannersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Banners</h1>
-        <p className="text-sm text-[var(--color-muted)] mt-1">Create and manage homepage/sector/PG banners.</p>
+        <p className="text-sm text-muted mt-1">Create and manage homepage/sector/PG banners.</p>
       </div>
 
       <Card className="p-5">
         <div className="font-medium">Create banner</div>
-        <form className="mt-4 grid gap-3" onSubmit={createBanner}>
+        {canManage ? (
+          <form className="mt-4 grid gap-3" onSubmit={createBanner}>
           <div className="grid gap-3 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Type</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-3"
+                className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-3"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
@@ -138,7 +176,7 @@ export default function AdminBannersPage() {
             <div>
               <label className="text-sm font-medium">Scope</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-3"
+                className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-3"
                 value={scope}
                 onChange={(e) => setScope(e.target.value)}
               >
@@ -170,6 +208,28 @@ export default function AdminBannersPage() {
             </div>
           </div>
 
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium">Upload image</label>
+              <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
+              {uploadError ? <div className="text-sm text-red-600 mt-2">{uploadError}</div> : null}
+              {uploading ? <div className="text-sm text-muted mt-2">Uploading…</div> : null}
+            </div>
+            <div>
+              <label className="text-sm font-medium">Preview</label>
+              {imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt="Banner preview"
+                  src={imageUrl}
+                  className="mt-2 h-24 w-full rounded-md object-cover border border-(--color-border)"
+                />
+              ) : (
+                <div className="mt-2 text-sm text-muted">No image selected</div>
+              )}
+            </div>
+          </div>
+
           <div>
             <label className="text-sm font-medium">CTA Label</label>
             <Input value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} placeholder="Explore" />
@@ -177,10 +237,13 @@ export default function AdminBannersPage() {
 
           {error ? <div className="text-sm text-red-600">{error}</div> : null}
 
-          <Button disabled={pending} type="submit">
-            {pending ? 'Creating…' : 'Create banner'}
-          </Button>
-        </form>
+            <Button disabled={pending} type="submit">
+              {pending ? 'Creating…' : 'Create banner'}
+            </Button>
+          </form>
+        ) : (
+          <div className="mt-3 text-sm text-muted">Read only</div>
+        )}
       </Card>
 
       <Card className="p-5">
@@ -191,26 +254,30 @@ export default function AdminBannersPage() {
           </Button>
         </div>
 
-        {loading ? <div className="mt-4 text-sm text-[var(--color-muted)]">Loading…</div> : null}
+        {loading ? <div className="mt-4 text-sm text-muted">Loading…</div> : null}
 
         <div className="mt-4 grid gap-3">
           {rows.map((b) => (
-            <div key={b.id} className="border border-[var(--color-border)] rounded-lg p-4">
+            <div key={b.id} className="border border-(--color-border) rounded-lg p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="font-medium truncate">{b.title}</div>
-                  <div className="text-sm text-[var(--color-muted)] mt-1">
+                  <div className="text-sm text-muted mt-1">
                     {b.type} • {b.isActive ? 'Active' : 'Inactive'} • {b.targets?.[0]?.scope || '—'}
                   </div>
                 </div>
-                <Button variant="outline" onClick={() => toggleActive(b)}>
-                  {b.isActive ? 'Disable' : 'Enable'}
-                </Button>
+                {canManage ? (
+                  <Button variant="outline" onClick={() => toggleActive(b)}>
+                    {b.isActive ? 'Disable' : 'Enable'}
+                  </Button>
+                ) : (
+                  <span className="text-xs text-muted">Read only</span>
+                )}
               </div>
             </div>
           ))}
           {!loading && rows.length === 0 ? (
-            <div className="text-sm text-[var(--color-muted)]">No banners yet.</div>
+            <div className="text-sm text-muted">No banners yet.</div>
           ) : null}
         </div>
       </Card>

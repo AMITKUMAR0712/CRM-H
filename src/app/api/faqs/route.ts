@@ -7,6 +7,7 @@ import { validateBody, hasValidationError } from '@/middleware/validation'
 import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
 import { z } from 'zod'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 const faqQuerySchema = z.object({
     category: z.string().optional(),
@@ -18,6 +19,9 @@ const faqQuerySchema = z.object({
  */
 export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { searchParams } = new URL(req.url)
         const category = searchParams.get('category')
         const sectorId = searchParams.get('sectorId')

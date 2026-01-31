@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { error, success } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 type MenuNode = {
   id: string
@@ -31,6 +32,9 @@ function buildTree(rows: Array<{ id: string; parentId: string | null }>, map: Ma
 
 export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = apiRateLimiter(req)
+    if (rateLimitResult) return rateLimitResult
+
     const { searchParams } = new URL(req.url)
     const visibility = (searchParams.get('visibility') || 'HEADER') as 'HEADER' | 'FOOTER' | 'BOTH'
 

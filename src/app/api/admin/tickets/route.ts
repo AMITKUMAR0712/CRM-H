@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
     if (hasValidationError(validation)) return validation.error
 
     const query = validation.data
+    const role = authResult.user.role
+    const userId = authResult.user.id
     const { page, limit, skip } = parsePagination(searchParams)
 
     const where: Prisma.TicketWhereInput = {}
@@ -27,6 +29,7 @@ export async function GET(req: NextRequest) {
     if (query.priority) where.priority = query.priority
     if (query.category) where.category = query.category
     if (query.assignedToId) where.assignedToId = query.assignedToId
+    if (role === 'MANAGER') where.assignedToId = userId
 
     if (query.search) {
       where.OR = [{ subject: { contains: query.search } }, { description: { contains: query.search } }]

@@ -6,12 +6,16 @@ import { tagCreateSchema, tagUpdateSchema } from '@/validators/blog.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 /**
  * GET /api/blog/tags - List all tags
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const tags = await prisma.tag.findMany({
             include: { _count: { select: { posts: true } } },
             orderBy: { name: 'asc' },

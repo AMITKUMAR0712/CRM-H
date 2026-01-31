@@ -4,14 +4,17 @@ import { success, paginated, error } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { sectorCreateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
-import { requirePermission } from '@/middleware/permissions'
-import { PERMISSIONS } from '@/lib/rbac'
+import { requireSuperAdmin } from '@/middleware/auth'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 /**
  * GET /api/sectors - List all sectors
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const sectors = await prisma.sector.findMany({
             where: { isActive: true },
             include: {
@@ -56,7 +59,7 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
     try {
-        const authResult = await requirePermission(PERMISSIONS.SECTOR_WRITE)
+        const authResult = await requireSuperAdmin()
         if (authResult instanceof NextResponse) return authResult
 
         const validation = await validateBody(req, sectorCreateSchema)

@@ -5,9 +5,9 @@ import { handleError } from '@/utils/errors'
 import { pgCreateSchema, pgQuerySchema } from '@/validators/pg.validator'
 import { validateBody, validateQuery, hasValidationError } from '@/middleware/validation'
 import { parsePagination, paginationQuery } from '@/utils/pagination'
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { requirePermission } from '@/middleware/permissions'
-import { PERMISSIONS } from '@/lib/rbac'
+import { PERMISSIONS, hasPermission } from '@/lib/rbac'
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,12 +21,26 @@ export async function GET(req: NextRequest) {
     const query = validation.data
     const { page, limit, skip } = parsePagination(searchParams)
 
-    const where: Prisma.PGWhereInput = {}
+    const where = {} as Prisma.PGWhereInput
 
     if (query.isActive !== 'false') where.isActive = true
-    if (query.sector) where.sector = { slug: query.sector }
+    const sectorFilter: Prisma.SectorWhereInput = {}
+    if (query.sector) sectorFilter.slug = query.sector
+    if (query.metroDistance) {
+      const distance = parseFloat(query.metroDistance)
+      if (!Number.isNaN(distance)) sectorFilter.metroDistance = { lte: distance }
+    }
+    if (Object.keys(sectorFilter).length > 0) where.sector = sectorFilter
     if (query.roomType) where.roomType = query.roomType
     if (query.occupancyType) where.occupancyType = query.occupancyType
+    if (query.category) {
+      ;(where as Prisma.PGWhereInput & { categories: unknown }).categories = {
+        some: { category: { slug: query.category } },
+      }
+    }
+    if (query.approvalStatus) {
+      ;(where as Prisma.PGWhereInput & { approvalStatus?: unknown }).approvalStatus = query.approvalStatus
+    }
 
     if (query.minRent || query.maxRent) {
       where.monthlyRent = {}
@@ -38,6 +52,10 @@ export async function GET(req: NextRequest) {
     if (query.hasWifi === 'true') where.hasWifi = true
     if (query.hasParking === 'true') where.hasParking = true
     if (query.hasGym === 'true') where.hasGym = true
+    if (query.hasPowerBackup === 'true') where.hasPowerBackup = true
+    if (query.hasLaundry === 'true') where.hasLaundry = true
+    if (query.hasTV === 'true') where.hasTV = true
+    if (query.hasFridge === 'true') where.hasFridge = true
     if (query.mealsIncluded === 'true') where.mealsIncluded = true
     if (query.isFeatured === 'true') where.isFeatured = true
 
@@ -49,17 +67,24 @@ export async function GET(req: NextRequest) {
       ]
     }
 
+    if (authResult.user.role === 'MANAGER') {
+      ;(where as Record<string, unknown>).assignments = { some: { userId: authResult.user.id } }
+    }
+
     const sortBy = query.sortBy || 'createdAt'
     const sortOrder = query.sortOrder || 'desc'
     const orderBy = { [sortBy]: sortOrder } as Prisma.PGOrderByWithRelationInput
 
+    const include = {
+      sector: { select: { id: true, name: true, slug: true } },
+      photos: { where: { isFeatured: true }, take: 1 },
+      categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
+    } as const
+
     const [pgs, total] = await Promise.all([
       prisma.pG.findMany({
         where,
-        include: {
-          sector: { select: { id: true, name: true, slug: true } },
-          photos: { where: { isFeatured: true }, take: 1 },
-        },
+        include: include as unknown as Prisma.PGInclude,
         ...paginationQuery({ page, limit, skip }),
         orderBy,
       }),
@@ -86,8 +111,61 @@ export async function POST(req: NextRequest) {
     const existing = await prisma.pG.findUnique({ where: { slug: data.slug } })
     if (existing) return NextResponse.json(error('A PG with this slug already exists'), { status: 409 })
 
+    const { categoryIds, approvalStatus, blockedReason, assignedManagerIds, ...pgData } = data
+
+    const isSuperAdmin = authResult.user.role === 'SUPER_ADMIN'
+    let assignments: Record<string, unknown> | undefined
+
+    if (authResult.user.role === 'MANAGER') {
+      assignments = { create: { userId: authResult.user.id } }
+    } else if (assignedManagerIds?.length) {
+      if (!isSuperAdmin) {
+        return NextResponse.json(error('Insufficient permissions to assign managers'), { status: 403 })
+      }
+
+      const managers = await prisma.user.findMany({
+        where: { id: { in: assignedManagerIds }, role: 'MANAGER' },
+        select: { id: true },
+      })
+
+      if (managers.length !== assignedManagerIds.length) {
+        return NextResponse.json(error('Invalid manager assignments'), { status: 400 })
+      }
+
+      assignments = { create: managers.map((m) => ({ userId: m.id })) }
+    }
+
+    const canApprove = hasPermission(authResult.user.role, PERMISSIONS.PG_APPROVE)
+    const approvalPayload = canApprove
+      ? {
+          approvalStatus: approvalStatus ?? 'APPROVED',
+          approvedAt: approvalStatus === 'APPROVED' || approvalStatus === undefined ? new Date() : null,
+          approvedById: authResult.user.id,
+          blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? 'Blocked by admin' : null,
+        }
+      : {
+          approvalStatus: 'PENDING',
+          approvedAt: null,
+          approvedById: null,
+          blockedReason: null,
+        }
+
+    if (categoryIds?.length && !isSuperAdmin) {
+      return NextResponse.json(error('Insufficient permissions to manage categories'), { status: 403 })
+    }
+
+    const createData = {
+      ...pgData,
+      createdById: authResult.user.id,
+      ...approvalPayload,
+      categories: categoryIds?.length
+        ? { create: categoryIds.map((categoryId) => ({ categoryId })) }
+        : undefined,
+      assignments,
+    }
+
     const pg = await prisma.pG.create({
-      data,
+      data: createData as unknown as Prisma.PGCreateInput,
       include: { sector: { select: { id: true, name: true, slug: true } } },
     })
 

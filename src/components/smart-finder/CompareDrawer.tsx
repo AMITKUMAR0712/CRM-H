@@ -20,7 +20,10 @@ interface PGData {
     mealsIncluded: boolean
     hasParking?: boolean
     hasGym?: boolean
-    hasHousekeeping?: boolean
+    hasPowerBackup?: boolean
+    hasLaundry?: boolean
+    hasTV?: boolean
+    hasFridge?: boolean
     isFeatured: boolean
     availableRooms: number
     photos?: { url: string; altText?: string | null }[]
@@ -79,7 +82,10 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
         { key: 'mealsIncluded', label: 'Meals Included', render: (pg: PGData) => <FeatureCell value={pg.mealsIncluded} /> },
         { key: 'hasParking', label: 'Parking', render: (pg: PGData) => <FeatureCell value={pg.hasParking} /> },
         { key: 'hasGym', label: 'Gym', render: (pg: PGData) => <FeatureCell value={pg.hasGym} /> },
-        { key: 'hasHousekeeping', label: 'Housekeeping', render: (pg: PGData) => <FeatureCell value={pg.hasHousekeeping} /> },
+        { key: 'hasPowerBackup', label: 'Power Backup', render: (pg: PGData) => <FeatureCell value={pg.hasPowerBackup} /> },
+        { key: 'hasLaundry', label: 'Laundry', render: (pg: PGData) => <FeatureCell value={pg.hasLaundry} /> },
+        { key: 'hasTV', label: 'TV', render: (pg: PGData) => <FeatureCell value={pg.hasTV} /> },
+        { key: 'hasFridge', label: 'Fridge', render: (pg: PGData) => <FeatureCell value={pg.hasFridge} /> },
     ]
 
     const shareViaWhatsApp = () => {
@@ -112,7 +118,7 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                         <div className="sticky top-0 bg-white border-b border-(--color-border) px-6 py-4 flex items-center justify-between">
                             <div>
                                 <h2 className="font-serif text-xl font-bold text-(--color-graphite)">Compare PGs</h2>
-                                <p className="text-sm text-(--color-muted)">{items.length} PGs selected</p>
+                                <p className="text-sm text-muted">{items.length} PGs selected</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button variant="outline" size="sm" onClick={shareViaWhatsApp}>
@@ -130,12 +136,12 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
 
                         {/* Comparison Table - Scrollable */}
                         <div className="flex-1 overflow-y-auto overflow-x-auto p-6">
-                            <table className="w-full min-w-[600px]">
+                            <table className="w-full min-w-150">
                                 <thead>
                                     <tr>
-                                        <th className="text-left py-3 px-4 font-medium text-(--color-muted) w-40">Feature</th>
+                                        <th className="text-left py-3 px-4 font-medium text-muted w-40">Feature</th>
                                         {items.map((pg) => (
-                                            <th key={pg.id} className="text-center py-3 px-4 min-w-[200px]">
+                                            <th key={pg.id} className="text-center py-3 px-4 min-w-50">
                                                 <div className="relative">
                                                     <button
                                                         onClick={() => onRemove(pg.id)}
@@ -152,11 +158,11 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                                                                 className="object-cover"
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-xs text-(--color-muted)">No image</div>
+                                                            <div className="w-full h-full flex items-center justify-center text-xs text-muted">No image</div>
                                                         )}
                                                     </div>
                                                     <p className="font-serif font-semibold text-(--color-graphite)">{pg.name}</p>
-                                                    {pg.sector && <p className="text-xs text-(--color-muted)">{pg.sector.name}</p>}
+                                                    {pg.sector && <p className="text-xs text-muted">{pg.sector.name}</p>}
                                                 </div>
                                             </th>
                                         ))}
@@ -164,7 +170,7 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                                 </thead>
                                 <tbody>
                                     {features.map((feature, idx) => (
-                                        <tr key={feature.key} className={idx % 2 === 0 ? 'bg-(--color-surface)/50' : ''}>
+                                        <tr key={feature.key} className={idx % 2 === 0 ? 'bg-surface/50' : ''}>
                                             <td className="py-3 px-4 font-medium text-(--color-graphite)">{feature.label}</td>
                                             {items.map((pg) => (
                                                 <td key={pg.id} className="py-3 px-4 text-center">

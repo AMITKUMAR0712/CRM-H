@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,30 +6,24 @@ datasource db {
   provider = "mysql"
 }
 
-// ============================================
-// CORE PG MANAGEMENT TABLES
-// ============================================
-
 model Sector {
-  id            String   @id @default(cuid())
-  name          String   @unique // e.g., "Sector 51"
-  slug          String   @unique // e.g., "sector-51"
-  description   String?  @db.Text
-  metroStation  String? // Nearest metro station
-  metroDistance Float? // Distance in km
-  highlights    Json? // JSON array of key highlights
+  id            String         @id @default(cuid())
+  name          String         @unique
+  slug          String         @unique
+  description   String?        @db.Text
+  metroStation  String?
+  metroDistance Float?
+  highlights    Json?
   latitude      Float?
   longitude     Float?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  pgs   PG[]
-  leads Lead[]
-  faqs  FAQ[]
-
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   bannerTargets BannerTarget[]
   enquiries     Enquiry[]
+  faqs          FAQ[]
+  leads         Lead[]
+  pgs           PG[]
 
   @@index([slug])
   @@index([isActive])
@@ -43,77 +31,853 @@ model Sector {
 }
 
 model PG {
-  id          String  @id @default(cuid())
-  name        String
-  slug        String  @unique
-  sectorId    String
-  address     String  @db.Text
-  latitude    Float?
-  longitude   Float?
-  description String? @db.Text
-
-  // Room & Pricing Info
-  roomType        RoomType // SINGLE, DOUBLE, TRIPLE, FOUR_SHARING
-  occupancyType   OccupancyType // BOYS, GIRLS, CO_LIVING
-  monthlyRent     Int // in INR
-  securityDeposit Int? // in INR
-
-  // Availability
-  totalRooms     Int     @default(0)
-  availableRooms Int     @default(0)
-  isAvailable    Boolean @default(true)
-
-  // Basic Amenities (Boolean flags)
-  hasAC          Boolean @default(false)
-  hasWifi        Boolean @default(true)
-  hasParking     Boolean @default(false)
-  hasGym         Boolean @default(false)
-  hasPowerBackup Boolean @default(true)
-  hasLaundry     Boolean @default(false)
-  hasTV          Boolean @default(false)
-  hasFridge      Boolean @default(false)
-
-  // Meals
-  mealsIncluded Boolean @default(false)
-  mealsPerDay   Int?    @default(0) // 0, 2, or 3
-
-  // Policies
-  gateClosingTime String? // e.g., "11:00 PM"
-  noticePeriod    Int?    @default(30) // days
-
-  // SEO
-  metaTitle       String? @db.VarChar(60)
-  metaDescription String? @db.VarChar(160)
-
-  // Status
-  isFeatured Boolean @default(false)
-  isActive   Boolean @default(true)
-  viewCount  Int     @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  sector        Sector         @relation(fields: [sectorId], references: [id], onDelete: Cascade)
-  amenities     PGAmenity[]
-  photos        Photo[]
-  leads         Lead[]
-  reviews       Review[]
-  notifications Notification[]
-
-  bannerTargets BannerTarget[]
-  enquiries     Enquiry[]
-  chatThreads   ChatThread[]
-  tickets       Ticket[]
+  id              String         @id @default(cuid())
+  name            String
+  slug            String         @unique
+  sectorId        String
+  createdById     String?
+  address         String         @db.Text
+  latitude        Float?
+  longitude       Float?
+  description     String?        @db.Text
+  roomType        RoomType
+  occupancyType   OccupancyType
+  monthlyRent     Int
+  securityDeposit Int?
+  totalRooms      Int            @default(0)
+  availableRooms  Int            @default(0)
+  isAvailable     Boolean        @default(true)
+  approvalStatus  PGApprovalStatus @default(APPROVED)
+  approvedAt      DateTime?
+  approvedById    String?
+  blockedReason   String?        @db.Text
+  hasAC           Boolean        @default(false)
+  hasWifi         Boolean        @default(true)
+  hasParking      Boolean        @default(false)
+  hasGym          Boolean        @default(false)
+  hasPowerBackup  Boolean        @default(true)
+  hasLaundry      Boolean        @default(false)
+  hasTV           Boolean        @default(false)
+  hasFridge       Boolean        @default(false)
+  mealsIncluded   Boolean        @default(false)
+  mealsPerDay     Int?           @default(0)
+  gateClosingTime String?
+  noticePeriod    Int?           @default(30)
+  metaTitle       String?        @db.VarChar(60)
+  metaDescription String?        @db.VarChar(160)
+  isFeatured      Boolean        @default(false)
+  isActive        Boolean        @default(true)
+  viewCount       Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  bannerTargets   BannerTarget[]
+  chatThreads     ChatThread[]
+  enquiries       Enquiry[]
+  leads           Lead[]
+  notifications   Notification[]
+  amenities       PGAmenity[]
+  sector          Sector         @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  photos          Photo[]
+  reviews         Review[]
+  tickets         Ticket[]
+  categories      PgCategory[]
+  approvedBy      User?          @relation("pg_approved_by", fields: [approvedById], references: [id])
+  createdBy       User?          @relation("pg_created_by", fields: [createdById], references: [id])
+  assignments     PgAssignment[]
 
   @@index([slug])
   @@index([sectorId])
+  @@index([createdById])
   @@index([roomType])
   @@index([occupancyType])
   @@index([monthlyRent])
   @@index([isActive])
   @@index([isFeatured])
   @@map("pgs")
+}
+
+model PgAssignment {
+  id        String   @id @default(cuid())
+  pgId      String
+  userId    String
+  createdAt DateTime @default(now())
+  pg        PG       @relation(fields: [pgId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pgId, userId])
+  @@index([pgId])
+  @@index([userId])
+  @@map("pg_assignments")
+}
+
+model Amenity {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  slug      String      @unique
+  icon      String?
+  category  String?
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  pgs       PGAmenity[]
+
+  @@index([slug])
+  @@index([category])
+  @@map("amenities")
+}
+
+model PGAmenity {
+  id        String   @id @default(cuid())
+  pgId      String
+  amenityId String
+  createdAt DateTime @default(now())
+  amenity   Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+  pg        PG       @relation(fields: [pgId], references: [id], onDelete: Cascade)
+
+  @@unique([pgId, amenityId])
+  @@index([pgId])
+  @@index([amenityId])
+  @@map("pg_amenities")
+}
+
+model Photo {
+  id           String   @id @default(cuid())
+  pgId         String
+  url          String   @db.Text
+  altText      String?  @db.VarChar(255)
+  caption      String?  @db.VarChar(255)
+  category     String?
+  isFeatured   Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pg           PG       @relation(fields: [pgId], references: [id], onDelete: Cascade)
+
+  @@index([pgId])
+  @@index([category])
+  @@index([isFeatured])
+  @@map("photos")
+}
+
+model Lead {
+  id                String         @id @default(cuid())
+  name              String
+  phone             String         @db.VarChar(15)
+  email             String?
+  preferredSectorId String?
+  budgetMin         Int?
+  budgetMax         Int?
+  roomType          RoomType?
+  occupancyType     OccupancyType?
+  moveInDate        DateTime?
+  visitSlot         String?
+  message           String?        @db.Text
+  source            String?        @default("website")
+  referrer          String?        @db.Text
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  status            LeadStatus     @default(NEW)
+  assignedToId      String?
+  priority          Priority       @default(MEDIUM)
+  pgId              String?
+  notes             String?        @db.Text
+  followUpDate      DateTime?
+  lastContactedAt   DateTime?
+  ipAddress         String?        @db.VarChar(45)
+  userAgent         String?        @db.Text
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  hasConsent        Boolean        @default(false)
+  activities        LeadActivity[]
+  assignedTo        User?          @relation(fields: [assignedToId], references: [id])
+  pg                PG?            @relation(fields: [pgId], references: [id])
+  preferredSector   Sector?        @relation(fields: [preferredSectorId], references: [id])
+
+  @@index([phone])
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([pgId])
+  @@index([preferredSectorId])
+  @@index([assignedToId])
+  @@map("leads")
+}
+
+model LeadActivity {
+  id            String   @id @default(cuid())
+  leadId        String
+  activityType  String
+  description   String   @db.Text
+  performedById String?
+  createdAt     DateTime @default(now())
+  lead          Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  performedBy   User?    @relation(fields: [performedById], references: [id])
+
+  @@index([leadId])
+  @@index([createdAt])
+  @@index([performedById], map: "lead_activities_performedById_fkey")
+  @@map("lead_activities")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?    @db.Text
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  posts       BlogPost[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  posts     PostTag[]
+
+  @@index([slug])
+  @@map("tags")
+}
+
+model BlogPost {
+  id              String     @id @default(cuid())
+  title           String     @db.VarChar(255)
+  slug            String     @unique
+  excerpt         String?    @db.Text
+  content         String     @db.LongText
+  featuredImage   String?    @db.Text
+  metaTitle       String?    @db.VarChar(60)
+  metaDescription String?    @db.VarChar(160)
+  focusKeyword    String?    @db.VarChar(100)
+  categoryId      String?
+  authorId        String
+  status          PostStatus @default(DRAFT)
+  publishedAt     DateTime?
+  viewCount       Int        @default(0)
+  readTime        Int?       @default(5)
+  isFeatured      Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  author          User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category        Category?  @relation(fields: [categoryId], references: [id])
+  tags            PostTag[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+  @@fulltext([title, content])
+  @@map("blog_posts")
+}
+
+model PostTag {
+  id        String   @id @default(cuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@index([postId])
+  @@index([tagId])
+  @@map("post_tags")
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  name                String
+  email               String               @unique
+  password            String
+  role                UserRole             @default(USER)
+  avatar              String?              @db.Text
+  phone               String?              @db.VarChar(15)
+  isActive            Boolean              @default(true)
+  lastLoginAt         DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  auditLogs           AuditLog[]           @relation("audit_actor")
+  bannerEvents        BannerEvent[]
+  bannersCreated      Banner[]             @relation("banner_created_by")
+  bannersUpdated      Banner[]             @relation("banner_updated_by")
+  blogPosts           BlogPost[]
+  chatMessages        ChatMessage[]        @relation("chat_message_sender")
+  chatReads           ChatReadReceipt[]    @relation("chat_read_user")
+  chatThreads         ChatThread[]         @relation("chat_thread_user")
+  enquiriesAssigned   Enquiry[]            @relation("enquiry_assigned_to")
+  enquiries           Enquiry[]
+  enquiryNotes        EnquiryNote[]        @relation("enquiry_note_created_by")
+  activities          LeadActivity[]
+  assignedLeads       Lead[]
+  menuItemsCreated    MenuItem[]           @relation("menu_created_by")
+  menuItemsUpdated    MenuItem[]           @relation("menu_updated_by")
+  notifications       Notification[]
+  pagesCreated        Page[]               @relation("page_created_by")
+  pagesUpdated        Page[]               @relation("page_updated_by")
+  passwordResetTokens PasswordResetToken[]
+  ticketMessages      TicketMessage[]      @relation("ticket_message_author")
+  ticketsAssigned     Ticket[]             @relation("ticket_assigned_to")
+  tickets             Ticket[]             @relation("ticket_user")
+  approvedPgs         PG[]                 @relation("pg_approved_by")
+  createdPgs          PG[]                 @relation("pg_created_by")
+  pgAssignments       PgAssignment[]
+  restrictionsCreated UserRestriction[]    @relation("restriction_created_by")
+  restrictionsRevoked UserRestriction[]    @relation("restriction_revoked_by")
+  restrictions        UserRestriction[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Banner {
+  id            String         @id @default(cuid())
+  type          BannerType
+  title         String         @db.VarChar(120)
+  subtitle      String?        @db.VarChar(255)
+  imageUrl      String?        @db.Text
+  ctaLabel      String?        @db.VarChar(60)
+  ctaHref       String?        @db.Text
+  discountType  DiscountType?
+  discountValue Int?
+  validFrom     DateTime?
+  validTill     DateTime?
+  isActive      Boolean        @default(true)
+  priority      Int            @default(0)
+  displayOrder  Int            @default(0)
+  createdById   String?
+  updatedById   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  events        BannerEvent[]
+  targets       BannerTarget[]
+  createdBy     User?          @relation("banner_created_by", fields: [createdById], references: [id])
+  updatedBy     User?          @relation("banner_updated_by", fields: [updatedById], references: [id])
+
+  @@index([type])
+  @@index([isActive])
+  @@index([priority, displayOrder])
+  @@index([validFrom])
+  @@index([validTill])
+  @@index([createdById], map: "banners_createdById_fkey")
+  @@index([updatedById], map: "banners_updatedById_fkey")
+  @@map("banners")
+}
+
+model BannerTarget {
+  id        String            @id @default(cuid())
+  bannerId  String
+  scope     BannerTargetScope
+  sectorId  String?
+  pgId      String?
+  createdAt DateTime          @default(now())
+  banner    Banner            @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  pg        PG?               @relation(fields: [pgId], references: [id], onDelete: Cascade)
+  sector    Sector?           @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+
+  @@unique([bannerId, scope, sectorId, pgId])
+  @@index([bannerId])
+  @@index([scope])
+  @@index([sectorId])
+  @@index([pgId])
+  @@map("banner_targets")
+}
+
+model BannerEvent {
+  id        String          @id @default(cuid())
+  bannerId  String
+  type      BannerEventType
+  path      String?         @db.VarChar(255)
+  userId    String?
+  sessionId String?         @db.VarChar(64)
+  ipAddress String?         @db.VarChar(45)
+  userAgent String?         @db.Text
+  metadata  Json?
+  createdAt DateTime        @default(now())
+  banner    Banner          @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  user      User?           @relation(fields: [userId], references: [id])
+
+  @@index([bannerId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([userId], map: "banner_events_userId_fkey")
+  @@map("banner_events")
+}
+
+model Enquiry {
+  id           String        @id @default(cuid())
+  type         EnquiryType   @default(CONTACT_US)
+  name         String
+  email        String?
+  phone        String?       @db.VarChar(15)
+  subject      String?       @db.VarChar(255)
+  message      String        @db.Text
+  pgId         String?
+  sectorId     String?
+  userId       String?
+  status       EnquiryStatus @default(NEW)
+  assignedToId String?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  source       String?       @default("website")
+  referrer     String?       @db.Text
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  ipAddress    String?       @db.VarChar(45)
+  userAgent    String?       @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  assignedTo   User?         @relation("enquiry_assigned_to", fields: [assignedToId], references: [id])
+  pg           PG?           @relation(fields: [pgId], references: [id])
+  sector       Sector?       @relation(fields: [sectorId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+  notes        EnquiryNote[]
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@index([pgId])
+  @@index([sectorId])
+  @@index([assignedToId])
+  @@index([userId], map: "enquiries_userId_fkey")
+  @@map("enquiries")
+}
+
+model EnquiryNote {
+  id          String   @id @default(cuid())
+  enquiryId   String
+  body        String   @db.Text
+  isInternal  Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  createdBy   User?    @relation("enquiry_note_created_by", fields: [createdById], references: [id])
+  enquiry     Enquiry  @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+
+  @@index([enquiryId])
+  @@index([createdAt])
+  @@index([createdById], map: "enquiry_notes_createdById_fkey")
+  @@map("enquiry_notes")
+}
+
+model UserRestriction {
+  id            String          @id @default(cuid())
+  userId        String
+  type          RestrictionType
+  reason        String?         @db.Text
+  startsAt      DateTime        @default(now())
+  endsAt        DateTime?
+  isActive      Boolean         @default(true)
+  createdById   String?
+  revokedAt     DateTime?
+  revokedById   String?
+  revokedReason String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  createdBy     User?           @relation("restriction_created_by", fields: [createdById], references: [id])
+  revokedBy     User?           @relation("restriction_revoked_by", fields: [revokedById], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([isActive])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@index([createdById], map: "user_restrictions_createdById_fkey")
+  @@index([revokedById], map: "user_restrictions_revokedById_fkey")
+  @@map("user_restrictions")
+}
+
+model ChatThread {
+  id            String            @id @default(cuid())
+  userId        String
+  pgId          String?
+  status        ChatThreadStatus  @default(OPEN)
+  mutedUntil    DateTime?
+  closedAt      DateTime?
+  lastMessageAt DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  messages      ChatMessage[]
+  reads         ChatReadReceipt[]
+  pg            PG?               @relation(fields: [pgId], references: [id])
+  user          User              @relation("chat_thread_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pgId])
+  @@index([status])
+  @@index([lastMessageAt])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String     @db.Text
+  isSystem  Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  sender    User       @relation("chat_message_sender", fields: [senderId], references: [id], onDelete: Cascade)
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model ChatReadReceipt {
+  id         String     @id @default(cuid())
+  threadId   String
+  userId     String
+  lastReadAt DateTime   @default(now())
+  thread     ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user       User       @relation("chat_read_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([threadId])
+  @@index([userId])
+  @@map("chat_read_receipts")
+}
+
+model Ticket {
+  id           String          @id @default(cuid())
+  userId       String
+  pgId         String?
+  category     TicketCategory
+  priority     TicketPriority  @default(MEDIUM)
+  status       TicketStatus    @default(OPEN)
+  subject      String          @db.VarChar(255)
+  description  String          @db.Text
+  assignedToId String?
+  slaDueAt     DateTime?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  messages     TicketMessage[]
+  assignedTo   User?           @relation("ticket_assigned_to", fields: [assignedToId], references: [id])
+  pg           PG?             @relation(fields: [pgId], references: [id])
+  user         User            @relation("ticket_user", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([pgId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([assignedToId])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id          String             @id @default(cuid())
+  ticketId    String
+  authorId    String
+  body        String             @db.Text
+  isInternal  Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  attachments TicketAttachment[]
+  author      User               @relation("ticket_message_author", fields: [authorId], references: [id], onDelete: Cascade)
+  ticket      Ticket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_messages")
+}
+
+model TicketAttachment {
+  id        String        @id @default(cuid())
+  messageId String
+  url       String        @db.Text
+  mimeType  String?       @db.VarChar(120)
+  sizeBytes Int?
+  createdAt DateTime      @default(now())
+  message   TicketMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@map("ticket_attachments")
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  actorId    String?
+  actorRole  UserRole?
+  action     String    @db.VarChar(100)
+  entityType String    @db.VarChar(60)
+  entityId   String?   @db.VarChar(64)
+  summary    String?   @db.VarChar(255)
+  metadata   Json?
+  ipAddress  String?   @db.VarChar(45)
+  userAgent  String?   @db.Text
+  createdAt  DateTime  @default(now())
+  actor      User?     @relation("audit_actor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  otpHash   String    @db.VarChar(255)
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([usedAt])
+  @@map("password_reset_tokens")
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  type      String   @default("text")
+  group     String?
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([group])
+  @@map("settings")
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String   @db.VarChar(255)
+  referrer  String?  @db.Text
+  userAgent String?  @db.Text
+  ipAddress String?  @db.VarChar(45)
+  country   String?  @db.VarChar(2)
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  pgId       String?
+  name       String
+  occupation String?
+  rating     Int      @db.TinyInt
+  comment    String   @db.Text
+  photo      String?  @db.Text
+  isVerified Boolean  @default(false)
+  isFeatured Boolean  @default(false)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  pg         PG?      @relation(fields: [pgId], references: [id])
+
+  @@index([pgId])
+  @@index([rating])
+  @@index([isFeatured])
+  @@index([isApproved])
+  @@map("reviews")
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String   @db.Text
+  answer    String   @db.Text
+  category  String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sectorId  String?
+  sector    Sector?  @relation(fields: [sectorId], references: [id])
+
+  @@index([category])
+  @@index([sectorId])
+  @@index([order])
+  @@map("faqs")
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  subject   String
+  body      String   @db.LongText
+  variables Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("email_templates")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  title     String
+  message   String   @db.Text
+  type      String   @default("info")
+  link      String?  @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  pGId      String?
+  pg        PG?      @relation(fields: [pGId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([pGId], map: "notifications_pGId_fkey")
+  @@map("notifications")
+}
+
+model GalleryImage {
+  id           String   @id @default(cuid())
+  url          String   @db.Text
+  altText      String?  @db.VarChar(255)
+  caption      String?  @db.VarChar(255)
+  album        String
+  sectorSlug   String?
+  pgId         String?
+  roomType     RoomType?
+  floor        Int?
+  availability String?  @db.VarChar(60)
+  displayOrder Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([album])
+  @@index([sectorSlug])
+  @@index([pgId])
+  @@index([isFeatured])
+  @@map("gallery_images")
+}
+
+model SmartCategory {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  description String?      @db.Text
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  pgLinks     PgCategory[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@map("smart_categories")
+}
+
+model PgCategory {
+  id         String        @id @default(cuid())
+  pgId       String
+  categoryId String
+  createdAt  DateTime      @default(now())
+  pg         PG            @relation(fields: [pgId], references: [id], onDelete: Cascade)
+  category   SmartCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([pgId, categoryId])
+  @@index([pgId])
+  @@index([categoryId])
+  @@map("pg_categories")
+}
+
+model Comparison {
+  id        String   @id @default(cuid())
+  sessionId String?
+  pgIds     Json
+  shareCode String?  @unique @db.VarChar(12)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([sessionId])
+  @@index([shareCode])
+  @@index([expiresAt])
+  @@map("comparisons")
+}
+
+model MenuItem {
+  id           String         @id @default(cuid())
+  title        String         @db.VarChar(80)
+  type         MenuItemType   @default(URL)
+  href         String?        @db.Text
+  pageId       String?
+  parentId     String?
+  order        Int            @default(0)
+  visibility   MenuVisibility @default(HEADER)
+  isActive     Boolean        @default(true)
+  openInNewTab Boolean        @default(false)
+  createdById  String?
+  updatedById  String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  createdBy    User?          @relation("menu_created_by", fields: [createdById], references: [id])
+  page         Page?          @relation(fields: [pageId], references: [id])
+  parent       MenuItem?      @relation("menu_parent", fields: [parentId], references: [id])
+  children     MenuItem[]     @relation("menu_parent")
+  updatedBy    User?          @relation("menu_updated_by", fields: [updatedById], references: [id])
+
+  @@index([visibility])
+  @@index([isActive])
+  @@index([parentId, order])
+  @@index([pageId])
+  @@index([deletedAt])
+  @@index([createdById], map: "menu_items_createdById_fkey")
+  @@index([updatedById], map: "menu_items_updatedById_fkey")
+  @@map("menu_items")
+}
+
+model Page {
+  id              String     @id @default(cuid())
+  title           String     @db.VarChar(120)
+  slug            String     @unique @db.VarChar(160)
+  status          PageStatus @default(DRAFT)
+  content         Json
+  metaTitle       String?    @db.VarChar(60)
+  metaDescription String?    @db.VarChar(160)
+  ogImageUrl      String?    @db.Text
+  isActive        Boolean    @default(true)
+  showOnHome      Boolean    @default(false)
+  publishedAt     DateTime?
+  createdById     String?
+  updatedById     String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  menuItems       MenuItem[]
+  createdBy       User?      @relation("page_created_by", fields: [createdById], references: [id])
+  updatedBy       User?      @relation("page_updated_by", fields: [updatedById], references: [id])
+
+  @@index([slug])
+  @@index([status])
+  @@index([isActive])
+  @@index([showOnHome])
+  @@index([publishedAt])
+  @@index([deletedAt])
+  @@index([createdById], map: "pages_createdById_fkey")
+  @@index([updatedById], map: "pages_updatedById_fkey")
+  @@map("pages")
 }
 
 enum RoomType {
@@ -129,129 +893,10 @@ enum OccupancyType {
   CO_LIVING
 }
 
-// Master Amenities Table
-model Amenity {
-  id        String   @id @default(cuid())
-  name      String   @unique // e.g., "Attached Bathroom"
-  slug      String   @unique // e.g., "attached-bathroom"
-  icon      String? // Icon name or SVG path
-  category  String? // e.g., "Room", "Common", "Safety", "Services"
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  pgs PGAmenity[]
-
-  @@index([slug])
-  @@index([category])
-  @@map("amenities")
-}
-
-// Junction Table: PG <-> Amenities (Many-to-Many)
-model PGAmenity {
-  id        String   @id @default(cuid())
-  pgId      String
-  amenityId String
-  createdAt DateTime @default(now())
-
-  pg      PG      @relation(fields: [pgId], references: [id], onDelete: Cascade)
-  amenity Amenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
-
-  @@unique([pgId, amenityId])
-  @@index([pgId])
-  @@index([amenityId])
-  @@map("pg_amenities")
-}
-
-// Photos for PGs
-model Photo {
-  id           String   @id @default(cuid())
-  pgId         String
-  url          String   @db.Text // Cloudinary/S3 URL
-  altText      String?  @db.VarChar(255)
-  caption      String?  @db.VarChar(255)
-  category     String? // e.g., "Room", "Common Area", "Food", "Exterior"
-  isFeatured   Boolean  @default(false)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  pg PG @relation(fields: [pgId], references: [id], onDelete: Cascade)
-
-  @@index([pgId])
-  @@index([category])
-  @@index([isFeatured])
-  @@map("photos")
-}
-
-// ============================================
-// LEAD MANAGEMENT
-// ============================================
-
-model Lead {
-  id String @id @default(cuid())
-
-  // User Info
-  name  String
-  phone String  @db.VarChar(15)
-  email String?
-
-  // Preferences
-  preferredSectorId String?
-  budgetMin         Int?
-  budgetMax         Int?
-  roomType          RoomType?
-  occupancyType     OccupancyType?
-  moveInDate        DateTime?
-
-  // Visit Request
-  visitSlot String? // e.g., "Morning", "Afternoon", "Evening"
-  message   String? @db.Text
-
-  // Source Tracking
-  source      String? @default("website") // "website", "google", "facebook", etc.
-  referrer    String? @db.Text // Full referrer URL
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-
-  // Status & Assignment
-  status       LeadStatus @default(NEW)
-  assignedToId String?
-  priority     Priority   @default(MEDIUM)
-
-  // Related PG (if user inquired about specific PG)
-  pgId String?
-
-  // Notes (internal)
-  notes String? @db.Text
-
-  // Follow-up
-  followUpDate    DateTime?
-  lastContactedAt DateTime?
-
-  // Metadata
-  ipAddress  String? @db.VarChar(45)
-  userAgent  String? @db.Text
-  hasConsent Boolean @default(false) // GDPR/marketing consent
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  preferredSector Sector?        @relation(fields: [preferredSectorId], references: [id], onDelete: SetNull)
-  pg              PG?            @relation(fields: [pgId], references: [id], onDelete: SetNull)
-  assignedTo      User?          @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
-  activities      LeadActivity[]
-
-  @@index([phone])
-  @@index([email])
-  @@index([status])
-  @@index([createdAt])
-  @@index([pgId])
-  @@index([preferredSectorId])
-  @@index([assignedToId])
-  @@map("leads")
+enum PGApprovalStatus {
+  PENDING
+  APPROVED
+  BLOCKED
 }
 
 enum LeadStatus {
@@ -271,185 +916,10 @@ enum Priority {
   URGENT
 }
 
-// Lead Activity Log (for tracking interactions)
-model LeadActivity {
-  id            String   @id @default(cuid())
-  leadId        String
-  activityType  String // "CALL", "EMAIL", "WHATSAPP", "VISIT", "NOTE", "STATUS_CHANGE"
-  description   String   @db.Text
-  performedById String?
-  createdAt     DateTime @default(now())
-
-  lead        Lead  @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  performedBy User? @relation(fields: [performedById], references: [id], onDelete: SetNull)
-
-  @@index([leadId])
-  @@index([createdAt])
-  @@map("lead_activities")
-}
-
-// ============================================
-// BLOG & CONTENT
-// ============================================
-
-model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?  @db.Text
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  posts BlogPost[]
-
-  @@index([slug])
-  @@map("categories")
-}
-
-model Tag {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  posts PostTag[]
-
-  @@index([slug])
-  @@map("tags")
-}
-
-model BlogPost {
-  id            String  @id @default(cuid())
-  title         String  @db.VarChar(255)
-  slug          String  @unique
-  excerpt       String? @db.Text
-  content       String  @db.LongText // Full blog content (Markdown or HTML)
-  featuredImage String? @db.Text // URL
-
-  // SEO
-  metaTitle       String? @db.VarChar(60)
-  metaDescription String? @db.VarChar(160)
-  focusKeyword    String? @db.VarChar(100)
-
-  // Categorization
-  categoryId String?
-
-  // Author
-  authorId String
-
-  // Publishing
-  status      PostStatus @default(DRAFT)
-  publishedAt DateTime?
-
-  // Engagement
-  viewCount Int  @default(0)
-  readTime  Int? @default(5) // in minutes
-
-  // Featured
-  isFeatured Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  tags     PostTag[]
-
-  @@index([slug])
-  @@index([status])
-  @@index([publishedAt])
-  @@index([categoryId])
-  @@index([authorId])
-  @@index([isFeatured])
-  @@fulltext([title, content]) // Full-text search index
-  @@map("blog_posts")
-}
-
 enum PostStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
-}
-
-// Junction Table: BlogPost <-> Tags (Many-to-Many)
-model PostTag {
-  id        String   @id @default(cuid())
-  postId    String
-  tagId     String
-  createdAt DateTime @default(now())
-
-  post BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag  Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@unique([postId, tagId])
-  @@index([postId])
-  @@index([tagId])
-  @@map("post_tags")
-}
-
-// ============================================
-// USER & AUTHENTICATION
-// ============================================
-
-model User {
-  id       String   @id @default(cuid())
-  name     String
-  email    String   @unique
-  password String // Hashed with bcrypt
-  role     UserRole @default(USER)
-  avatar   String?  @db.Text
-  phone    String?  @db.VarChar(15)
-
-  // Status
-  isActive    Boolean   @default(true)
-  lastLoginAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  blogPosts     BlogPost[]
-  assignedLeads Lead[]
-  activities    LeadActivity[]
-  notifications Notification[]
-
-  bannersCreated Banner[]      @relation("banner_created_by")
-  bannersUpdated Banner[]      @relation("banner_updated_by")
-  bannerEvents   BannerEvent[]
-
-  enquiries         Enquiry[]
-  enquiriesAssigned Enquiry[]     @relation("enquiry_assigned_to")
-  enquiryNotes      EnquiryNote[] @relation("enquiry_note_created_by")
-
-  restrictions        UserRestriction[]
-  restrictionsCreated UserRestriction[] @relation("restriction_created_by")
-  restrictionsRevoked UserRestriction[] @relation("restriction_revoked_by")
-
-  chatThreads         ChatThread[]      @relation("chat_thread_user")
-  chatThreadsAssigned ChatThread[]      @relation("chat_thread_assigned_to")
-  chatMessages        ChatMessage[]     @relation("chat_message_sender")
-  chatReads           ChatReadReceipt[] @relation("chat_read_user")
-
-  tickets         Ticket[]        @relation("ticket_user")
-  ticketsAssigned Ticket[]        @relation("ticket_assigned_to")
-  ticketMessages  TicketMessage[] @relation("ticket_message_author")
-
-  auditLogs AuditLog[] @relation("audit_actor")
-
-  passwordResetTokens PasswordResetToken[]
-
-  // CMS: Menus & Pages
-  menuItemsCreated MenuItem[] @relation("menu_created_by")
-  menuItemsUpdated MenuItem[] @relation("menu_updated_by")
-  pagesCreated     Page[]     @relation("page_created_by")
-  pagesUpdated     Page[]     @relation("page_updated_by")
-
-  @@index([email])
-  @@index([role])
-  @@map("users")
 }
 
 enum UserRole {
@@ -459,10 +929,6 @@ enum UserRole {
   MANAGER
   VIEWER
 }
-
-// ============================================
-// HOME PAGE BANNERS & DISCOUNTS
-// ============================================
 
 enum BannerType {
   HERO
@@ -481,95 +947,11 @@ enum BannerTargetScope {
   PG
 }
 
-model Banner {
-  id String @id @default(cuid())
-
-  type     BannerType
-  title    String     @db.VarChar(120)
-  subtitle String?    @db.VarChar(255)
-  imageUrl String?    @db.Text
-  ctaLabel String?    @db.VarChar(60)
-  ctaHref  String?    @db.Text
-
-  discountType  DiscountType?
-  discountValue Int?
-
-  validFrom DateTime?
-  validTill DateTime?
-
-  isActive     Boolean @default(true)
-  priority     Int     @default(0)
-  displayOrder Int     @default(0)
-
-  createdById String?
-  updatedById String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  createdBy User? @relation("banner_created_by", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedBy User? @relation("banner_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
-
-  targets BannerTarget[]
-  events  BannerEvent[]
-
-  @@index([type])
-  @@index([isActive])
-  @@index([priority, displayOrder])
-  @@index([validFrom])
-  @@index([validTill])
-  @@map("banners")
-}
-
-model BannerTarget {
-  id        String            @id @default(cuid())
-  bannerId  String
-  scope     BannerTargetScope
-  sectorId  String?
-  pgId      String?
-  createdAt DateTime          @default(now())
-
-  banner Banner  @relation(fields: [bannerId], references: [id], onDelete: Cascade)
-  sector Sector? @relation(fields: [sectorId], references: [id], onDelete: Cascade)
-  pg     PG?     @relation(fields: [pgId], references: [id], onDelete: Cascade)
-
-  @@unique([bannerId, scope, sectorId, pgId])
-  @@index([bannerId])
-  @@index([scope])
-  @@index([sectorId])
-  @@index([pgId])
-  @@map("banner_targets")
-}
-
 enum BannerEventType {
   IMPRESSION
   CLICK
   CONVERSION
 }
-
-model BannerEvent {
-  id        String          @id @default(cuid())
-  bannerId  String
-  type      BannerEventType
-  path      String?         @db.VarChar(255)
-  userId    String?
-  sessionId String?         @db.VarChar(64)
-  ipAddress String?         @db.VarChar(45)
-  userAgent String?         @db.Text
-  metadata  Json?
-  createdAt DateTime        @default(now())
-
-  banner Banner @relation(fields: [bannerId], references: [id], onDelete: Cascade)
-  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([bannerId])
-  @@index([type])
-  @@index([createdAt])
-  @@map("banner_events")
-}
-
-// ============================================
-// CONTACT / ENQUIRY MANAGEMENT
-// ============================================
 
 enum EnquiryType {
   CONTACT_US
@@ -584,191 +966,17 @@ enum EnquiryStatus {
   CLOSED
 }
 
-model Enquiry {
-  id String @id @default(cuid())
-
-  type EnquiryType @default(CONTACT_US)
-
-  name    String
-  email   String?
-  phone   String? @db.VarChar(15)
-  subject String? @db.VarChar(255)
-  message String  @db.Text
-
-  pgId     String?
-  sectorId String?
-  userId   String?
-
-  status       EnquiryStatus @default(NEW)
-  assignedToId String?
-
-  resolvedAt DateTime?
-  closedAt   DateTime?
-
-  source      String? @default("website")
-  referrer    String? @db.Text
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-
-  ipAddress String? @db.VarChar(45)
-  userAgent String? @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  pg         PG?     @relation(fields: [pgId], references: [id], onDelete: SetNull)
-  sector     Sector? @relation(fields: [sectorId], references: [id], onDelete: SetNull)
-  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  assignedTo User?   @relation("enquiry_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
-
-  notes EnquiryNote[]
-
-  @@index([type])
-  @@index([status])
-  @@index([createdAt])
-  @@index([pgId])
-  @@index([sectorId])
-  @@index([assignedToId])
-  @@map("enquiries")
-}
-
-model EnquiryNote {
-  id          String   @id @default(cuid())
-  enquiryId   String
-  body        String   @db.Text
-  isInternal  Boolean  @default(true)
-  createdById String?
-  createdAt   DateTime @default(now())
-
-  enquiry   Enquiry @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
-  createdBy User?   @relation("enquiry_note_created_by", fields: [createdById], references: [id], onDelete: SetNull)
-
-  @@index([enquiryId])
-  @@index([createdAt])
-  @@map("enquiry_notes")
-}
-
-// ============================================
-// USER RESTRICTIONS (BLOCK / SUSPEND)
-// ============================================
-
 enum RestrictionType {
   SOFT_BLOCK
   HARD_BLOCK
   SUSPENSION
 }
 
-model UserRestriction {
-  id     String @id @default(cuid())
-  userId String
-
-  type   RestrictionType
-  reason String?         @db.Text
-
-  startsAt DateTime  @default(now())
-  endsAt   DateTime?
-
-  isActive Boolean @default(true)
-
-  createdById   String?
-  revokedAt     DateTime?
-  revokedById   String?
-  revokedReason String?   @db.Text
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdBy User? @relation("restriction_created_by", fields: [createdById], references: [id], onDelete: SetNull)
-  revokedBy User? @relation("restriction_revoked_by", fields: [revokedById], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([type])
-  @@index([isActive])
-  @@index([startsAt])
-  @@index([endsAt])
-  @@map("user_restrictions")
-}
-
-// ============================================
-// USER CHAT (USER ↔ ADMIN)
-// ============================================
-
 enum ChatThreadStatus {
   OPEN
   MUTED
   CLOSED
 }
-
-model ChatThread {
-  id String @id @default(cuid())
-
-  userId String
-  pgId   String?
-
-  assignedToId String?
-
-  status     ChatThreadStatus @default(OPEN)
-  mutedUntil DateTime?
-  closedAt   DateTime?
-
-  lastMessageAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user       User  @relation("chat_thread_user", fields: [userId], references: [id], onDelete: Cascade)
-  assignedTo User? @relation("chat_thread_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
-  pg         PG?   @relation(fields: [pgId], references: [id], onDelete: SetNull)
-
-  messages ChatMessage[]
-  reads    ChatReadReceipt[]
-
-  @@index([userId])
-  @@index([pgId])
-  @@index([assignedToId])
-  @@index([status])
-  @@index([lastMessageAt])
-  @@map("chat_threads")
-}
-
-model ChatMessage {
-  id       String  @id @default(cuid())
-  threadId String
-  senderId String
-  body     String  @db.Text
-  isSystem Boolean @default(false)
-
-  createdAt DateTime @default(now())
-
-  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  sender User       @relation("chat_message_sender", fields: [senderId], references: [id], onDelete: Cascade)
-
-  @@index([threadId])
-  @@index([senderId])
-  @@index([createdAt])
-  @@map("chat_messages")
-}
-
-model ChatReadReceipt {
-  id         String   @id @default(cuid())
-  threadId   String
-  userId     String
-  lastReadAt DateTime @default(now())
-
-  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  user   User       @relation("chat_read_user", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([threadId, userId])
-  @@index([threadId])
-  @@index([userId])
-  @@map("chat_read_receipts")
-}
-
-// ============================================
-// SUPPORT TICKETS
-// ============================================
 
 enum TicketCategory {
   ELECTRICITY
@@ -793,316 +1001,6 @@ enum TicketStatus {
   CLOSED
 }
 
-model Ticket {
-  id String @id @default(cuid())
-
-  userId String
-  pgId   String?
-
-  category TicketCategory
-  priority TicketPriority @default(MEDIUM)
-  status   TicketStatus   @default(OPEN)
-
-  subject     String @db.VarChar(255)
-  description String @db.Text
-
-  assignedToId String?
-
-  slaDueAt   DateTime?
-  resolvedAt DateTime?
-  closedAt   DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user       User  @relation("ticket_user", fields: [userId], references: [id], onDelete: Cascade)
-  pg         PG?   @relation(fields: [pgId], references: [id], onDelete: SetNull)
-  assignedTo User? @relation("ticket_assigned_to", fields: [assignedToId], references: [id], onDelete: SetNull)
-
-  messages TicketMessage[]
-
-  @@index([userId])
-  @@index([pgId])
-  @@index([status])
-  @@index([priority])
-  @@index([category])
-  @@index([assignedToId])
-  @@index([createdAt])
-  @@map("tickets")
-}
-
-model TicketMessage {
-  id       String @id @default(cuid())
-  ticketId String
-  authorId String
-
-  body       String  @db.Text
-  isInternal Boolean @default(false)
-
-  createdAt DateTime @default(now())
-
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  author User   @relation("ticket_message_author", fields: [authorId], references: [id], onDelete: Cascade)
-
-  attachments TicketAttachment[]
-
-  @@index([ticketId])
-  @@index([authorId])
-  @@index([createdAt])
-  @@map("ticket_messages")
-}
-
-model TicketAttachment {
-  id        String   @id @default(cuid())
-  messageId String
-  url       String   @db.Text
-  mimeType  String?  @db.VarChar(120)
-  sizeBytes Int?
-  createdAt DateTime @default(now())
-
-  message TicketMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-  @@index([messageId])
-  @@map("ticket_attachments")
-}
-
-// ============================================
-// SECURITY & AUDIT LOGS
-// ============================================
-
-model AuditLog {
-  id String @id @default(cuid())
-
-  actorId   String?
-  actorRole UserRole?
-
-  action     String  @db.VarChar(100)
-  entityType String  @db.VarChar(60)
-  entityId   String? @db.VarChar(64)
-
-  summary  String? @db.VarChar(255)
-  metadata Json?
-
-  ipAddress String? @db.VarChar(45)
-  userAgent String? @db.Text
-
-  createdAt DateTime @default(now())
-
-  actor User? @relation("audit_actor", fields: [actorId], references: [id], onDelete: SetNull)
-
-  @@index([actorId])
-  @@index([action])
-  @@index([entityType])
-  @@index([createdAt])
-  @@map("audit_logs")
-}
-
-// ============================================
-// PASSWORD RESET (OTP OVER EMAIL)
-// ============================================
-
-model PasswordResetToken {
-  id     String @id @default(cuid())
-  userId String
-
-  otpHash   String    @db.VarChar(255)
-  expiresAt DateTime
-  usedAt    DateTime?
-
-  attempts Int @default(0)
-
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([expiresAt])
-  @@index([usedAt])
-  @@map("password_reset_tokens")
-}
-
-// ============================================
-// SITE SETTINGS
-// ============================================
-
-model Setting {
-  id        String   @id @default(cuid())
-  key       String   @unique // e.g., "site_name", "contact_email"
-  value     String   @db.Text
-  type      String   @default("text") // "text", "number", "boolean", "json"
-  group     String? // e.g., "general", "contact", "seo", "email"
-  isPublic  Boolean  @default(false) // Can be accessed from frontend
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([key])
-  @@index([group])
-  @@map("settings")
-}
-
-// ============================================
-// ANALYTICS & TRACKING
-// ============================================
-
-model PageView {
-  id        String   @id @default(cuid())
-  path      String   @db.VarChar(255)
-  referrer  String?  @db.Text
-  userAgent String?  @db.Text
-  ipAddress String?  @db.VarChar(45)
-  country   String?  @db.VarChar(2) // ISO 2-letter country code
-  createdAt DateTime @default(now())
-
-  @@index([path])
-  @@index([createdAt])
-  @@map("page_views")
-}
-
-// ============================================
-// REVIEWS & TESTIMONIALS
-// ============================================
-
-model Review {
-  id         String   @id @default(cuid())
-  pgId       String?
-  name       String
-  occupation String?
-  rating     Int      @db.TinyInt // 1-5
-  comment    String   @db.Text
-  photo      String?  @db.Text
-  isVerified Boolean  @default(false)
-  isFeatured Boolean  @default(false)
-  isApproved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  pg PG? @relation(fields: [pgId], references: [id], onDelete: SetNull)
-
-  @@index([pgId])
-  @@index([rating])
-  @@index([isFeatured])
-  @@index([isApproved])
-  @@map("reviews")
-}
-
-// Add relation to PG model (add this to PG model above)
-// reviews Review[]
-
-// ============================================
-// FAQ MANAGEMENT
-// ============================================
-
-model FAQ {
-  id        String   @id @default(cuid())
-  question  String   @db.Text
-  answer    String   @db.Text
-  category  String? // e.g., "General", "Booking", "Payments", "Facilities"
-  sectorId  String? // Optional - for sector-specific FAQs
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  sector Sector? @relation(fields: [sectorId], references: [id], onDelete: SetNull)
-
-  @@index([category])
-  @@index([sectorId])
-  @@index([order])
-  @@map("faqs")
-}
-
-// ============================================
-// EMAIL TEMPLATES
-// ============================================
-
-model EmailTemplate {
-  id        String   @id @default(cuid())
-  name      String   @unique // e.g., "lead_notification", "welcome_email"
-  subject   String
-  body      String   @db.LongText // HTML content
-  variables Json? // JSON array of available variables
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([name])
-  @@map("email_templates")
-}
-
-// ============================================
-// NOTIFICATIONS
-// ============================================
-
-model Notification {
-  id        String   @id @default(cuid())
-  userId    String?
-  title     String
-  message   String   @db.Text
-  type      String   @default("info") // "info", "success", "warning", "error"
-  link      String?  @db.Text
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  user User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pg   PG?     @relation(fields: [pGId], references: [id])
-  pGId String?
-
-  @@index([userId])
-  @@index([isRead])
-  @@index([createdAt])
-  @@map("notifications")
-}
-
-// Add relation to User model (add this to User model above)
-// notifications Notification[]
-
-// ============================================
-// GALLERY IMAGES (Non-PG specific)
-// ============================================
-
-model GalleryImage {
-  id           String   @id @default(cuid())
-  url          String   @db.Text // Cloudinary/S3 URL
-  altText      String?  @db.VarChar(255)
-  caption      String?  @db.VarChar(255)
-  album        String // "rooms", "common", "food", "neighborhood", "safety", "exterior"
-  sectorSlug   String? // Optional sector association (e.g., "sector-51")
-  pgId         String? // Optional PG association
-  displayOrder Int      @default(0)
-  isFeatured   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([album])
-  @@index([sectorSlug])
-  @@index([pgId])
-  @@index([isFeatured])
-  @@map("gallery_images")
-}
-
-// ============================================
-// SMART FINDER COMPARISONS
-// ============================================
-
-model Comparison {
-  id        String   @id @default(cuid())
-  sessionId String? // For anonymous users (cookie-based)
-  pgIds     Json // Array of PG IDs to compare
-  shareCode String?  @unique @db.VarChar(12) // Short code for sharing via WhatsApp
-  createdAt DateTime @default(now())
-  expiresAt DateTime // Auto-expire after 24-48 hours
-
-  @@index([sessionId])
-  @@index([shareCode])
-  @@index([expiresAt])
-  @@map("comparisons")
-}
-
-// ============================================
-// CMS: DYNAMIC MENUS & PAGES
-// ============================================
-
 enum MenuVisibility {
   HEADER
   FOOTER
@@ -1114,84 +1012,8 @@ enum MenuItemType {
   URL
 }
 
-model MenuItem {
-  id    String       @id @default(cuid())
-  title String       @db.VarChar(80)
-  type  MenuItemType @default(URL)
-
-  // If type=URL, href is the full URL/path. If type=PAGE, href is optional and derived from the Page slug.
-  href   String? @db.Text
-  pageId String?
-
-  parentId     String?
-  order        Int            @default(0)
-  visibility   MenuVisibility @default(HEADER)
-  isActive     Boolean        @default(true)
-  openInNewTab Boolean        @default(false)
-
-  createdById String?
-  updatedById String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  // Relations
-  page     Page?      @relation(fields: [pageId], references: [id], onDelete: SetNull)
-  parent   MenuItem?  @relation("menu_parent", fields: [parentId], references: [id], onDelete: SetNull)
-  children MenuItem[] @relation("menu_parent")
-
-  createdBy User? @relation("menu_created_by", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedBy User? @relation("menu_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
-
-  @@index([visibility])
-  @@index([isActive])
-  @@index([parentId, order])
-  @@index([pageId])
-  @@index([deletedAt])
-  @@map("menu_items")
-}
-
 enum PageStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
-}
-
-model Page {
-  id     String     @id @default(cuid())
-  title  String     @db.VarChar(120)
-  slug   String     @unique @db.VarChar(160)
-  status PageStatus @default(DRAFT)
-
-  // Page Builder JSON: sections/blocks structure.
-  content Json
-
-  // SEO
-  metaTitle       String? @db.VarChar(60)
-  metaDescription String? @db.VarChar(160)
-  ogImageUrl      String? @db.Text
-
-  // Visibility
-  isActive   Boolean @default(true)
-  showOnHome Boolean @default(false)
-
-  publishedAt DateTime?
-  createdById String?
-  updatedById String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  menuItems MenuItem[]
-
-  createdBy User? @relation("page_created_by", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedBy User? @relation("page_updated_by", fields: [updatedById], references: [id], onDelete: SetNull)
-
-  @@index([slug])
-  @@index([status])
-  @@index([isActive])
-  @@index([showOnHome])
-  @@index([publishedAt])
-  @@index([deletedAt])
-  @@map("pages")
 }

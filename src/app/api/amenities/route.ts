@@ -6,6 +6,7 @@ import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { z } from 'zod'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 const amenitySchema = z.object({
     name: z.string().min(2).max(50),
@@ -18,8 +19,11 @@ const amenitySchema = z.object({
 /**
  * GET /api/amenities - List all amenities
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const amenities = await prisma.amenity.findMany({
             where: { isActive: true },
             orderBy: [{ category: 'asc' }, { name: 'asc' }],

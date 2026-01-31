@@ -70,39 +70,45 @@ export default function HomeBannersClient({ banners }: { banners: Banner[] }) {
   return (
     <section className="bg-white border-b border-[var(--color-border)]">
       <div className="container-custom py-4">
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {banners.map((b) => (
-            <Card key={b.id} className="p-4">
-              <div className="flex items-start gap-4">
-                {b.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt={b.title}
-                    src={b.imageUrl}
-                    className="w-16 h-16 rounded-md object-cover border border-[var(--color-border)]"
-                  />
-                ) : null}
+            <Card key={b.id} className="group overflow-hidden rounded-2xl border border-[var(--color-border)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              {b.imageUrl ? (
+                <div className="relative w-full overflow-hidden">
+                  <div className="aspect-[16/9] w-full bg-[var(--color-muted)]/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt={b.title}
+                      src={b.imageUrl}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  </div>
+                </div>
+              ) : null}
 
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium truncate">{b.title}</div>
-                  {b.subtitle ? <div className="text-sm text-[var(--color-muted)] mt-1 line-clamp-2">{b.subtitle}</div> : null}
+              <div className="p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-base sm:text-lg truncate">{b.title}</div>
+                    {b.subtitle ? (
+                      <div className="text-sm text-[var(--color-muted)] mt-1 line-clamp-2">{b.subtitle}</div>
+                    ) : null}
+                  </div>
 
                   {b.discountType && b.discountValue ? (
-                    <div className="mt-2 text-sm">
-                      <span className="inline-flex items-center rounded-full bg-[var(--color-limestone)] px-2 py-1">
-                        {b.discountType === 'PERCENT' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
-                      </span>
-                    </div>
-                  ) : null}
-
-                  {b.ctaHref ? (
-                    <div className="mt-3">
-                      <Button asChild size="sm" onClick={() => track(b.id, 'CLICK').catch(() => undefined)}>
-                        <Link href={b.ctaHref}>{b.ctaLabel || 'Explore'}</Link>
-                      </Button>
-                    </div>
+                    <span className="shrink-0 inline-flex items-center rounded-full bg-[var(--color-limestone)] px-2.5 py-1 text-xs font-medium">
+                      {b.discountType === 'PERCENT' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
+                    </span>
                   ) : null}
                 </div>
+
+                {b.ctaHref ? (
+                  <div className="mt-4">
+                    <Button asChild size="sm" className="rounded-full px-5" onClick={() => track(b.id, 'CLICK').catch(() => undefined)}>
+                      <Link href={b.ctaHref}>{b.ctaLabel || 'Explore'}</Link>
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             </Card>
           ))}

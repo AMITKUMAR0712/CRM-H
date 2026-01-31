@@ -5,12 +5,16 @@ import { handleError } from '@/utils/errors'
 import { comparisonCreateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { nanoid } from 'nanoid'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 /**
  * POST /api/comparisons - Create a new comparison
  */
 export async function POST(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const validation = await validateBody(req, comparisonCreateSchema)
         if (hasValidationError(validation)) {
             return validation.error

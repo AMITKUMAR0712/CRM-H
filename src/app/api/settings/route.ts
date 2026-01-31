@@ -6,12 +6,16 @@ import { settingUpdateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 /**
  * GET /api/settings - Get settings
  */
 export async function GET(req: NextRequest) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { searchParams } = new URL(req.url)
         const publicOnly = searchParams.get('public') === 'true'
 

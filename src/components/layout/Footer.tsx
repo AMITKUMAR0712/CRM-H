@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Phone, Mail, MapPin, MessageCircle, Facebook, Instagram, Linkedin, Youtube } from 'lucide-react'
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 
 type FooterLink = { href: string; label: string }
@@ -15,23 +16,32 @@ const FALLBACK_FOOTER_LINKS: FooterLink[] = [
 ]
 
 export default async function Footer() {
-    const [menuItems, sectors, settings] = await Promise.all([
-        prisma.menuItem.findMany({
-            where: { deletedAt: null, isActive: true, visibility: { in: ['FOOTER', 'BOTH'] } },
-            orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
-            include: { page: { select: { slug: true } } },
-        }),
-        prisma.sector.findMany({
-            where: { isActive: true },
-            orderBy: { name: 'asc' },
-            select: { slug: true, name: true },
-            take: 8,
-        }),
-        prisma.setting.findMany({
-            where: { isPublic: true, group: { in: ['contact', 'social', 'general'] } },
-            select: { key: true, value: true },
-        }),
-    ])
+    let menuItems: Prisma.MenuItemGetPayload<{ include: { page: { select: { slug: true } } } }>[] = []
+    let sectors: Array<{ slug: string; name: string }> = []
+    let settings: Array<{ key: string; value: string }> = []
+
+    try {
+        ;[menuItems, sectors, settings] = await Promise.all([
+            prisma.menuItem.findMany({
+                where: { deletedAt: null, isActive: true, visibility: { in: ['FOOTER', 'BOTH'] } },
+                orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
+                include: { page: { select: { slug: true } } },
+            }),
+            prisma.sector.findMany({
+                where: { isActive: true },
+                orderBy: { name: 'asc' },
+                select: { slug: true, name: true },
+                take: 8,
+            }),
+            prisma.setting.findMany({
+                where: { isPublic: true, group: { in: ['contact', 'social', 'general'] } },
+                select: { key: true, value: true },
+            }),
+        ])
+    } catch (err) {
+        // Keep the page alive with fallbacks if the DB is unreachable.
+        console.error('[Footer] Failed to load footer data', err)
+    }
 
     const settingsMap = new Map(settings.map((s) => [s.key, s.value]))
     const siteName = settingsMap.get('site_name') || 'SOHO PG'
@@ -62,7 +72,7 @@ export default async function Footer() {
     const sectorLinks: FooterLink[] = sectors.map((s) => ({ href: `/pg-locations/${s.slug}`, label: s.name }))
 
     return (
-        <footer className="bg-[var(--color-graphite)] text-white">
+        <footer className="bg-(--color-graphite) text-white">
             {/* Main Footer */}
             <div className="container-custom section-padding">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -79,7 +89,7 @@ export default async function Footer() {
                                 href={socialFacebook}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 bg-white/10 rounded-full hover:bg-[var(--color-clay)] transition-colors"
+                                className="p-2 bg-white/10 rounded-full hover:bg-(--color-clay) transition-colors"
                                 aria-label="Facebook"
                             >
                                 <Facebook className="w-5 h-5" />
@@ -88,7 +98,7 @@ export default async function Footer() {
                                 href={socialInstagram}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 bg-white/10 rounded-full hover:bg-[var(--color-clay)] transition-colors"
+                                className="p-2 bg-white/10 rounded-full hover:bg-(--color-clay) transition-colors"
                                 aria-label="Instagram"
                             >
                                 <Instagram className="w-5 h-5" />
@@ -97,7 +107,7 @@ export default async function Footer() {
                                 href={socialLinkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 bg-white/10 rounded-full hover:bg-[var(--color-clay)] transition-colors"
+                                className="p-2 bg-white/10 rounded-full hover:bg-(--color-clay) transition-colors"
                                 aria-label="LinkedIn"
                             >
                                 <Linkedin className="w-5 h-5" />
@@ -106,7 +116,7 @@ export default async function Footer() {
                                 href={socialYoutube}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 bg-white/10 rounded-full hover:bg-[var(--color-clay)] transition-colors"
+                                className="p-2 bg-white/10 rounded-full hover:bg-(--color-clay) transition-colors"
                                 aria-label="YouTube"
                             >
                                 <Youtube className="w-5 h-5" />
@@ -153,7 +163,7 @@ export default async function Footer() {
                         <h4 className="font-serif text-lg font-semibold mb-6">Contact Us</h4>
                         <ul className="space-y-4">
                             <li className="flex items-start gap-3">
-                                <MapPin className="w-5 h-5 text-[var(--color-clay)] shrink-0 mt-0.5" />
+                                <MapPin className="w-5 h-5 text-(--color-clay) shrink-0 mt-0.5" />
                                 <span className="text-gray-400 text-sm">
                                     {(() => {
                                         const parts = contactAddress.split(',').map((p) => p.trim()).filter(Boolean)
@@ -168,7 +178,7 @@ export default async function Footer() {
                                 </span>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Phone className="w-5 h-5 text-[var(--color-clay)]" />
+                                <Phone className="w-5 h-5 text-(--color-clay)" />
                                 <a
                                     href={`tel:${contactPhone}`}
                                     className="text-gray-400 hover:text-white transition-colors text-sm"
@@ -177,7 +187,7 @@ export default async function Footer() {
                                 </a>
                             </li>
                             <li className="flex items-center gap-3">
-                                <Mail className="w-5 h-5 text-[var(--color-clay)]" />
+                                <Mail className="w-5 h-5 text-(--color-clay)" />
                                 <a
                                     href={`mailto:${contactEmail}`}
                                     className="text-gray-400 hover:text-white transition-colors text-sm"
@@ -186,7 +196,7 @@ export default async function Footer() {
                                 </a>
                             </li>
                             <li className="flex items-center gap-3">
-                                <MessageCircle className="w-5 h-5 text-[var(--color-clay)]" />
+                                <MessageCircle className="w-5 h-5 text-(--color-clay)" />
                                 <a
                                     href={`https://wa.me/${whatsappNumber}`}
                                     target="_blank"

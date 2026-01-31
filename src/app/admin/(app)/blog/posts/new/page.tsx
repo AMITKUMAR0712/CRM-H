@@ -5,12 +5,15 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import RichTextEditor from '@/components/admin/blog/RichTextEditor'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 const schema = z.object({
   title: z.string().min(5),
@@ -33,6 +36,9 @@ type ApiResponse<T> =
 export default function NewPostPage() {
   const router = useRouter()
   const [editorValue, setEditorValue] = React.useState('<p></p>')
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canWrite = role ? hasPermission(role, PERMISSIONS.BLOG_WRITE) : false
 
   const {
     register,
@@ -71,11 +77,19 @@ export default function NewPostPage() {
     router.refresh()
   }
 
+  if (!canWrite) {
+    return (
+      <Card className="p-5">
+        <div className="text-sm text-muted">You do not have permission to create blog posts.</div>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">New Blog Post</h1>
-        <p className="text-sm text-[var(--color-muted)]">Write and publish SEO-optimized content.</p>
+        <p className="text-sm text-muted">Write and publish SEO-optimized content.</p>
       </div>
 
       <Card>
@@ -105,7 +119,7 @@ export default function NewPostPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-sm font-medium">Status</label>
-                <select className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4" {...register('status')}>
+                <select className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-4" {...register('status')}>
                   <option value="DRAFT">DRAFT</option>
                   <option value="PUBLISHED">PUBLISHED</option>
                   <option value="ARCHIVED">ARCHIVED</option>

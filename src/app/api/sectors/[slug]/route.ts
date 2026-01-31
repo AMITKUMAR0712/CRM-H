@@ -6,6 +6,7 @@ import { sectorUpdateSchema } from '@/validators/common.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { requirePermission } from '@/middleware/permissions'
 import { PERMISSIONS } from '@/lib/rbac'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 interface RouteParams {
     params: Promise<{ slug: string }>
@@ -16,6 +17,9 @@ interface RouteParams {
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { slug } = await params
 
         const sector = await prisma.sector.findFirst({

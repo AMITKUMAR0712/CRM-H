@@ -55,6 +55,11 @@ export const sectorApi = {
     getBySlug: (slug: string) => apiFetch(`/sectors/${slug}`),
 }
 
+// Smart Finder Category APIs
+export const smartCategoryApi = {
+    getAll: () => apiFetch('/smart-categories', { revalidate: 3600 }),
+}
+
 // Lead APIs (Public)
 export const leadApi = {
     create: (data: unknown) => apiFetch('/leads', { method: 'POST', body: data }),

@@ -5,6 +5,17 @@ import prisma from './prisma'
 import { UserRole } from '@prisma/client'
 import { getActiveUserRestriction } from '@/lib/restrictions'
 
+if (!process.env.NEXTAUTH_SECRET) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('NEXTAUTH_SECRET is required')
+    }
+    console.warn('NEXTAUTH_SECRET is not set. Using insecure defaults for development.')
+}
+
+if (!process.env.NEXTAUTH_URL && process.env.NODE_ENV !== 'production') {
+    process.env.NEXTAUTH_URL = 'http://localhost:3000'
+}
+
 // Extend NextAuth types
 declare module 'next-auth' {
     interface Session {

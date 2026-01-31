@@ -1,5 +1,22 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary'
 
+const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? String(5 * 1024 * 1024))
+const ALLOWED_IMAGE_TYPES = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+])
+
+function hasCloudinaryConfig(): boolean {
+    return Boolean(
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+    )
+}
+
 // Configure Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -36,6 +53,18 @@ export async function uploadFile(
     options: UploadOptions = {}
 ): Promise<UploadResult> {
     try {
+        if (!hasCloudinaryConfig()) {
+            return { success: false, error: 'Upload is not configured' }
+        }
+
+        if (file.size > MAX_UPLOAD_BYTES) {
+            return { success: false, error: 'File size exceeds limit' }
+        }
+
+        if (file.type && !ALLOWED_IMAGE_TYPES.has(file.type)) {
+            return { success: false, error: 'Unsupported file type' }
+        }
+
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
 
@@ -182,6 +211,7 @@ export function getOptimizedUrl(
 export async function uploadPGPhoto(file: File, pgSlug: string): Promise<UploadResult> {
     return uploadFile(file, {
         folder: `soho-pg/pgs/${pgSlug}`,
+        resourceType: 'image',
         transformation: {
             width: 1200,
             height: 800,
@@ -197,9 +227,26 @@ export async function uploadPGPhoto(file: File, pgSlug: string): Promise<UploadR
 export async function uploadGalleryImage(file: File, album: string): Promise<UploadResult> {
     return uploadFile(file, {
         folder: `soho-pg/gallery/${album}`,
+        resourceType: 'image',
         transformation: {
             width: 1600,
             height: 1200,
+            crop: 'fill',
+            quality: 'auto:good',
+        },
+    })
+}
+
+/**
+ * Upload banner image
+ */
+export async function uploadBannerImage(file: File): Promise<UploadResult> {
+    return uploadFile(file, {
+        folder: 'soho-pg/banners',
+        resourceType: 'image',
+        transformation: {
+            width: 1600,
+            height: 900,
             crop: 'fill',
             quality: 'auto:good',
         },

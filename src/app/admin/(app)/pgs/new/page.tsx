@@ -5,11 +5,14 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 const schema = z.object({
   name: z.string().min(3),
@@ -26,6 +29,12 @@ const schema = z.object({
   isAvailable: z.boolean().default(true),
   hasAC: z.boolean().default(false),
   hasWifi: z.boolean().default(true),
+  hasParking: z.boolean().default(false),
+  hasGym: z.boolean().default(false),
+  hasPowerBackup: z.boolean().default(true),
+  hasLaundry: z.boolean().default(false),
+  hasTV: z.boolean().default(false),
+  hasFridge: z.boolean().default(false),
   mealsIncluded: z.boolean().default(false),
   mealsPerDay: z.coerce.number().optional(),
   gateClosingTime: z.string().optional(),
@@ -34,6 +43,7 @@ const schema = z.object({
   metaDescription: z.string().max(160).optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
+  categoryIds: z.array(z.string()).optional(),
 })
 
 type FormValues = z.input<typeof schema>
@@ -45,6 +55,11 @@ type ApiResponse<T> =
 export default function NewPgPage() {
   const router = useRouter()
   const [saving, setSaving] = React.useState(false)
+  const [categories, setCategories] = React.useState<Array<{ id: string; name: string }>>([])
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canWrite = role ? hasPermission(role, PERMISSIONS.PG_WRITE) : false
+  const canReadCategories = role ? hasPermission(role, PERMISSIONS.SMART_CATEGORY_READ) : false
 
   const {
     register,
@@ -65,11 +80,35 @@ export default function NewPgPage() {
       monthlyRent: 12000,
       mealsIncluded: false,
       hasAC: false,
+      hasParking: false,
+      hasGym: false,
+      hasPowerBackup: true,
+      hasLaundry: false,
+      hasTV: false,
+      hasFridge: false,
+      categoryIds: [],
     },
   })
 
+  React.useEffect(() => {
+    if (!canReadCategories) return
+
+    async function fetchCategories() {
+      const res = await fetch('/api/admin/smart-categories?limit=200&includeInactive=true')
+      const json = await res.json()
+      if (res.ok && json.success) {
+        setCategories((json.data || []).map((c: { id: string; name: string }) => ({ id: c.id, name: c.name })))
+      }
+    }
+
+    void fetchCategories()
+  }, [canReadCategories])
+
   const onSubmit = async (values: FormValues) => {
     const payload = schema.parse(values)
+    if (!canReadCategories) {
+      delete (payload as FormValues & { categoryIds?: string[] }).categoryIds
+    }
     setSaving(true)
     try {
       const res = await fetch('/api/admin/pgs', {
@@ -91,11 +130,19 @@ export default function NewPgPage() {
     }
   }
 
+  if (!canWrite) {
+    return (
+      <Card className="p-5">
+        <div className="text-sm text-muted">You do not have permission to create PGs.</div>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold">Create PG</h1>
-        <p className="text-sm text-[var(--color-muted)]">Create a new PG listing with pricing, availability and SEO.</p>
+        <p className="text-sm text-muted">Create a new PG listing with pricing, availability and SEO.</p>
       </div>
 
       <Card>
@@ -114,6 +161,18 @@ export default function NewPgPage() {
                 <label className="text-sm font-medium">Slug</label>
                 <Input {...register('slug')} placeholder="soho-sector-51" />
                 {errors.slug?.message ? <p className="text-sm text-red-600">{errors.slug.message}</p> : null}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Smart Finder Categories</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {categories.map((category) => (
+                  <label key={category.id} className="flex items-center gap-2 text-sm">
+                    <input type="checkbox" value={category.id} {...register('categoryIds')} />
+                    {category.name}
+                  </label>
+                ))}
               </div>
             </div>
 
@@ -144,7 +203,7 @@ export default function NewPgPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-sm font-medium">Room Type</label>
-                <select className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4" {...register('roomType')}>
+                <select className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-4" {...register('roomType')}>
                   <option value="SINGLE">SINGLE</option>
                   <option value="DOUBLE">DOUBLE</option>
                   <option value="TRIPLE">TRIPLE</option>
@@ -153,7 +212,7 @@ export default function NewPgPage() {
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium">Occupancy</label>
-                <select className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4" {...register('occupancyType')}>
+                <select className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-4" {...register('occupancyType')}>
                   <option value="BOYS">BOYS</option>
                   <option value="GIRLS">GIRLS</option>
                   <option value="CO_LIVING">CO_LIVING</option>
@@ -179,6 +238,64 @@ export default function NewPgPage() {
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" {...register('isFeatured')} /> Featured
               </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('isAvailable')} /> Available
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasWifi')} /> WiFi
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasAC')} /> AC
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasParking')} /> Parking
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasGym')} /> Gym
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasPowerBackup')} /> Power Backup
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasLaundry')} /> Laundry
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasTV')} /> TV
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('hasFridge')} /> Fridge
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register('mealsIncluded')} /> Meals Included
+              </label>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Meals Per Day</label>
+                <Input type="number" {...register('mealsPerDay')} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Notice Period (days)</label>
+                <Input type="number" {...register('noticePeriod')} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Security Deposit</label>
+                <Input type="number" {...register('securityDeposit')} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Gate Closing Time</label>
+                <Input {...register('gateClosingTime')} placeholder="10:30 PM" />
+              </div>
             </div>
 
             <div className="flex items-center gap-2">

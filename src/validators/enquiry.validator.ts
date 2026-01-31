@@ -40,5 +40,18 @@ export const enquiryQuerySchema = z.object({
   status: z.nativeEnum(EnquiryStatus).optional(),
   type: z.nativeEnum(EnquiryType).optional(),
   assignedToId: z.string().cuid().optional(),
+  pgId: z.string().cuid().optional(),
+  sectorId: z.string().cuid().optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  search: z.string().optional(),
+})
+
+export const enquiryUserQuerySchema = z.object({
+  page: z.string().optional().default('1'),
+  limit: z.string().optional().default('20'),
+  status: z.nativeEnum(EnquiryStatus).optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
   search: z.string().optional(),
 })

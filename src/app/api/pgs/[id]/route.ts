@@ -5,7 +5,8 @@ import { handleError } from '@/utils/errors'
 import { pgUpdateSchema } from '@/validators/pg.validator'
 import { validateBody, hasValidationError } from '@/middleware/validation'
 import { requirePermission } from '@/middleware/permissions'
-import { PERMISSIONS } from '@/lib/rbac'
+import { PERMISSIONS, hasPermission } from '@/lib/rbac'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -16,6 +17,9 @@ interface RouteParams {
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
     try {
+        const rateLimitResult = apiRateLimiter(req)
+        if (rateLimitResult) return rateLimitResult
+
         const { id } = await params
 
         // Try to find by ID first, then by slug
@@ -26,11 +30,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
                     { slug: id },
                 ],
                 isActive: true,
+                approvalStatus: 'APPROVED',
             },
             include: {
                 sector: true,
                 amenities: { include: { amenity: true } },
                 photos: { orderBy: { displayOrder: 'asc' } },
+                categories: { include: { category: { select: { id: true, name: true, slug: true } } } },
                 reviews: {
                     where: { isApproved: true },
                     orderBy: { createdAt: 'desc' },
@@ -75,8 +81,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         const data = validation.data
 
         // Check if PG exists
-        const existing = await prisma.pG.findUnique({
-            where: { id },
+        const existing = await prisma.pG.findFirst({
+            where: {
+                id,
+                ...(authResult.user.role === 'MANAGER' ? { createdById: authResult.user.id } : {}),
+            },
         })
 
         if (!existing) {
@@ -97,9 +106,34 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
             }
         }
 
+        const { categoryIds, approvalStatus, blockedReason, ...pgData } = data
+
+        const isApprovalUpdate = approvalStatus !== undefined || blockedReason !== undefined
+        if (isApprovalUpdate && !hasPermission(authResult.user.role, PERMISSIONS.PG_APPROVE)) {
+            return NextResponse.json(error('Insufficient permissions to approve or block PG listings'), { status: 403 })
+        }
+
+        const approvalPayload = isApprovalUpdate
+            ? {
+                  approvalStatus,
+                  approvedAt: approvalStatus === 'APPROVED' ? new Date() : approvalStatus === 'PENDING' ? null : existing.approvedAt,
+                  approvedById: approvalStatus ? authResult.user.id : existing.approvedById,
+                  blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? existing.blockedReason ?? 'Blocked by admin' : null,
+              }
+            : {}
+
         const pg = await prisma.pG.update({
             where: { id },
-            data,
+            data: {
+                ...pgData,
+                ...approvalPayload,
+                categories: categoryIds
+                    ? {
+                          deleteMany: {},
+                          create: categoryIds.map((categoryId) => ({ categoryId })),
+                      }
+                    : undefined,
+            },
             include: { sector: true },
         })
 
@@ -120,8 +154,11 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
         const { id } = await params
 
-        const existing = await prisma.pG.findUnique({
-            where: { id },
+        const existing = await prisma.pG.findFirst({
+            where: {
+                id,
+                ...(authResult.user.role === 'MANAGER' ? { createdById: authResult.user.id } : {}),
+            },
         })
 
         if (!existing) {

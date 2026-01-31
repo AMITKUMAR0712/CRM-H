@@ -18,19 +18,20 @@ type ShellUser = {
 
 const navItems = [
   { href: '/user', label: 'Dashboard' },
+  { href: '/user/enquiries', label: 'My Enquiries' },
   { href: '/user/tickets', label: 'Support Tickets' },
   { href: '/user/chats', label: 'Chat' },
 ]
 
 export default function UserShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[260px_1fr]">
-      <aside className="border-r border-[var(--color-border)] bg-white">
-        <div className="p-4 border-b border-[var(--color-border)]">
+      <aside className="border-r border-(--color-border) bg-white">
+        <div className="p-4 border-b border-(--color-border)">
           <div className="font-semibold leading-tight">SOHO PG</div>
-          <div className="text-sm text-[var(--color-muted)]">User Panel</div>
+          <div className="text-sm text-muted">User Panel</div>
         </div>
 
         <nav className="p-2">
@@ -43,8 +44,8 @@ export default function UserShell({ user, children }: { user: ShellUser; childre
                 className={cn(
                   'block rounded-md px-3 py-2 text-sm transition-colors',
                   active
-                    ? 'bg-[var(--color-limestone)] text-[var(--color-foreground)]'
-                    : 'hover:bg-[var(--color-limestone)]/60'
+                    ? 'bg-(--color-limestone) text-(--color-foreground)'
+                    : 'hover:bg-(--color-limestone)/60'
                 )}
               >
                 {item.label}
@@ -55,10 +56,10 @@ export default function UserShell({ user, children }: { user: ShellUser; childre
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="h-14 border-b border-[var(--color-border)] bg-white flex items-center justify-between px-4">
+        <header className="h-14 border-b border-(--color-border) bg-white flex items-center justify-between px-4">
           <div className="min-w-0">
             <div className="text-sm font-medium truncate">{user.name}</div>
-            <div className="text-xs text-[var(--color-muted)] truncate">{user.email} • {user.role}</div>
+            <div className="text-xs text-muted truncate">{user.email} • {user.role}</div>
           </div>
           <Button variant="outline" onClick={() => signOut({ callbackUrl: '/login' })}>
             Logout

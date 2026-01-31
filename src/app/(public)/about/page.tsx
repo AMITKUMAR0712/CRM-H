@@ -13,10 +13,16 @@ import { generateOrganizationSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 
 export async function generateMetadata(): Promise<Metadata> {
-    const page = await prisma.page.findFirst({
-        where: { slug: 'about', deletedAt: null, isActive: true, status: 'PUBLISHED' },
-        select: { title: true, metaTitle: true, metaDescription: true, ogImageUrl: true },
-    })
+    let page: { title: string; metaTitle: string | null; metaDescription: string | null; ogImageUrl: string | null } | null = null
+
+    try {
+        page = await prisma.page.findFirst({
+            where: { slug: 'about', deletedAt: null, isActive: true, status: 'PUBLISHED' },
+            select: { title: true, metaTitle: true, metaDescription: true, ogImageUrl: true },
+        })
+    } catch (err) {
+        console.error('[About] Failed to load metadata', err)
+    }
 
     if (!page) {
         return generatePageMetadata(
@@ -45,22 +51,33 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Get review stats for trust signals
 async function getReviewStats() {
-    const stats = await prisma.review.aggregate({
-        where: { isApproved: true },
-        _avg: { rating: true },
-        _count: true,
-    })
-    return {
-        avgRating: stats._avg.rating ? Math.round(stats._avg.rating * 10) / 10 : 4.8,
-        totalReviews: stats._count || 50,
+    try {
+        const stats = await prisma.review.aggregate({
+            where: { isApproved: true },
+            _avg: { rating: true },
+            _count: true,
+        })
+        return {
+            avgRating: stats._avg.rating ? Math.round(stats._avg.rating * 10) / 10 : 4.8,
+            totalReviews: stats._count || 50,
+        }
+    } catch (err) {
+        console.error('[About] Failed to load review stats', err)
+        return { avgRating: 4.8, totalReviews: 50 }
     }
 }
 
 export default async function AboutPage() {
-    const page = await prisma.page.findFirst({
-        where: { slug: 'about', deletedAt: null, isActive: true, status: 'PUBLISHED' },
-        select: { title: true, content: true },
-    })
+    let page: { title: string; content: unknown } | null = null
+
+    try {
+        page = await prisma.page.findFirst({
+            where: { slug: 'about', deletedAt: null, isActive: true, status: 'PUBLISHED' },
+            select: { title: true, content: true },
+        })
+    } catch (err) {
+        console.error('[About] Failed to load CMS content', err)
+    }
 
     if (page) return <PageRenderer title={page.title} content={page.content} />
 

@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import NavbarClient, { MenuNode } from './NavbarClient'
 
@@ -26,15 +27,23 @@ function buildTree(rows: Array<{ id: string; parentId: string | null }>, map: Ma
 }
 
 export default async function Navbar() {
-  const items = await prisma.menuItem.findMany({
-    where: {
-      deletedAt: null,
-      isActive: true,
-      visibility: { in: ['HEADER', 'BOTH'] },
-    },
-    orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
-    include: { page: { select: { slug: true } } },
-  })
+  let items: Prisma.MenuItemGetPayload<{ include: { page: { select: { slug: true } } } }>[] = []
+
+  try {
+    items = await prisma.menuItem.findMany({
+      where: {
+        deletedAt: null,
+        isActive: true,
+        visibility: { in: ['HEADER', 'BOTH'] },
+      },
+      orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
+      include: { page: { select: { slug: true } } },
+    })
+  } catch (err) {
+    // Avoid taking down the whole page if the DB is temporarily unavailable.
+    console.error('[Navbar] Failed to load menu items', err)
+    return <NavbarClient headerMenu={FALLBACK_HEADER_MENU} />
+  }
 
   if (!items.length) {
     return <NavbarClient headerMenu={FALLBACK_HEADER_MENU} />

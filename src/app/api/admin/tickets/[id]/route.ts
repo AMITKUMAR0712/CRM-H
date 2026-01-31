@@ -19,8 +19,11 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const ticket = await prisma.ticket.findUnique({
-      where: { id },
+    const ticket = await prisma.ticket.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
       include: {
         user: { select: { id: true, name: true, email: true, role: true } },
         pg: { select: { id: true, name: true, slug: true } },
@@ -48,7 +51,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
 
-    const existing = await prisma.ticket.findUnique({ where: { id } })
+    const existing = await prisma.ticket.findFirst({
+      where: {
+        id,
+        ...(authResult.user.role === 'MANAGER' ? { assignedToId: authResult.user.id } : {}),
+      },
+    })
     if (!existing) return NextResponse.json(error('Ticket not found'), { status: 404 })
 
     const validation = await validateBody(req, ticketUpdateSchema)

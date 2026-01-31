@@ -4,9 +4,13 @@ import { error, success } from '@/utils/apiResponse'
 import { handleError } from '@/utils/errors'
 import { validateQuery, hasValidationError } from '@/middleware/validation'
 import { bannerPublicQuerySchema } from '@/validators/banner.validator'
+import { apiRateLimiter } from '@/middleware/rateLimit'
 
 export async function GET(req: NextRequest) {
   try {
+    const rateLimitResult = apiRateLimiter(req)
+    if (rateLimitResult) return rateLimitResult
+
     const { searchParams } = new URL(req.url)
     const validation = validateQuery(searchParams, bannerPublicQuerySchema)
     if (hasValidationError(validation)) return validation.error

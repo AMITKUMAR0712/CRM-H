@@ -15,56 +15,68 @@ import StickyCtaBar from '@/components/layout/StickyCtaBar'
 import PGPhotoGallery from '@/components/pg/PGPhotoGallery'
 import prisma from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
+import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 
 type Props = {
     params: Promise<{ slug: string }>
 }
 
 async function getPG(slug: string) {
-    const pg = await prisma.pG.findUnique({
-        where: { slug, isActive: true },
-        include: {
-            sector: true,
-            photos: {
-                orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
-            },
-            amenities: {
-                include: { amenity: true },
-            },
-            reviews: {
-                where: { isApproved: true },
-                orderBy: { createdAt: 'desc' },
-                take: 5,
-                select: {
-                    id: true,
-                    rating: true,
-                    comment: true,
-                    name: true,
-                    createdAt: true,
+    try {
+        const pg = await prisma.pG.findFirst({
+            where: { slug, isActive: true, approvalStatus: 'APPROVED' },
+            include: {
+                sector: true,
+                photos: {
+                    orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
+                },
+                amenities: {
+                    include: { amenity: true },
+                },
+                reviews: {
+                    where: { isApproved: true },
+                    orderBy: { createdAt: 'desc' },
+                    take: 5,
+                    select: {
+                        id: true,
+                        rating: true,
+                        comment: true,
+                        name: true,
+                        createdAt: true,
+                    },
                 },
             },
-        },
-    })
+        })
 
-    return pg
+        return pg
+    } catch (err) {
+        console.error('[PG] Failed to load PG', err)
+        return null
+    }
 }
 
 async function getRelatedPGs(sectorId: string, currentSlug: string) {
-    const pgs = await prisma.pG.findMany({
-        where: {
-            sectorId,
-            isActive: true,
-            slug: { not: currentSlug },
-        },
-        include: {
-            photos: { where: { isFeatured: true }, take: 1 },
-            sector: { select: { name: true, slug: true } },
-        },
-        take: 3,
-        orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
-    })
+    try {
+        const pgs = await prisma.pG.findMany({
+            where: {
+                sectorId,
+                isActive: true,
+                approvalStatus: 'APPROVED',
+                slug: { not: currentSlug },
+            },
+            include: {
+                photos: { where: { isFeatured: true }, take: 1 },
+                sector: { select: { name: true, slug: true } },
+            },
+            take: 3,
+            orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+        })
 
-    return pgs
+        return pgs
+    } catch (err) {
+        console.error('[PG] Failed to load related PGs', err)
+        return []
+    }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -87,12 +99,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-    const pgs = await prisma.pG.findMany({
-        where: { isActive: true },
-        select: { slug: true },
-    })
+    try {
+        const pgs = await prisma.pG.findMany({
+            where: { isActive: true, approvalStatus: 'APPROVED' },
+            select: { slug: true },
+        })
 
-    return pgs.map((pg) => ({ slug: pg.slug }))
+        return pgs.map((pg) => ({ slug: pg.slug }))
+    } catch (err) {
+        console.error('[PG] Failed to build static params', err)
+        return []
+    }
 }
 
 const roomTypeLabels: Record<string, string> = {
@@ -129,11 +146,16 @@ export default async function PGDetailPage({ params }: Props) {
         notFound()
     }
 
-    // Increment view count
-    await prisma.pG.update({
-        where: { id: pg.id },
-        data: { viewCount: { increment: 1 } },
-    })
+    if (process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD) {
+        try {
+            await prisma.pG.update({
+                where: { id: pg.id },
+                data: { viewCount: { increment: 1 } },
+            })
+        } catch (err) {
+            console.error('[PG] Failed to increment view count', err)
+        }
+    }
 
     const relatedPGs = await getRelatedPGs(pg.sectorId, slug)
 

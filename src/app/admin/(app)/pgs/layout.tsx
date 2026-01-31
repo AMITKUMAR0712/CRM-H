@@ -1,7 +1,7 @@
-import { requireAdminPermission } from '@/lib/admin/guard'
+import { requireAdminAnyPermission } from '@/lib/admin/guard'
 import { PERMISSIONS } from '@/lib/rbac'
 
 export default async function PgsLayout({ children }: { children: React.ReactNode }) {
-  await requireAdminPermission(PERMISSIONS.PG_WRITE)
+  await requireAdminAnyPermission([PERMISSIONS.PG_READ, PERMISSIONS.PG_WRITE])
   return <>{children}</>
 }

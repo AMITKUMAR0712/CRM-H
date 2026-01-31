@@ -7,7 +7,7 @@ import { validateBody, validateQuery, hasValidationError } from '@/middleware/va
 import { parsePagination, paginationQuery } from '@/utils/pagination'
 import { Prisma, PostStatus } from '@prisma/client'
 import { requirePermission } from '@/middleware/permissions'
-import { PERMISSIONS } from '@/lib/rbac'
+import { PERMISSIONS, hasPermission } from '@/lib/rbac'
 
 export async function GET(req: NextRequest) {
   try {
@@ -67,6 +67,10 @@ export async function POST(req: NextRequest) {
 
     const existing = await prisma.blogPost.findUnique({ where: { slug: data.slug } })
     if (existing) return NextResponse.json(error('A blog post with this slug already exists'), { status: 409 })
+
+    if (data.status === PostStatus.PUBLISHED && !hasPermission(authResult.user.role, PERMISSIONS.BLOG_PUBLISH)) {
+      return NextResponse.json(error('Insufficient permissions to publish blog posts'), { status: 403 })
+    }
 
     const publishedAt =
       data.status === PostStatus.PUBLISHED

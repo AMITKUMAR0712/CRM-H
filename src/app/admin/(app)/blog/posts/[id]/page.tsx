@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import type { UserRole } from '@prisma/client'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import RichTextEditor from '@/components/admin/blog/RichTextEditor'
+import { hasPermission, PERMISSIONS } from '@/lib/rbac'
 
 const schema = z.object({
   title: z.string().min(5).optional(),
@@ -46,12 +49,18 @@ type PostDetails = {
 }
 
 export default function EditPostPage() {
-  const params = useParams<{ id: string }>()
+  const params = useParams<{ id?: string }>()
   const router = useRouter()
-  const id = params.id
+  const id = params?.id ?? ''
+  const { data: session } = useSession()
+  const role = session?.user?.role as UserRole | undefined
+  const canDelete = role ? hasPermission(role, PERMISSIONS.BLOG_DELETE) : false
+  const canPublish = role ? hasPermission(role, PERMISSIONS.BLOG_PUBLISH) : false
+  const canWrite = role ? hasPermission(role, PERMISSIONS.BLOG_WRITE) : false
 
   const postQuery = useQuery({
     queryKey: ['admin-post', id],
+    enabled: Boolean(id),
     queryFn: async () => {
       const res = await fetch(`/api/admin/blog/posts/${id}`, { cache: 'no-store' })
       const json = (await res.json()) as ApiResponse<PostDetails>
@@ -122,16 +131,24 @@ export default function EditPostPage() {
     router.refresh()
   }
 
+  if (!id) {
+    return (
+      <Card className="p-5">
+        <div className="text-sm text-muted">Post ID is missing.</div>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Edit Blog Post</h1>
-          <p className="text-sm text-[var(--color-muted)]">Update content, SEO and publish state.</p>
+          <p className="text-sm text-muted">Update content, SEO and publish state.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => postQuery.refetch()}>Refresh</Button>
-          <Button variant="outline" onClick={onDelete}>Delete</Button>
+          {canDelete ? <Button variant="outline" onClick={onDelete}>Delete</Button> : null}
         </div>
       </div>
 
@@ -143,6 +160,7 @@ export default function EditPostPage() {
             <p className="text-sm text-red-600">{(postQuery.error as Error).message}</p>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <fieldset disabled={!canWrite} className={!canWrite ? 'opacity-70' : undefined}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-sm font-medium">Title</label>
@@ -157,14 +175,16 @@ export default function EditPostPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-sm font-medium">Status</label>
-                  <select className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4" {...register('status')}>
-                    <option value="DRAFT">DRAFT</option>
-                    <option value="PUBLISHED">PUBLISHED</option>
-                    <option value="ARCHIVED">ARCHIVED</option>
-                  </select>
-                </div>
+                {canPublish ? (
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium">Status</label>
+                    <select className="h-12 w-full rounded-lg border border-(--color-border) bg-white px-4" {...register('status')}>
+                      <option value="DRAFT">DRAFT</option>
+                      <option value="PUBLISHED">PUBLISHED</option>
+                      <option value="ARCHIVED">ARCHIVED</option>
+                    </select>
+                  </div>
+                ) : null}
                 <label className="flex items-center gap-2 text-sm mt-8">
                   <input type="checkbox" {...register('isFeatured')} /> Featured
                 </label>
@@ -195,9 +215,14 @@ export default function EditPostPage() {
                 <label className="text-sm font-medium">Meta Description</label>
                 <Textarea {...register('metaDescription')} />
               </div>
+              </fieldset>
 
               <div className="flex items-center gap-2">
-                <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving…' : 'Save'}</Button>
+                {canWrite ? (
+                  <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving…' : 'Save'}</Button>
+                ) : (
+                  <span className="text-sm text-muted">Read only</span>
+                )}
                 <Button type="button" variant="outline" onClick={() => router.back()}>Back</Button>
               </div>
             </form>

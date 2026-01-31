@@ -46,6 +46,7 @@ export default function AdminLeadsKanbanPage() {
   const { data: session } = useSession()
   const role = session?.user?.role as UserRole | undefined
   const canAssign = role ? hasPermission(role, PERMISSIONS.LEAD_ASSIGN) : false
+  const canWrite = role ? hasPermission(role, PERMISSIONS.LEAD_WRITE) : false
 
   const usersQuery = useQuery({
     queryKey: ['admin-users'],
@@ -72,6 +73,7 @@ export default function AdminLeadsKanbanPage() {
   })
 
   const updateLead = async (id: string, patch: Partial<{ status: LeadStatus; assignedToId: string | null }>) => {
+    if (!canWrite && patch.status) return
     const res = await fetch(`/api/admin/leads/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -91,7 +93,7 @@ export default function AdminLeadsKanbanPage() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Leads Kanban</h1>
-          <p className="text-sm text-[var(--color-muted)]">Move leads across stages, assign owners, and track follow-ups.</p>
+          <p className="text-sm text-muted">Move leads across stages, assign owners, and track follow-ups.</p>
         </div>
         <Button variant="outline" onClick={() => leadsQuery.refetch()}>Refresh</Button>
       </div>
@@ -129,33 +131,39 @@ export default function AdminLeadsKanbanPage() {
             return (
               <Card key={col.key}>
                 <CardHeader>
-                  <CardTitle className="text-base">{col.title} <span className="text-[var(--color-muted)]">({items.length})</span></CardTitle>
+                  <CardTitle className="text-base">{col.title} <span className="text-muted">({items.length})</span></CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {items.map((lead) => (
-                    <div key={lead.id} className="rounded-lg border border-[var(--color-border)] bg-white p-3">
+                    <div key={lead.id} className="rounded-lg border border-(--color-border) bg-white p-3">
                       <div className="font-medium text-sm">{lead.name}</div>
-                      <div className="text-xs text-[var(--color-muted)]">{lead.phone}{lead.preferredSector ? ` • ${lead.preferredSector.name}` : ''}</div>
+                      <div className="text-xs text-muted">{lead.phone}{lead.preferredSector ? ` • ${lead.preferredSector.name}` : ''}</div>
 
                       <div className="mt-2 grid grid-cols-1 gap-2">
                         <div className="text-xs">
-                          <span className="text-[var(--color-muted)]">Status</span>
-                          <select
-                            className="mt-1 h-10 w-full rounded-lg border border-[var(--color-border)] bg-white px-3 text-sm"
-                            value={lead.status}
-                            onChange={(e) => updateLead(lead.id, { status: e.target.value as LeadStatus })}
-                          >
-                            {['NEW', 'CONTACTED', 'VISITED', 'INTERESTED', 'CONVERTED', 'CLOSED', 'LOST'].map((s) => (
-                              <option key={s} value={s}>{s}</option>
-                            ))}
-                          </select>
+                          <span className="text-muted">Status</span>
+                          {canWrite ? (
+                            <select
+                              className="mt-1 h-10 w-full rounded-lg border border-(--color-border) bg-white px-3 text-sm"
+                              value={lead.status}
+                              onChange={(e) => updateLead(lead.id, { status: e.target.value as LeadStatus })}
+                            >
+                              {['NEW', 'CONTACTED', 'VISITED', 'INTERESTED', 'CONVERTED', 'CLOSED', 'LOST'].map((s) => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <div className="mt-1 h-10 w-full rounded-lg border border-(--color-border) bg-(--color-limestone)/30 px-3 text-sm flex items-center">
+                              {lead.status}
+                            </div>
+                          )}
                         </div>
 
                         <div className="text-xs">
-                          <span className="text-[var(--color-muted)]">Assignee</span>
+                          <span className="text-muted">Assignee</span>
                           {canAssign ? (
                             <select
-                              className="mt-1 h-10 w-full rounded-lg border border-[var(--color-border)] bg-white px-3 text-sm"
+                              className="mt-1 h-10 w-full rounded-lg border border-(--color-border) bg-white px-3 text-sm"
                               value={lead.assignedToId ?? ''}
                               onChange={(e) => updateLead(lead.id, { assignedToId: e.target.value || null })}
                               disabled={usersQuery.isLoading || !!usersQuery.error}
@@ -168,7 +176,7 @@ export default function AdminLeadsKanbanPage() {
                               ))}
                             </select>
                           ) : (
-                            <div className="mt-1 h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-limestone)]/30 px-3 text-sm flex items-center">
+                            <div className="mt-1 h-10 w-full rounded-lg border border-(--color-border) bg-(--color-limestone)/30 px-3 text-sm flex items-center">
                               {lead.assignedTo ? `${lead.assignedTo.name} (${lead.assignedTo.role})` : 'Unassigned'}
                             </div>
                           )}
@@ -178,7 +186,7 @@ export default function AdminLeadsKanbanPage() {
                   ))}
 
                   {!items.length ? (
-                    <div className="text-sm text-[var(--color-muted)]">No leads.</div>
+                    <div className="text-sm text-muted">No leads.</div>
                   ) : null}
                 </CardContent>
               </Card>

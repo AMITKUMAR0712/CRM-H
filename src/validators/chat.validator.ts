@@ -12,5 +12,4 @@ export const chatMessageCreateSchema = z.object({
 export const chatThreadUpdateSchema = z.object({
   status: z.nativeEnum(ChatThreadStatus).optional(),
   mutedUntil: z.string().datetime().nullable().optional(),
-  assignedToId: z.string().cuid().nullable().optional(),
 })
