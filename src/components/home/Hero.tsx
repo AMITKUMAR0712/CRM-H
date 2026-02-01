@@ -173,7 +173,7 @@ function TypewriterAnimated({
 
 function HeroBackgroundAnimation({
     targetRef,
-    sheenDurationSec = 9,
+    sheenDurationSec = 14,
 }: {
     targetRef: React.RefObject<HTMLElement | null>
     sheenDurationSec?: number
@@ -483,7 +483,7 @@ export default function Hero() {
                 />
             </div>
 
-            <HeroBackgroundAnimation targetRef={sectionRef} sheenDurationSec={9} />
+            <HeroBackgroundAnimation targetRef={sectionRef} sheenDurationSec={14} />
 
             <div className="pointer-events-none absolute -top-24 left-1/2 h-105 w-105 -translate-x-1/2 rounded-full bg-(--color-clay)/25 blur-3xl" />
             <div className="pointer-events-none absolute top-20 left-10 h-90 w-90 rounded-full bg-(--color-olive)/20 blur-3xl" />
@@ -536,7 +536,7 @@ export default function Hero() {
                     </motion.div>
 
                     <h1
-                        className="font-serif font-bold text-(--color-graphite) mb-6 leading-[1.05] text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+                        className="font-serif font-bold text-(--color-graphite) mb-8 leading-[1.1] text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
                         style={{ textWrap: 'balance' }}
                     >
                         <span className="block min-h-[2.2em] md:min-h-[2.35em]">

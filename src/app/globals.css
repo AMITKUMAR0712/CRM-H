@@ -30,20 +30,36 @@
     --color-primary: var(--color-clay);
     --color-secondary: var(--color-olive);
     --color-border: var(--color-soft-grey);
-    --color-muted: #8A8A8A;
+    --color-muted: #757575; /* Slightly darker for better contrast */
 
-    /* Typography */
+    /* Typography - Modular Scale 1.25 */
     --font-serif: 'Outfit', 'Georgia', serif;
     --font-sans: 'Inter', 'Helvetica Neue', sans-serif;
+    
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.25rem;
+    --text-xl: 1.563rem;
+    --text-2xl: 1.953rem;
+    --text-3xl: 2.441rem;
+    --text-4xl: 3.052rem;
+    --text-5xl: 3.815rem;
 
     /* Spacing */
-    --spacing-section: 6rem;
-    --spacing-container: 1.5rem;
+    --spacing-section: clamp(4rem, 8vw, 8rem);
+    --spacing-container: clamp(1rem, 5vw, 2.5rem);
 
     /* Transitions */
     --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-    --duration-normal: 300ms;
-    --duration-slow: 600ms;
+    --duration-fast: 200ms;
+    --duration-normal: 350ms;
+    --duration-slow: 700ms;
+
+    /* Focus States */
+    --ring-width: 3px;
+    --ring-offset: 2px;
+    --ring-color: color-mix(in srgb, var(--color-clay) 25%, transparent);
   }
 
   /* Base Styles */
@@ -85,16 +101,16 @@
     font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
-    line-height: 1.6;
+    line-height: 1.625;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    font-weight: 700; /* Bolder headings for more impact */
+    line-height: 1.15;
+    letter-spacing: -0.025em;
   }
 
   ::selection {

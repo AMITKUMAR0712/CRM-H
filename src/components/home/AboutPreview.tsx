@@ -30,7 +30,7 @@ const features = [
 
 export default function AboutPreview() {
     return (
-        <section className="section-padding bg-[var(--color-surface)]">
+        <section className="section-padding bg-surface">
             <div className="container-custom">
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     {/* Text Content */}
@@ -40,18 +40,18 @@ export default function AboutPreview() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
                     >
-                        <span className="text-[var(--color-clay)] text-sm font-medium uppercase tracking-widest mb-4 block">
+                        <span className="text-(--color-clay) text-sm font-medium uppercase tracking-widest mb-4 block">
                             About SOHO PG
                         </span>
-                        <h2 className="font-serif text-3xl md:text-4xl font-bold text-[var(--color-graphite)] mb-6">
+                        <h2 className="font-serif text-3xl md:text-4xl font-bold text-(--color-graphite) mb-6">
                             A Premium PG Experience in Noida
                         </h2>
-                        <p className="text-[var(--color-muted)] text-lg mb-6 leading-relaxed">
+                        <p className="text-muted text-lg mb-6 leading-relaxed">
                             SOHO PG started with a simple idea: finding a PG shouldn&apos;t be stressful.
                             We saw people compromise on basics—cleanliness, comfort, and clarity.
                             So we built spaces where the experience is consistent.
                         </p>
-                        <p className="text-[var(--color-muted)] mb-8">
+                        <p className="text-muted mb-8">
                             From onboarding to daily living, our goal is to make your stay calm,
                             organized, and premium—without the drama.
                         </p>
@@ -81,17 +81,16 @@ export default function AboutPreview() {
                                 key={feature.title}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: 0.1 * index }}
-                                className="p-5 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)] hover:shadow-lg transition-shadow"
+                                transition={{ delay: 0.15 * index, duration: 0.5, ease: "easeOut" }}
+                                className="p-6 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)] hover:border-[var(--color-clay)]/30 hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
                             >
-                                <div className="w-12 h-12 rounded-xl bg-[var(--color-clay)]/10 flex items-center justify-center mb-4">
-                                    <feature.icon className="w-6 h-6 text-[var(--color-clay)]" />
+                                <div className="w-12 h-12 rounded-xl bg-(--color-clay)/10 flex items-center justify-center mb-4">
+                                    <feature.icon className="w-6 h-6 text-(--color-clay)" />
                                 </div>
-                                <h3 className="font-semibold text-[var(--color-graphite)] mb-2">
+                                <h3 className="font-semibold text-(--color-graphite) mb-2">
                                     {feature.title}
                                 </h3>
-                                <p className="text-sm text-[var(--color-muted)]">
+                                <p className="text-sm text-muted">
                                     {feature.description}
                                 </p>
                             </motion.div>

@@ -9,17 +9,17 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    "bg-[var(--color-clay)] text-white hover:bg-[var(--color-clay)]/90 shadow-lg hover:shadow-xl hover:scale-[1.02]",
+                    "bg-[var(--color-clay)] text-white hover:bg-[var(--color-clay)]/95 shadow-md hover:shadow-lg active:scale-[0.98]",
                 secondary:
-                    "bg-[var(--color-olive)] text-white hover:bg-[var(--color-olive)]/90",
+                    "bg-[var(--color-olive)] text-white hover:bg-[var(--color-olive)]/95 hover:shadow-md active:scale-[0.98]",
                 outline:
-                    "border-2 border-[var(--color-border)] bg-transparent hover:bg-[var(--color-foreground)] hover:text-[var(--color-background)]",
+                    "border-2 border-[var(--color-border)] bg-transparent hover:border-[var(--color-clay)] hover:text-[var(--color-clay)] active:scale-[0.98]",
                 ghost:
-                    "hover:bg-[var(--color-limestone)] hover:text-[var(--color-graphite)]",
+                    "hover:bg-[var(--color-limestone)] hover:text-[var(--color-graphite)] active:scale-[0.98]",
                 link:
                     "text-[var(--color-clay)] underline-offset-4 hover:underline",
                 white:
-                    "bg-white text-[var(--color-graphite)] hover:bg-white/90 shadow-lg",
+                    "bg-white text-[var(--color-graphite)] border border-transparent hover:border-[var(--color-border)] shadow-sm hover:shadow-md active:scale-[0.98]",
             },
             size: {
                 default: "h-11 px-6 py-2",

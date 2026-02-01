@@ -60,7 +60,7 @@ export default function NavbarClient({ headerMenu }: { headerMenu: MenuNode[] })
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-in-out',
           'supports-backdrop-filter:backdrop-blur-xl',
           isScrolled
             ? 'py-3 navbar-scrolled'
@@ -135,20 +135,20 @@ export default function NavbarClient({ headerMenu }: { headerMenu: MenuNode[] })
                     <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/85 backdrop-blur-xl shadow-[0_22px_60px_rgba(0,0,0,0.14)]">
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/35 to-transparent" />
                       <div className="p-2">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.href}
-                          className={cn(
-                            'block rounded-xl px-3 py-2 text-sm font-medium transition-colors',
-                            isActiveHref(child.href)
-                              ? 'bg-(--color-clay)/10 text-(--color-clay)'
-                              : 'text-(--color-graphite) hover:bg-(--color-limestone)'
-                          )}
-                        >
-                          {child.title}
-                        </Link>
-                      ))}
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.id}
+                            href={child.href}
+                            className={cn(
+                              'block rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                              isActiveHref(child.href)
+                                ? 'bg-(--color-clay)/10 text-(--color-clay)'
+                                : 'text-(--color-graphite) hover:bg-(--color-limestone)'
+                            )}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
                       </div>
                     </div>
                   </div>
