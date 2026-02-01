@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
 
     const where = {} as Prisma.PGWhereInput
 
-    if (query.isActive !== 'false') where.isActive = true
+    if (query.isActive === 'true') where.isActive = true
+    if (query.isActive === 'false') where.isActive = false
     const sectorFilter: Prisma.SectorWhereInput = {}
     if (query.sector) sectorFilter.slug = query.sector
     if (query.metroDistance) {
@@ -34,12 +35,12 @@ export async function GET(req: NextRequest) {
     if (query.roomType) where.roomType = query.roomType
     if (query.occupancyType) where.occupancyType = query.occupancyType
     if (query.category) {
-      ;(where as Prisma.PGWhereInput & { categories: unknown }).categories = {
+      ; (where as Prisma.PGWhereInput & { categories: unknown }).categories = {
         some: { category: { slug: query.category } },
       }
     }
     if (query.approvalStatus) {
-      ;(where as Prisma.PGWhereInput & { approvalStatus?: unknown }).approvalStatus = query.approvalStatus
+      ; (where as Prisma.PGWhereInput & { approvalStatus?: unknown }).approvalStatus = query.approvalStatus
     }
 
     if (query.minRent || query.maxRent) {
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (authResult.user.role === 'MANAGER') {
-      ;(where as Record<string, unknown>).assignments = { some: { userId: authResult.user.id } }
+      ; (where as Record<string, unknown>).assignments = { some: { userId: authResult.user.id } }
     }
 
     const sortBy = query.sortBy || 'createdAt'
@@ -93,6 +94,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(paginated(pgs, page, limit, total))
   } catch (err) {
+    console.error('Admin PGs GET Error:', err)
     const { statusCode, message } = handleError(err)
     return NextResponse.json(error(message), { status: statusCode })
   }
@@ -138,17 +140,17 @@ export async function POST(req: NextRequest) {
     const canApprove = hasPermission(authResult.user.role, PERMISSIONS.PG_APPROVE)
     const approvalPayload = canApprove
       ? {
-          approvalStatus: approvalStatus ?? 'APPROVED',
-          approvedAt: approvalStatus === 'APPROVED' || approvalStatus === undefined ? new Date() : null,
-          approvedById: authResult.user.id,
-          blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? 'Blocked by admin' : null,
-        }
+        approvalStatus: approvalStatus ?? 'APPROVED',
+        approvedAt: approvalStatus === 'APPROVED' || approvalStatus === undefined ? new Date() : null,
+        approvedById: authResult.user.id,
+        blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? 'Blocked by admin' : null,
+      }
       : {
-          approvalStatus: 'PENDING',
-          approvedAt: null,
-          approvedById: null,
-          blockedReason: null,
-        }
+        approvalStatus: 'PENDING',
+        approvedAt: null,
+        approvedById: null,
+        blockedReason: null,
+      }
 
     if (categoryIds?.length && !isSuperAdmin) {
       return NextResponse.json(error('Insufficient permissions to manage categories'), { status: 403 })
@@ -171,6 +173,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(success(pg, 'PG created successfully'), { status: 201 })
   } catch (err) {
+    console.error('Admin PGs POST Error:', err)
     const { statusCode, message } = handleError(err)
     return NextResponse.json(error(message), { status: statusCode })
   }

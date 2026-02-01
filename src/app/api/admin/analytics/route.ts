@@ -36,19 +36,19 @@ export async function GET(req: NextRequest) {
       leadsByDay,
       pageViewsByDay,
     ] = await Promise.all([
-      prisma.user.count(),
-      prisma.pG.count(),
-      prisma.pG.count({ where: { approvalStatus: 'PENDING' } as Prisma.PGWhereInput }),
-      prisma.pG.count({ where: { approvalStatus: 'APPROVED' } as Prisma.PGWhereInput }),
-      prisma.pG.count({ where: { approvalStatus: 'BLOCKED' } as Prisma.PGWhereInput }),
-      prisma.lead.count(),
-      prisma.enquiry.count(),
+      prisma.user.count().catch(() => 0),
+      prisma.pG.count().catch(() => 0),
+      prisma.pG.count({ where: { approvalStatus: 'PENDING' } }).catch(() => 0),
+      prisma.pG.count({ where: { approvalStatus: 'APPROVED' } }).catch(() => 0),
+      prisma.pG.count({ where: { approvalStatus: 'BLOCKED' } }).catch(() => 0),
+      prisma.lead.count().catch(() => 0),
+      prisma.enquiry.count().catch(() => 0),
       prisma.$queryRaw<{ totalRooms: number | null; occupiedRooms: number | null }[]>(Prisma.sql`
-        SELECT SUM(totalRooms) AS totalRooms,
-               SUM(GREATEST(totalRooms - availableRooms, 0)) AS occupiedRooms
+        SELECT COALESCE(SUM(totalRooms), 0) AS totalRooms,
+               COALESCE(SUM(GREATEST(totalRooms - availableRooms, 0)), 0) AS occupiedRooms
         FROM pgs
         WHERE isActive = 1
-      `),
+      `).catch(() => [{ totalRooms: 0, occupiedRooms: 0 }]),
       prisma.$queryRaw<{ path: string; count: bigint }[]>(Prisma.sql`
         SELECT path, COUNT(*) AS count
         FROM page_views
@@ -56,28 +56,28 @@ export async function GET(req: NextRequest) {
         GROUP BY path
         ORDER BY count DESC
         LIMIT 10
-      `),
+      `).catch(() => []),
       prisma.$queryRaw<{ day: string; count: bigint }[]>(Prisma.sql`
         SELECT DATE(createdAt) as day, COUNT(*) as count
         FROM enquiries
         WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL ${range - 1} DAY)
         GROUP BY DATE(createdAt)
         ORDER BY day ASC
-      `),
+      `).catch(() => []),
       prisma.$queryRaw<{ day: string; count: bigint }[]>(Prisma.sql`
         SELECT DATE(createdAt) as day, COUNT(*) as count
         FROM leads
         WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL ${range - 1} DAY)
         GROUP BY DATE(createdAt)
         ORDER BY day ASC
-      `),
+      `).catch(() => []),
       prisma.$queryRaw<{ day: string; count: bigint }[]>(Prisma.sql`
         SELECT DATE(createdAt) as day, COUNT(*) as count
         FROM page_views
         WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL ${range - 1} DAY)
         GROUP BY DATE(createdAt)
         ORDER BY day ASC
-      `),
+      `).catch(() => []),
     ])
 
     const totalRooms = Number(occupancyRows?.[0]?.totalRooms ?? 0)
@@ -106,6 +106,7 @@ export async function GET(req: NextRequest) {
       })
     )
   } catch (err) {
+    console.error('Analytics API Error:', err)
     const { statusCode, message } = handleError(err)
     return NextResponse.json(error(message), { status: statusCode })
   }
