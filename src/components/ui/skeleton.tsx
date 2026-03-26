@@ -7,7 +7,7 @@ function Skeleton({
     return (
         <div
             className={cn(
-                "animate-pulse rounded-lg bg-[var(--color-limestone)]",
+                "animate-pulse rounded-xl bg-(--color-limestone)",
                 className
             )}
             {...props}

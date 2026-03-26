@@ -63,10 +63,10 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
     return (
         <>
             {/* Gallery Grid */}
-            <div className="grid grid-cols-4 gap-2 rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 rounded-2xl overflow-hidden">
                 {/* Featured Photo - Large */}
                 <div
-                    className="col-span-4 md:col-span-2 md:row-span-2 relative aspect-[4/3] md:aspect-auto md:h-full cursor-pointer group"
+                    className="col-span-2 md:col-span-2 md:row-span-2 relative aspect-video md:aspect-auto md:h-[400px] cursor-pointer group overflow-hidden"
                     onClick={() => openLightbox(0)}
                 >
                     <Image
@@ -88,7 +88,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                     return (
                         <div
                             key={photo.id}
-                            className="relative aspect-square cursor-pointer group hidden md:block"
+                            className="relative aspect-square cursor-pointer group overflow-hidden"
                             onClick={() => openLightbox(actualIndex)}
                         >
                             <Image
@@ -96,7 +96,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                                 alt={photo.altText || `${pgName} photo ${idx + 2}`}
                                 fill
                                 className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                sizes="25vw"
+                                sizes="(max-width: 768px) 50vw, 25vw"
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
 
@@ -114,7 +114,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                 {photos.length > 1 && (
                     <button
                         onClick={() => openLightbox(0)}
-                        className="col-span-4 md:hidden py-3 text-center text-sm font-medium text-[var(--color-clay)] bg-[var(--color-surface)] border-t border-[var(--color-border)]"
+                        className="col-span-2 md:hidden py-3 text-center text-sm font-medium text-[var(--color-clay)] bg-[var(--color-surface)] border-t border-[var(--color-border)]"
                     >
                         View all {totalPhotos} photos
                     </button>
