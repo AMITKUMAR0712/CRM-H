@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string }
+type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string; details?: unknown }
 
 export default function NewTicketPage() {
   const router = useRouter()
