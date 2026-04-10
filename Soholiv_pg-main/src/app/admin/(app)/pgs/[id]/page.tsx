@@ -7,14 +7,14 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
+
 
 const schema = z.object({
   name: z.string().min(3).optional(),

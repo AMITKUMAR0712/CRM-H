@@ -1,4 +1,11 @@
-import { UserRole } from '@prisma/client'
+export enum UserRole {
+  USER = 'USER',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  VIEWER = 'VIEWER',
+}
+
 
 export const PERMISSIONS = {
   DASHBOARD_VIEW: 'dashboard:view',

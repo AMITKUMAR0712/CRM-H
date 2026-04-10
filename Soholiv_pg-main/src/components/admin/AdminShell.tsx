@@ -4,11 +4,11 @@ import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
+
 
 type ShellUser = {
   id: string

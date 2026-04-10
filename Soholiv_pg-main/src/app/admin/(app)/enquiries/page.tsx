@@ -2,11 +2,10 @@
 
 import * as React from 'react'
 import { useSession } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
 
 type PaginationMeta = { page: number; limit: number; total: number; totalPages: number }
 

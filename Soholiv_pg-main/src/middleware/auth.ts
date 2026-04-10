@@ -1,7 +1,8 @@
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@/lib/rbac'
+
 import prisma from '@/lib/prisma'
 import { getActiveUserRestriction } from '@/lib/restrictions'
 

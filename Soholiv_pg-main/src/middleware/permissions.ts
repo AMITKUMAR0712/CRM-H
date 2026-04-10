@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@/lib/rbac'
+
 import { requireAuth, AuthSession } from '@/middleware/auth'
 import { Permission, hasPermission } from '@/lib/rbac'
 
@@ -41,3 +42,19 @@ export async function requireAnyPermission(
 
   return session
 }
+
+export async function requireSuperAdmin(): Promise<AuthSession | NextResponse> {
+  const authResult = await requireAuth()
+  if (authResult instanceof NextResponse) return authResult
+
+  const session = authResult as AuthSession
+  if (session.user.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { success: false, error: 'Access forbidden. Super Admin only.' },
+      { status: 403 }
+    )
+  }
+
+  return session
+}
+

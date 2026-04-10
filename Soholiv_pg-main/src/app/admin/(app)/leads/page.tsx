@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
-import type { UserRole } from '@prisma/client'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
 
 type LeadStatus = 'NEW' | 'CONTACTED' | 'VISITED' | 'INTERESTED' | 'CONVERTED' | 'CLOSED' | 'LOST'
 
