@@ -284,6 +284,51 @@ async function main() {
         }
         console.log('✅ Settings synced.')
 
+        // 5. Sync Gallery Images
+        console.log('🔄 Syncing gallery images...')
+        const fs = await import('fs')
+        const path = await import('path')
+        
+        const publicDir = path.join(process.cwd(), 'public')
+        const files = fs.readdirSync(publicDir)
+        const imageExtensions = ['.jpeg', '.jpg', '.png', '.webp']
+        
+        const imageFiles = files.filter(file => 
+            imageExtensions.includes(path.extname(file).toLowerCase())
+        )
+
+        console.log(`📸 Found ${imageFiles.length} images in public folder.`)
+
+        // Delete existing gallery images first
+        await prisma.galleryImage.deleteMany({})
+
+        const galleryData = imageFiles.map(img => {
+            let sectorSlug = 'sector-51' // default
+            let sectorName = 'Sector 51'
+
+            const lowerImg = img.toLowerCase()
+            if (lowerImg.includes('sector 22') || lowerImg.includes('sec22') || lowerImg.includes('ouse no 10')) {
+                sectorSlug = 'sector-22'
+                sectorName = 'Sector 22'
+            } else if (lowerImg.includes('168')) {
+                sectorSlug = 'sector-168'
+                sectorName = 'Sector 168'
+            }
+
+            return {
+                url: `/${img}`,
+                altText: img.replace(/\.[^/.]+$/, "").replace(/-/g, " "),
+                album: sectorName,
+                sectorSlug: sectorSlug,
+                isActive: true
+            }
+        })
+
+        await prisma.galleryImage.createMany({
+            data: galleryData
+        })
+        console.log(`✅ Gallery synced with ${galleryData.length} images.`)
+
         console.log('🎉 Successfully synced all locations and settings!')
     } catch (error) {
         console.error('❌ Error during sync:', error)
