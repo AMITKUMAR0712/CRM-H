@@ -302,6 +302,44 @@ async function main() {
         // Delete existing gallery images first
         await prisma.galleryImage.deleteMany({})
 
+        // Categorization logic
+        const categorizeImage = (filename: string): string => {
+            const lower = filename.toLowerCase()
+            
+            // Rooms - bedrooms, bathrooms
+            if (lower.includes('bad') || lower.includes('bath') || lower.includes('room') || 
+                lower.includes('no77') || lower.includes('no85') || /no\d/.test(lower)) {
+                return 'Rooms'
+            }
+            
+            // Common Areas - living areas, shared spaces, PG interiors
+            if (lower.includes('res') || lower.includes('pg') || lower.includes('common') || 
+                lower.includes('hall') || lower.includes('lounge')) {
+                return 'Common Areas'
+            }
+            
+            // Neighborhood - exterior, roads, surrounding areas
+            if (lower.includes('road') || lower.includes('street') || lower.includes('ext') || 
+                lower.includes('block') || lower.includes('exterior') || lower.includes('f block')) {
+                return 'Neighborhood'
+            }
+            
+            // Food - kitchen, dining, meals
+            if (lower.includes('food') || lower.includes('kitchen') || lower.includes('dining') || 
+                lower.includes('meal')) {
+                return 'Food'
+            }
+            
+            // Security - gates, parking, entrance
+            if (lower.includes('gate') || lower.includes('parking') || lower.includes('entrance') || 
+                lower.includes('security') || lower.includes('door')) {
+                return 'Safety'
+            }
+            
+            // Default to Common Areas
+            return 'Common Areas'
+        }
+
         const galleryData = imageFiles.map(img => {
             let sectorSlug = 'sector-51' // default
             let sectorName = 'Sector 51'
@@ -315,13 +353,23 @@ async function main() {
                 sectorName = 'Sector 168'
             }
 
+            const category = categorizeImage(img)
+
             return {
                 url: `/${img}`,
                 altText: img.replace(/\.[^/.]+$/, "").replace(/-/g, " "),
-                album: sectorName,
+                album: category,
                 sectorSlug: sectorSlug,
                 isActive: true
             }
+        })
+
+        // Log categorization summary
+        const categories = new Set(galleryData.map(g => g.album))
+        console.log('📂 Image Categories:')
+        categories.forEach(cat => {
+            const count = galleryData.filter(g => g.album === cat).length
+            console.log(`   - ${cat}: ${count} images`)
         })
 
         await prisma.galleryImage.createMany({
