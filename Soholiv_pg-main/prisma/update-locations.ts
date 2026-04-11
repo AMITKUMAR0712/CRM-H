@@ -77,7 +77,7 @@ async function main() {
                 metroDistance: 0.5,
                 latitude: 28.5847,
                 longitude: 77.3734,
-                highlights: { highlights: ['Near Metro', 'D-Block Market', 'Safe and Secure'] },
+                highlights: ['Near Metro', 'D-Block Market', 'Safe and Secure'],
             },
             {
                 name: 'Sector 22',
@@ -87,7 +87,7 @@ async function main() {
                 metroDistance: 2.5,
                 latitude: 28.5956,
                 longitude: 77.3456,
-                highlights: { highlights: ['Market Proximity', 'Quiet Blocks', 'Well Connected'] },
+                highlights: ['Market Proximity', 'Quiet Blocks', 'Well Connected'],
             },
             {
                 name: 'Sector 168',
@@ -97,7 +97,7 @@ async function main() {
                 metroDistance: 1.5,
                 latitude: 28.5047,
                 longitude: 77.3917,
-                highlights: { highlights: ['Expressway Access', 'Corporate Hubs', 'Clean Environment'] },
+                highlights: ['Expressway Access', 'Corporate Hubs', 'Clean Environment'],
             }
         ]
 

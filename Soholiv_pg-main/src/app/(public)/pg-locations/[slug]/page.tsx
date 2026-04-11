@@ -90,7 +90,9 @@ export default async function SectorPage({ params }: Props) {
         notFound()
     }
 
-    const highlights = (sector.highlights as string[] | null) || []
+    const highlights: string[] = Array.isArray(sector.highlights) 
+        ? sector.highlights 
+        : (sector.highlights as any)?.highlights || []
 
     // Collect unique amenities from all PGs
     const allAmenities = new Set<string>()
