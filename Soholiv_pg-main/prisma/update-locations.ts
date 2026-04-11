@@ -258,6 +258,32 @@ async function main() {
 
         console.log('✅ PGs synced.')
 
+        // 4. Update Global Settings
+        console.log('🔄 Syncing site settings...')
+        const settings = [
+            { key: 'site_name', value: 'Soho Liv', type: 'text', group: 'general', isPublic: true },
+            {
+                key: 'site_description',
+                value: 'Premium "Budget Luxury" co-living for students and professionals in Noida. Experience comfort, safety, and community at Soho Liv.',
+                type: 'text',
+                group: 'general',
+                isPublic: true,
+            },
+            { key: 'contact_phone', value: '+91 9871648677, +91 8595099961', type: 'text', group: 'contact', isPublic: true },
+            { key: 'contact_email', value: 'soholivpg@gmail.com', type: 'text', group: 'contact', isPublic: true },
+            { key: 'contact_address', value: 'D 85/14, Sector 51, Near Sector 52 Metro Station, Noida, Uttar Pradesh 201301', type: 'text', group: 'contact', isPublic: true },
+            { key: 'whatsapp_number', value: '919871648677', type: 'text', group: 'contact', isPublic: true },
+        ]
+
+        for (const setting of settings) {
+            await prisma.setting.upsert({
+                where: { key: setting.key },
+                update: { value: setting.value },
+                create: setting
+            })
+        }
+        console.log('✅ Settings synced.')
+
         console.log('🎉 Successfully synced all locations and settings!')
     } catch (error) {
         console.error('❌ Error during sync:', error)
