@@ -308,14 +308,22 @@ export default async function SectorPage({ params }: Props) {
                                     <h3 className="font-serif text-lg font-semibold mb-4">Need Help?</h3>
                                     <div className="space-y-3">
                                         <Button variant="secondary" className="w-full bg-white text-(--color-graphite) hover:bg-gray-100" asChild>
+<<<<<<< HEAD
                                             <a href="tel:+919871648677" className="flex items-center justify-center gap-2">
+=======
+                                            <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                                 <Phone className="w-4 h-4" />
                                                 Call Now
                                             </a>
                                         </Button>
                                         <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                                             <a
+<<<<<<< HEAD
                                                 href="https://wa.me/919871648677"
+=======
+                                                href="https://wa.me/919876543210"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center justify-center gap-2"

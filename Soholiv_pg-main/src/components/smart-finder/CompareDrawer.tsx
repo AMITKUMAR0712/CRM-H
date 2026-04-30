@@ -112,10 +112,17 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+<<<<<<< HEAD
                         className="fixed bottom-0 left-0 right-0 z-50 bg-(--color-surface) rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col"
                     >
                         {/* Header */}
                         <div className="sticky top-0 bg-(--color-surface) border-b border-(--color-border) px-6 py-4 flex items-center justify-between">
+=======
+                        className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col"
+                    >
+                        {/* Header */}
+                        <div className="sticky top-0 bg-white border-b border-(--color-border) px-6 py-4 flex items-center justify-between">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                             <div>
                                 <h2 className="font-serif text-xl font-bold text-(--color-graphite)">Compare PGs</h2>
                                 <p className="text-sm text-muted">{items.length} PGs selected</p>
@@ -184,7 +191,11 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                         </div>
 
                         {/* Actions */}
+<<<<<<< HEAD
                         <div className="sticky bottom-0 bg-(--color-surface) border-t border-(--color-border) px-6 py-4 flex flex-wrap gap-3 justify-center">
+=======
+                        <div className="sticky bottom-0 bg-white border-t border-(--color-border) px-6 py-4 flex flex-wrap gap-3 justify-center">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                             <Button asChild>
                                 <Link href="/contact">
                                     <Calendar className="w-4 h-4 mr-2" />
@@ -192,13 +203,21 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
+<<<<<<< HEAD
                                 <a href="tel:+919871648677">
+=======
+                                <a href="tel:+919876543210">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     <Phone className="w-4 h-4 mr-2" />
                                     Call Now
                                 </a>
                             </Button>
                             <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white" asChild>
+<<<<<<< HEAD
                                 <a href="https://wa.me/919871648677" target="_blank" rel="noopener noreferrer">
+=======
+                                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     <MessageCircle className="w-4 h-4 mr-2" />
                                     WhatsApp
                                 </a>

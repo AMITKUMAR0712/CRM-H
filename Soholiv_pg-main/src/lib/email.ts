@@ -154,8 +154,13 @@ export async function sendLeadConfirmation(lead: {
       <div style="margin: 20px 0; padding: 15px; background: #F2F0E9; border-radius: 8px;">
         <p style="margin: 0 0 10px 0; color: #2A2A2A;"><strong>Need immediate assistance?</strong></p>
         <p style="margin: 0; color: #6B705C;">
+<<<<<<< HEAD
           📞 Call us: <a href="tel:+919871648677" style="color: #B07D62;">+91 9871648677</a><br>
           💬 WhatsApp: <a href="https://wa.me/919871648677" style="color: #B07D62;">Chat Now</a>
+=======
+          📞 Call us: <a href="tel:+919876543210" style="color: #B07D62;">+91 98765 43210</a><br>
+          💬 WhatsApp: <a href="https://wa.me/919876543210" style="color: #B07D62;">Chat Now</a>
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
         </p>
       </div>
       

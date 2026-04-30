@@ -127,7 +127,11 @@ export default function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <select
                     {...register('preferredSector')}
+<<<<<<< HEAD
                     className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-base"
+=======
+                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4 text-base"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 >
                     {sectors.map((s) => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -136,7 +140,11 @@ export default function ContactForm() {
 
                 <select
                     {...register('budget')}
+<<<<<<< HEAD
                     className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-base"
+=======
+                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4 text-base"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 >
                     {budgets.map((b) => (
                         <option key={b.value} value={b.value}>{b.label}</option>

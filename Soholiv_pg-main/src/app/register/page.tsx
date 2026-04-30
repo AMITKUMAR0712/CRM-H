@@ -84,7 +84,11 @@ export default function RegisterPage() {
           transition={{ duration: 0.6 }}
           className="hidden lg:block"
         >
+<<<<<<< HEAD
           <div className="inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-(--color-surface)\/70 px-4 py-2 backdrop-blur">
+=======
+          <div className="inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-white/70 px-4 py-2 backdrop-blur">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
             <Sparkles className="h-4 w-4 text-(--color-clay)" />
             <span className="text-sm font-medium">Join SOHO PG</span>
           </div>
@@ -106,7 +110,11 @@ export default function RegisterPage() {
               title: 'Premium PG access',
               desc: 'Explore sectors and book visits quickly.',
             }].map((f) => (
+<<<<<<< HEAD
               <div key={f.title} className="rounded-2xl border border-(--color-border) bg-(--color-surface)\/70 p-4 backdrop-blur">
+=======
+              <div key={f.title} className="rounded-2xl border border-(--color-border) bg-white/70 p-4 backdrop-blur">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5">{f.icon}</div>
                   <div>
@@ -126,7 +134,11 @@ export default function RegisterPage() {
           transition={{ duration: 0.55 }}
           className="flex justify-center"
         >
+<<<<<<< HEAD
           <Card className="w-full max-w-md border border-(--color-border) bg-(--color-surface)\/80 p-6 shadow-xl backdrop-blur">
+=======
+          <Card className="w-full max-w-md border border-(--color-border) bg-white/80 p-6 shadow-xl backdrop-blur">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
             <div className="flex items-center gap-2">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-(--color-limestone)">
                 <UserPlus className="h-5 w-5 text-(--color-graphite)" />

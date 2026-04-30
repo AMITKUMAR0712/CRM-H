@@ -74,7 +74,11 @@ export default function LoginClient() {
           transition={{ duration: 0.6 }}
           className="hidden lg:block"
         >
+<<<<<<< HEAD
           <div className="inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-(--color-surface)\/70 px-4 py-2 backdrop-blur">
+=======
+          <div className="inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-white/70 px-4 py-2 backdrop-blur">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
             <Sparkles className="h-4 w-4 text-(--color-clay)" />
             <span className="text-sm font-medium">Premium PG experience</span>
           </div>
@@ -104,7 +108,11 @@ export default function LoginClient() {
                 desc: 'Find the right sector, faster.',
               },
             ].map((f) => (
+<<<<<<< HEAD
               <div key={f.title} className="rounded-2xl border border-(--color-border) bg-(--color-surface)\/70 p-4 backdrop-blur">
+=======
+              <div key={f.title} className="rounded-2xl border border-(--color-border) bg-white/70 p-4 backdrop-blur">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5">{f.icon}</div>
                   <div>
@@ -124,11 +132,19 @@ export default function LoginClient() {
           transition={{ duration: 0.55 }}
           className="flex justify-center"
         >
+<<<<<<< HEAD
           <Card className="w-full max-w-md border border-(--color-border) bg-(--color-surface)\/80 p-6 shadow-xl backdrop-blur">
             <div className="mb-4 flex items-center justify-between">
               <Link
                 href="/"
                 className="group inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-(--color-surface)\/70 px-3 py-2 text-sm font-medium text-(--color-graphite) backdrop-blur transition-colors hover:bg-(--color-limestone)"
+=======
+          <Card className="w-full max-w-md border border-(--color-border) bg-white/80 p-6 shadow-xl backdrop-blur">
+            <div className="mb-4 flex items-center justify-between">
+              <Link
+                href="/"
+                className="group inline-flex items-center gap-2 rounded-full border border-(--color-border) bg-white/70 px-3 py-2 text-sm font-medium text-(--color-graphite) backdrop-blur transition-colors hover:bg-(--color-limestone)"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
               >
                 <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
                 Back to Home

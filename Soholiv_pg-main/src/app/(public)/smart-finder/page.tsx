@@ -195,7 +195,11 @@ export default function SmartFinderPage() {
                             <Link href="/contact">Book a Visit</Link>
                         </Button>
                         <Button variant="outline" asChild>
+<<<<<<< HEAD
                             <a href="tel:+919871648677">Call Now</a>
+=======
+                            <a href="tel:+919876543210">Call Now</a>
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         </Button>
                     </>
                 }
@@ -217,7 +221,11 @@ export default function SmartFinderPage() {
                             <div className="space-y-3">
                                 <label className="block text-sm font-medium">Category</label>
                                 <select
+<<<<<<< HEAD
                                     className="w-full rounded-xl border border-(--color-border)/70 bg-(--color-surface) text-(--color-graphite) px-3 py-2 text-sm"
+=======
+                                    className="w-full rounded-xl border border-(--color-border)/70 bg-white px-3 py-2 text-sm"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     value={selectedFilters.category}
                                     onChange={(e) => updateFilter('category', e.target.value)}
                                 >
@@ -248,7 +256,11 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.sector}
                                         onChange={(e) => updateFilter('sector', e.target.value)}
+<<<<<<< HEAD
                                         className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+=======
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     >
                                         {filters.sectors.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                                     </select>
@@ -260,7 +272,11 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.roomType}
                                         onChange={(e) => updateFilter('roomType', e.target.value)}
+<<<<<<< HEAD
                                         className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+=======
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     >
                                         {filters.roomTypes.map((r) => (<option key={r.value} value={r.value}>{r.label}</option>))}
                                     </select>
@@ -272,7 +288,11 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.occupancy}
                                         onChange={(e) => updateFilter('occupancy', e.target.value)}
+<<<<<<< HEAD
                                         className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+=======
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     >
                                         {filters.occupancy.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
                                     </select>
@@ -284,7 +304,11 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.budget}
                                         onChange={(e) => updateFilter('budget', e.target.value)}
+<<<<<<< HEAD
                                         className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+=======
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     >
                                         {filters.budgets.map((b) => (<option key={b.value} value={b.value}>{b.label}</option>))}
                                     </select>
@@ -296,7 +320,11 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.metroDistance}
                                         onChange={(e) => updateFilter('metroDistance', e.target.value)}
+<<<<<<< HEAD
                                         className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+=======
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     >
                                         {filters.metroDistance.map((m) => (<option key={m.value} value={m.value}>{m.label}</option>))}
                                     </select>

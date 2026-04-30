@@ -211,7 +211,11 @@ export default async function PGDetailPage({ params }: Props) {
                                 </Link>
                             </Button>
                             <Button asChild>
+<<<<<<< HEAD
                                 <a href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`} target="_blank" rel="noopener noreferrer">
+=======
+                                <a href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`} target="_blank" rel="noopener noreferrer">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     <MessageCircle className="mr-2 h-4 w-4" />
                                     WhatsApp
                                 </a>
@@ -265,7 +269,11 @@ export default async function PGDetailPage({ params }: Props) {
                                         <p className="text-3xl font-bold">{formatPrice(pg.monthlyRent)}</p>
                                     </div>
                                     <Button variant="secondary" className="bg-white text-[var(--color-graphite)] hover:bg-gray-100" asChild>
+<<<<<<< HEAD
                                         <a href="tel:+919871648677">
+=======
+                                        <a href="tel:+919876543210">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                             <Phone className="mr-2 h-4 w-4" />
                                             Call Now
                                         </a>
@@ -522,14 +530,22 @@ export default async function PGDetailPage({ params }: Props) {
                                     )}
                                     <div className="mt-4 space-y-3">
                                         <Button variant="secondary" className="w-full bg-white text-[var(--color-graphite)] hover:bg-gray-100" asChild>
+<<<<<<< HEAD
                                             <a href="tel:+919871648677">
+=======
+                                            <a href="tel:+919876543210">
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                                 <Phone className="mr-2 h-4 w-4" />
                                                 Call Now
                                             </a>
                                         </Button>
                                         <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                                             <a
+<<<<<<< HEAD
                                                 href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`}
+=======
+                                                href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`}
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >

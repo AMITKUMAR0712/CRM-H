@@ -16,9 +16,15 @@ export default function PageHero({ kicker, title, subtitle, align = 'center', ac
   return (
     <section className="relative overflow-hidden pb-10 pt-10 md:pb-12 md:pt-14">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+<<<<<<< HEAD
         <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_0%,rgba(176,125,98,0.22),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(45%_45%_at_12%_30%,rgba(107,112,92,0.16),transparent_58%)]" />
         <div className="page-hero-grid absolute inset-0 opacity-[0.35] [background-image:linear-gradient(to_right,rgba(42,42,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(42,42,42,0.06)_1px,transparent_1px)] [background-size:72px_72px]" />
+=======
+        <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_0%,rgba(176,125,98,0.20),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(45%_45%_at_12%_30%,rgba(107,112,92,0.14),transparent_58%)]" />
+        <div className="absolute inset-0 opacity-[0.35] [background-image:linear-gradient(to_right,rgba(42,42,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(42,42,42,0.06)_1px,transparent_1px)] [background-size:72px_72px]" />
+>>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
       </div>
 
       <div className="container-custom">
