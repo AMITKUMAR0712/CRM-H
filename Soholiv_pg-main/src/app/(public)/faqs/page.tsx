@@ -219,7 +219,7 @@ export default function FAQPage() {
                                 {category.questions.map((item, qIdx) => (
                                     <details
                                         key={qIdx}
-                                        className="group rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 overflow-hidden transition-all duration-300"
+                                        className="group rounded-2xl border border-(--color-border)/70 bg-(--color-surface) overflow-hidden transition-all duration-300"
                                     >
                                         <summary className="flex cursor-pointer items-center justify-between p-6 font-medium text-(--color-graphite) hover:bg-(--color-surface)/50">
                                             <span className="pr-4">{item.q}</span>
@@ -236,11 +236,11 @@ export default function FAQPage() {
                         </div>
                     ))}
 
-                    <div className="mt-20 relative overflow-hidden rounded-3xl border border-(--color-border)/70 bg-(--color-graphite) p-10 text-center text-white shadow-2xl">
+                    <div className="mt-20 relative overflow-hidden rounded-3xl border border-white/10 section-always-dark p-10 text-center text-white shadow-2xl">
                         <div className="absolute inset-0 bg-linear-to-br from-(--color-clay)/20 to-transparent pointer-events-none" />
                         <HelpCircle className="w-12 h-12 mx-auto mb-6 text-(--color-clay)" />
                         <h3 className="font-serif text-2xl font-bold mb-4">Still have questions?</h3>
-                        <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+                        <p className="text-gray-300 mb-8 max-w-lg mx-auto">
                             Our team is here to help you 24/7. Reach out to us via WhatsApp, Email, or Phone for instant support.
                         </p>
                         <div className="flex flex-wrap justify-center gap-4">

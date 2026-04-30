@@ -50,11 +50,7 @@ export default function PGCard({ pg }: PGCardProps) {
     const featuredPhoto = pg.photos?.find(p => p.isFeatured) || pg.photos?.[0]
 
     return (
-<<<<<<< HEAD
         <div className="bg-(--color-surface) rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
-=======
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
             <Link href={`/pg/${pg.slug}`} className="block">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Image */}
@@ -146,21 +142,13 @@ export default function PGCard({ pg }: PGCardProps) {
             {/* Quick Action Buttons - Outside the link to prevent nested links */}
             <div className="mt-4 flex items-center justify-end gap-2 pt-4 border-t border-[var(--color-border)]/50">
                 <Button size="sm" variant="outline" asChild>
-<<<<<<< HEAD
                     <a href={`tel:+919871648677`} onClick={(e) => e.stopPropagation()}>
-=======
-                    <a href={`tel:+919876543210`} onClick={(e) => e.stopPropagation()}>
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         Call Now
                     </a>
                 </Button>
                 <Button size="sm" asChild>
                     <a
-<<<<<<< HEAD
                         href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name}. Please share more details.`)}`}
-=======
-                        href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name}. Please share more details.`)}`}
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}

@@ -74,11 +74,7 @@
     /* Dark palette (same token names so existing UI adapts) */
     --color-alabaster: #0B0F14;
     --color-limestone: #0F1622;
-<<<<<<< HEAD
     --color-graphite: #F0EDE5;
-=======
-    --color-graphite: #E9E6DE;
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
     --color-soft-grey: #273142;
 
     --color-surface: #121A27;
@@ -88,19 +84,11 @@
     --color-background-alt: var(--color-limestone);
     --color-foreground: var(--color-graphite);
     --color-border: var(--color-soft-grey);
-<<<<<<< HEAD
     --color-muted: #C8D5E8;
 
     /* Boost primary accents for readability */
     --color-clay: #E0A080;
     --color-olive: #A0AE8A;
-=======
-    --color-muted: #A5B1C3;
-
-    /* Boost primary accents for readability */
-    --color-clay: #D38F72;
-    --color-olive: #8E9A78;
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
 
     /* Accents in dark mode (slightly brighter) */
     --color-accent-blue: #60A5FA;
@@ -109,7 +97,6 @@
     --color-accent-orange: #FDBA74;
   }
 
-<<<<<<< HEAD
   /* Dark mode — make native form elements readable */
   html.dark select,
   html.dark input,
@@ -230,8 +217,6 @@
     color: #C8D5E8;
   }
 
-=======
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
   body {
     font-family: var(--font-sans);
     background-color: var(--color-background);
@@ -243,7 +228,6 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-<<<<<<< HEAD
     font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.025em;
@@ -334,11 +318,6 @@
   .section-always-dark h3,
   .section-always-dark h4 {
     color: #ffffff !important;
-=======
-    font-weight: 700; /* Bolder headings for more impact */
-    line-height: 1.15;
-    letter-spacing: -0.025em;
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
   }
 
   ::selection {

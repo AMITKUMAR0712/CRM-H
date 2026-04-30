@@ -12,13 +12,8 @@ interface StickyCtaBarProps {
 }
 
 export default function StickyCtaBar({
-<<<<<<< HEAD
     phone = '+919871648677',
     whatsapp = '919871648677',
-=======
-    phone = '+919876543210',
-    whatsapp = '919876543210',
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
     showBookVisit = true
 }: StickyCtaBarProps) {
     return (
@@ -26,11 +21,7 @@ export default function StickyCtaBar({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-<<<<<<< HEAD
             className="fixed bottom-0 left-0 right-0 z-40 bg-(--color-surface)/95 backdrop-blur-md border-t border-(--color-border) shadow-[0_-8px_30px_rgba(0,0,0,0.18)] p-4 md:hidden"
-=======
-            className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-(--color-border) shadow-[0_-8px_30px_rgba(0,0,0,0.12)] p-4 md:hidden"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
         >
             <div className="container-custom flex gap-3">
                 <Button
@@ -79,13 +70,8 @@ export default function StickyCtaBar({
 
 // Desktop floating version
 export function FloatingCtaDesktop({
-<<<<<<< HEAD
     phone = '+919871648677',
     whatsapp = '919871648677'
-=======
-    phone = '+919876543210',
-    whatsapp = '919876543210'
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
 }: StickyCtaBarProps) {
     return (
         <div className="hidden md:flex fixed bottom-8 right-8 z-40 flex-col gap-3">

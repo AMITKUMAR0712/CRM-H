@@ -50,17 +50,10 @@ export default async function Footer() {
     const siteDescription =
         settingsMap.get('site_description') ||
         'Premium paying guest accommodation in Noida. Experience comfort, safety, and community living at its finest.'
-<<<<<<< HEAD
     const contactPhone = settingsMap.get('contact_phone') || '+919871648677'
     const contactEmail = settingsMap.get('contact_email') || 'info@sohopg.com'
     const contactAddress = settingsMap.get('contact_address') || 'A-123, Sector 51, Noida, Uttar Pradesh 201301'
     const whatsappNumber = (settingsMap.get('whatsapp_number') || settingsMap.get('whatsapp') || '919871648677').replace(/^\+/, '')
-=======
-    const contactPhone = settingsMap.get('contact_phone') || '+919876543210'
-    const contactEmail = settingsMap.get('contact_email') || 'info@sohopg.com'
-    const contactAddress = settingsMap.get('contact_address') || 'A-123, Sector 51, Noida, Uttar Pradesh 201301'
-    const whatsappNumber = (settingsMap.get('whatsapp_number') || settingsMap.get('whatsapp') || '919876543210').replace(/^\+/, '')
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
 
     const socialFacebook = settingsMap.get('facebook_url') || 'https://facebook.com'
     const socialInstagram = settingsMap.get('instagram_url') || 'https://instagram.com'
@@ -81,11 +74,7 @@ export default async function Footer() {
     const sectorLinks: FooterLink[] = sectors.map((s) => ({ href: `/pg-locations/${s.slug}`, label: s.name }))
 
     return (
-<<<<<<< HEAD
         <footer className="footer-dark-bg text-white">
-=======
-        <footer className="bg-(--color-graphite) text-white">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
             {/* Main Footer */}
             <div className="container-custom section-padding">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">

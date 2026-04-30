@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-<<<<<<< HEAD
 import Image from 'next/image'
-=======
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
 import { 
     ShieldCheck, Sparkles, Users, ArrowRight, Star, 
     Award, CheckCircle, Target, Compass, Heart, 
@@ -113,7 +110,6 @@ export default async function AboutPage() {
                 {/* Legacy Section */}
                 <section className="grid lg:grid-cols-2 gap-12 items-center">
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-(--color-limestone) shadow-2xl">
-<<<<<<< HEAD
                          <Image
                              src="/about1.png"
                              alt="Soho Liv PG - Our Legacy"
@@ -121,11 +117,6 @@ export default async function AboutPage() {
                              className="object-cover"
                              sizes="(max-width: 768px) 100vw, 50vw"
                          />
-=======
-                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Building className="w-32 h-32 text-(--color-clay)/20" />
-                         </div>
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                          <div className="absolute bottom-10 left-10 p-8 glass rounded-2xl border border-white/20">
                             <div className="text-4xl font-bold text-(--color-clay)">15+</div>
                             <div className="text-sm font-medium uppercase tracking-wider">Years of Mastery</div>
@@ -169,11 +160,7 @@ export default async function AboutPage() {
                             content: "To provide universal accessibility across all major hubs while maintaining uncompromising standards of hygiene and comfort." 
                         }
                     ].map((item, idx) => (
-<<<<<<< HEAD
                         <div key={idx} className="relative group p-8 rounded-2xl border border-(--color-border)/70 bg-(--color-surface) backdrop-blur-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl">
-=======
-                        <div key={idx} className="relative group p-8 rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 backdrop-blur-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                             <div className="w-12 h-12 rounded-xl bg-(--color-clay)/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <item.icon className="w-6 h-6 text-(--color-clay)" />
                             </div>
@@ -205,11 +192,7 @@ export default async function AboutPage() {
                 </section>
 
                 {/* Founder */}
-<<<<<<< HEAD
                 <section className="relative overflow-hidden rounded-3xl border border-white/10 section-always-dark text-white p-10 lg:p-16">
-=======
-                <section className="relative overflow-hidden rounded-3xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-10 lg:p-16">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                     <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-(--color-clay)/10 to-transparent pointer-events-none" />
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-8">
@@ -217,21 +200,12 @@ export default async function AboutPage() {
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--color-clay)/20 text-(--color-clay) text-xs font-bold uppercase tracking-widest">
                                     Our Leader
                                 </div>
-<<<<<<< HEAD
                                 <h2 className="font-serif text-4xl font-bold text-white">Meet Our Founder: Mr. Jitendra Dixit</h2>
                                 <p className="text-gray-200 leading-relaxed italic text-lg">
                                     &quot;Treat every resident like family&quot;
                                 </p>
                              </div>
                              <div className="space-y-4 text-gray-300 leading-relaxed">
-=======
-                                <h2 className="font-serif text-4xl font-bold">Meet Our Founder: Mr. Jitendra Dixit</h2>
-                                <p className="text-gray-300 leading-relaxed italic text-lg">
-                                    &quot;Treat every resident like family&quot;
-                                </p>
-                             </div>
-                             <div className="space-y-4 text-gray-400 leading-relaxed">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                 <p>
                                     With over 15 years of mastery in real estate and hospitality, Mr. Jitendra Dixit remains the heartbeat of Soho Liv. His philosophy is woven into the fabric of our operations.
                                 </p>
@@ -243,7 +217,6 @@ export default async function AboutPage() {
                                 <div className="flex gap-1 text-(--color-clay)">
                                     {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
                                 </div>
-<<<<<<< HEAD
                                 <span className="text-sm font-medium tracking-wide text-white">Visionary Excellence</span>
                              </div>
                         </div>
@@ -256,17 +229,6 @@ export default async function AboutPage() {
                                  sizes="(max-width: 768px) 100vw, 400px"
                              />
                              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-=======
-                                <span className="text-sm font-medium tracking-wide">Visionary Excellence</span>
-                             </div>
-                        </div>
-                        <div className="relative aspect-square max-w-md mx-auto lg:ml-auto w-full rounded-2xl overflow-hidden shadow-2xl bg-white/5">
-                             <div className="absolute inset-0 flex items-center justify-center">
-                                <UserCircle className="w-32 h-32 text-white/5" />
-                             </div>
-                             {/* Founder Image would go here */}
-                             <div className="absolute inset-0 bg-linear-to-t from-(--color-graphite) via-transparent to-transparent opacity-60" />
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         </div>
                     </div>
                 </section>

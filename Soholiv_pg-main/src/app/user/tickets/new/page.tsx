@@ -62,11 +62,7 @@ export default function NewTicketPage() {
           <div>
             <label className="text-sm font-medium">Description</label>
             <textarea
-<<<<<<< HEAD
               className="w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
-=======
-              className="w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
               rows={5}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -79,11 +75,7 @@ export default function NewTicketPage() {
             <div>
               <label className="text-sm font-medium">Category</label>
               <select
-<<<<<<< HEAD
                 className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
-=======
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-3"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -97,11 +89,7 @@ export default function NewTicketPage() {
             <div>
               <label className="text-sm font-medium">Priority</label>
               <select
-<<<<<<< HEAD
                 className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
-=======
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-3"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >

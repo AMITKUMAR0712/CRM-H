@@ -68,11 +68,7 @@ export default function HomeBannersClient({ banners }: { banners: Banner[] }) {
   }, [])
 
   return (
-<<<<<<< HEAD
     <section className="bg-(--color-surface) border-b border-[var(--color-border)]">
-=======
-    <section className="bg-white border-b border-[var(--color-border)]">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
       <div className="container-custom py-4">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {banners.map((b) => (

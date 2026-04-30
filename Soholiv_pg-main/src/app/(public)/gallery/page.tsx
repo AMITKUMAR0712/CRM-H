@@ -104,11 +104,7 @@ export default function GalleryPage() {
                         <select
                             value={activeSector}
                             onChange={(e) => setActiveSector(e.target.value)}
-<<<<<<< HEAD
                             className="h-10 rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
-=======
-                            className="h-10 rounded-lg border border-[var(--color-border)] bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         >
                             <option value="">All Sectors</option>
                             {sectors.map((sector) => (
@@ -119,11 +115,7 @@ export default function GalleryPage() {
                         <select
                             value={activeRoomType}
                             onChange={(e) => setActiveRoomType(e.target.value)}
-<<<<<<< HEAD
                             className="h-10 rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
-=======
-                            className="h-10 rounded-lg border border-[var(--color-border)] bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                         >
                             {roomTypes.map((type) => (
                                 <option key={type.id} value={type.id}>{type.name}</option>
@@ -199,21 +191,13 @@ export default function GalleryPage() {
                                 </Link>
                             </Button>
                             <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white" asChild>
-<<<<<<< HEAD
                                 <a href="https://wa.me/919871648677" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-=======
-                                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     <MessageCircle className="w-4 h-4" />
                                     WhatsApp
                                 </a>
                             </Button>
                             <Button variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-<<<<<<< HEAD
                                 <a href="tel:+919871648677" className="flex items-center gap-2">
-=======
-                                <a href="tel:+919876543210" className="flex items-center gap-2">
->>>>>>> eb5334bcb12450ce0c614a2fd036de97997fa69e
                                     <Phone className="w-4 h-4" />
                                     Call Now
                                 </a>
