@@ -301,6 +301,13 @@
   .footer-dark-bg .hover\:text-white:hover {
     color: #ffffff;
   }
+  /* Ensure headings inside footer stay white in both modes */
+  .footer-dark-bg h1,
+  .footer-dark-bg h2,
+  .footer-dark-bg h3,
+  .footer-dark-bg h4 {
+    color: #ffffff !important;
+  }
 
   /* ─── ALWAYS-DARK SECTION (Testimonials, Founder, etc.) ─── */
   /* These sections must ALWAYS be dark — the graphite token flips in dark mode */
