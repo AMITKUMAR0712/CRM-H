@@ -16,11 +16,11 @@ export default function CTASection() {
                     className="max-w-2xl mx-auto"
                 >
                     <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-                        Ready to Find Your Perfect PG?
+                        Ready to Book the Best PG in Noida?
                     </h2>
                     <p className="text-white/80 text-lg mb-8">
-                        Book a visit today and experience the SOHO PG difference.
-                        Limited rooms available in prime locations.
+                        Book a visit for Soho Liv PGs in Sector 168, Sector 22 or Sector 51 Noida.
+                        Get affordable rent, direct chat, CRM ticket support and quick problem resolution.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

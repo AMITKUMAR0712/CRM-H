@@ -61,6 +61,26 @@ const nextConfig: NextConfig = {
         ]
     },
 
+    async redirects() {
+        return [
+            {
+                source: '/pg-locations/sector-51',
+                destination: '/pg-locations/best-pg-in-sector-51-noida',
+                permanent: true,
+            },
+            {
+                source: '/pg-locations/sector-168',
+                destination: '/pg-locations/best-pg-in-sector-168-noida-expressway',
+                permanent: true,
+            },
+            {
+                source: '/pg-locations/sector-22',
+                destination: '/pg-locations/best-pg-in-sector-22-noida',
+                permanent: true,
+            },
+        ]
+    },
+
     // // Webpack optimizations
     // webpack: (config, { dev, isServer }) => {
     //     // Production optimizations

@@ -226,47 +226,56 @@ async function main() {
     const endUser = user
 
     // ========== 2. SECTORS ==========
-    const [sector51, sector62, sector50] = await Promise.all([
+    const [sector51, sector22, sector168] = await Promise.all([
         prisma.sector.upsert({
             where: { slug: 'sector-51' },
-            update: {},
+            update: {
+                description: 'Premium affordable PG hub in Sector 51, Noida near Sector 52 Metro with meals, WiFi, security and Soho Liv support.',
+                highlights: ['Near Sector 52 Metro', 'Affordable PG', 'CRM Support'],
+            },
             create: {
                 name: 'Sector 51',
                 slug: 'sector-51',
-                description: 'Tech hub near metro',
+                description: 'Premium affordable PG hub in Sector 51, Noida near Sector 52 Metro with meals, WiFi, security and Soho Liv support.',
                 metroStation: 'Sector 51 Metro',
                 metroDistance: 0.5,
                 latitude: 28.4303,
                 longitude: 77.3784,
-                highlights: ['Near Metro', 'IT Hub']
+                highlights: ['Near Sector 52 Metro', 'Affordable PG', 'CRM Support']
             },
         }),
         prisma.sector.upsert({
-            where: { slug: 'sector-62' },
-            update: {},
+            where: { slug: 'sector-22' },
+            update: {
+                description: 'Well-connected residential PG location in Sector 22, Noida with affordable rent, daily markets and fast support.',
+                highlights: ['Market Proximity', 'Budget PG', 'Well Connected'],
+            },
             create: {
-                name: 'Sector 62',
-                slug: 'sector-62',
-                description: 'Corporate hub',
-                metroStation: 'Sector 62 Metro',
-                metroDistance: 0.8,
-                latitude: 28.6279,
-                longitude: 77.3649,
-                highlights: ['Corporate', 'Restaurants']
+                name: 'Sector 22',
+                slug: 'sector-22',
+                description: 'Well-connected residential PG location in Sector 22, Noida with affordable rent, daily markets and fast support.',
+                metroStation: 'Noida City Centre',
+                metroDistance: 2.5,
+                latitude: 28.5956,
+                longitude: 77.3456,
+                highlights: ['Market Proximity', 'Budget PG', 'Well Connected']
             },
         }),
         prisma.sector.upsert({
-            where: { slug: 'sector-50' },
-            update: {},
+            where: { slug: 'sector-168' },
+            update: {
+                description: 'Modern Noida Expressway PG location in Sector 168, ideal for professionals looking for AC rooms, meals and WiFi.',
+                highlights: ['Noida Expressway', 'Corporate Hubs', 'Best PG for Professionals'],
+            },
             create: {
-                name: 'Sector 50',
-                slug: 'sector-50',
-                description: 'Residential area',
-                metroStation: 'Sector 50 Metro',
-                metroDistance: 1.2,
-                latitude: 28.4285,
-                longitude: 77.3721,
-                highlights: ['Quiet', 'Parks']
+                name: 'Sector 168',
+                slug: 'sector-168',
+                description: 'Modern Noida Expressway PG location in Sector 168, ideal for professionals looking for AC rooms, meals and WiFi.',
+                metroStation: 'Sector 142 Metro',
+                metroDistance: 1.5,
+                latitude: 28.5047,
+                longitude: 77.3917,
+                highlights: ['Noida Expressway', 'Corporate Hubs', 'Best PG for Professionals']
             },
         }),
     ])
@@ -336,13 +345,13 @@ async function main() {
         },
     })
     const pg2 = await prisma.pG.upsert({
-        where: { slug: 'soho-comfort-62' },
+        where: { slug: 'soho-comfort-sector-22-noida-pg' },
         update: {},
         create: {
             name: 'SOHO Comfort',
-            slug: 'soho-comfort-62',
-            sectorId: sector62.id,
-            address: 'B-45, Sector 62, Noida',
+            slug: 'soho-comfort-sector-22-noida-pg',
+            sectorId: sector22.id,
+            address: 'B-45, Sector 22, Noida',
             roomType: RoomType.DOUBLE,
             occupancyType: OccupancyType.CO_LIVING,
             monthlyRent: 8000,
@@ -361,13 +370,13 @@ async function main() {
         },
     })
     const pg3 = await prisma.pG.upsert({
-        where: { slug: 'soho-girls-50' },
+        where: { slug: 'soho-girls-sector-168-noida-expressway-pg' },
         update: {},
         create: {
             name: 'SOHO Girls Haven',
-            slug: 'soho-girls-50',
-            sectorId: sector50.id,
-            address: 'C-78, Sector 50, Noida',
+            slug: 'soho-girls-sector-168-noida-expressway-pg',
+            sectorId: sector168.id,
+            address: 'C-78, Sector 168, Noida Expressway',
             roomType: RoomType.TRIPLE,
             occupancyType: OccupancyType.GIRLS,
             monthlyRent: 7000,

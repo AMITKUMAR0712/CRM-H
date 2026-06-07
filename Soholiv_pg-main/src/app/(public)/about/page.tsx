@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
-    ShieldCheck, Sparkles, Users, ArrowRight, Star, 
+    ShieldCheck, Star, 
     Award, CheckCircle, Target, Compass, Heart, 
     Layout, Wifi, Utensils, Zap, Coffee, UserCircle, Building 
 } from 'lucide-react'
 
 import prisma from '@/lib/prisma'
-import PageRenderer from '@/components/cms/PageRenderer'
 import PageHero from '@/components/layout/PageHero'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,10 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
     if (!page) {
         return generatePageMetadata(
-            'About Soho Liv - Premium Co-living Excellence',
-            '15 Years of Excellence. 500+ Premium Rooms. Soho Liv is the gold standard for budget luxury co-living in Delhi NCR.',
+            'About Soho Liv | Best PG in Noida with CRM Support',
+            'Soho Liv is a trusted affordable PG and co-living brand in Noida and Greater Noida with 500+ rooms, Budget Luxury stays, CRM ticket support, direct chat and fast resident service.',
             '/about',
-            ['about Soho Liv', 'Jitendra Dixit', 'co-living vision', 'premium PG Noida', 'budget luxury']
+            ['about Soho Liv', 'best PG in Noida', 'Jitendra Dixit', 'co-living vision', 'premium PG Noida', 'budget luxury PG', 'Noida PG CRM support']
         )
     }
 
@@ -54,8 +53,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-    let page: { title: string; content: unknown } | null = null
-
     /* CMS content is disabled temporarily to show the new premium design */
     /*
     try {
@@ -91,8 +88,8 @@ export default async function AboutPage() {
             
             <PageHero
                 kicker="15 Years of Excellence"
-                title="Experience Urban Living Reimagined"
-                subtitle="500+ Premium Rooms. One Family. The gold standard for Budget Luxury co-living."
+                title="Best PG Living in Noida, Reimagined"
+                subtitle="500+ rooms, affordable Budget Luxury stays, direct chat and CRM ticket support for students and professionals in Noida and Greater Noida."
                 actions={
                     <>
                         <Button asChild size="lg">
@@ -126,13 +123,13 @@ export default async function AboutPage() {
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--color-clay)/10 text-(--color-clay) text-xs font-bold uppercase tracking-widest">
                             Our Story
                         </div>
-                        <h2 className="font-serif text-4xl font-bold leading-tight">Our Legacy: A Vision Born in Delhi NCR</h2>
+                        <h2 className="font-serif text-4xl font-bold leading-tight">Our Legacy: Affordable PG Living in Noida</h2>
                         <div className="space-y-4 text-(--color-muted) leading-relaxed">
                             <p>
-                                Fifteen years ago, <strong>Mr. Jitendra Dixit</strong> recognized a fundamental challenge for the modern Indian migrant: the struggle to find a residence that offered more than just a roof.
+                                Fifteen years ago, <strong>Mr. Jitendra Dixit</strong> recognized a fundamental challenge for the modern Indian migrant: the struggle to find an affordable PG in Noida that offered more than just a roof.
                             </p>
                             <p>
-                                He envisioned a sanctuary that combined the warmth of home with the efficiency of modern living. What began as a modest 30-room startup has flourished under his visionary leadership into Soho Liv—a premier co-living network managing over 500+ premium units across Delhi NCR.
+                                He envisioned a sanctuary that combined the warmth of home with the efficiency of modern living. What began as a modest 30-room startup has flourished into Soho Liv, a trusted PG and co-living network managing over 500+ units across Noida, Greater Noida and Delhi NCR.
                             </p>
                             <p>
                                 Today, we stand as the gold standard for <strong>&quot;Budget Luxury,&quot;</strong> proving that premium comfort doesn&apos;t have to come with a premium price tag.

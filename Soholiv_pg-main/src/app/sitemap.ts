@@ -6,6 +6,7 @@
 import { MetadataRoute } from 'next'
 import prisma from '@/lib/prisma'
 import { SITE_CONFIG } from '@/lib/seo/constants'
+import { getPGSeoSlug, getSectorSeoSlug } from '@/lib/seo/slugs'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = SITE_CONFIG.url
@@ -80,6 +81,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             where: { isActive: true, approvalStatus: 'APPROVED' },
             select: {
                 slug: true,
+                sector: { select: { slug: true } },
                 updatedAt: true,
                 isFeatured: true,
             },
@@ -87,7 +89,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })
 
         const pgPages: MetadataRoute.Sitemap = pgs.map((pg) => ({
-            url: `${baseUrl}/pg/${pg.slug}`,
+            url: `${baseUrl}/pg/${getPGSeoSlug(pg.slug, pg.sector.slug)}`,
             lastModified: pg.updatedAt,
             changeFrequency: 'weekly' as const,
             priority: pg.isFeatured ? 0.9 : 0.7,
@@ -103,7 +105,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })
 
         const locationPages: MetadataRoute.Sitemap = sectors.map((sector) => ({
-            url: `${baseUrl}/pg-locations/${sector.slug}`,
+            url: `${baseUrl}/pg-locations/${getSectorSeoSlug(sector.slug)}`,
             lastModified: sector.updatedAt,
             changeFrequency: 'daily' as const,
             priority: 0.8,

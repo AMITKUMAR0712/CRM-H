@@ -19,6 +19,7 @@ import { generatePGMetadata } from '@/lib/seo/metadata'
 import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+import { getPGSeoSlug, getSectorSeoSlug, resolvePGSlug } from '@/lib/seo/slugs'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -26,8 +27,9 @@ type Props = {
 
 async function getPG(slug: string) {
     try {
+        const resolvedSlug = resolvePGSlug(slug)
         const pg = await prisma.pG.findFirst({
-            where: { slug, isActive: true, approvalStatus: 'APPROVED' },
+            where: { slug: resolvedSlug, isActive: true, approvalStatus: 'APPROVED' },
             include: {
                 sector: true,
                 photos: {
@@ -88,19 +90,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!pg) return { title: 'PG Not Found' }
 
     return generatePGMetadata({
-        ...pg,
-        photos: pg.photos || []
-    } as any)
+        name: pg.name,
+        description: pg.description,
+        metaTitle: pg.metaTitle,
+        metaDescription: pg.metaDescription,
+        slug: pg.slug,
+        sector: { name: pg.sector.name, slug: pg.sector.slug },
+        roomType: pg.roomType,
+        hasAC: pg.hasAC,
+        monthlyRent: pg.monthlyRent,
+        mealsIncluded: pg.mealsIncluded,
+        photos: pg.photos.map((photo) => ({ url: photo.url })),
+    })
 }
 
 export async function generateStaticParams() {
     try {
         const pgs = await prisma.pG.findMany({
             where: { isActive: true, approvalStatus: 'APPROVED' },
-            select: { slug: true },
+            select: { slug: true, sector: { select: { slug: true } } },
         })
 
-        return pgs.map((pg) => ({ slug: pg.slug }))
+        return pgs.map((pg) => ({ slug: getPGSeoSlug(pg.slug, pg.sector.slug) }))
     } catch (err) {
         console.error('[PG] Failed to build static params', err)
         return []
@@ -152,7 +163,9 @@ export default async function PGDetailPage({ params }: Props) {
         }
     }
 
-    const relatedPGs = await getRelatedPGs(pg.sectorId, slug)
+    const relatedPGs = await getRelatedPGs(pg.sectorId, pg.slug)
+    const sectorUrlSlug = getSectorSeoSlug(pg.sector.slug)
+    const pgUrlSlug = getPGSeoSlug(pg.slug, pg.sector.slug)
 
     // Calculate average rating
     const avgRating = pg.reviews.length > 0
@@ -181,15 +194,22 @@ export default async function PGDetailPage({ params }: Props) {
 
     // Structured Data
     const productSchema = generateProductSchema({
-        ...pg,
-        reviews: pg.reviews.map(r => ({ rating: r.rating }))
-    } as any)
+        name: pg.name,
+        description: pg.description,
+        slug: pg.slug,
+        monthlyRent: pg.monthlyRent,
+        securityDeposit: pg.securityDeposit,
+        availableRooms: pg.availableRooms,
+        photos: pg.photos.map((photo) => ({ url: photo.url })),
+        sector: { name: pg.sector.name, slug: pg.sector.slug },
+        reviews: pg.reviews.map((review) => ({ rating: review.rating })),
+    })
 
     const breadcrumbSchema = generateBreadcrumbSchema([
         { name: 'Home', url: '/' },
         { name: 'Locations', url: '/pg-locations' },
-        { name: pg.sector.name, url: `/pg-locations/${pg.sector.slug}` },
-        { name: pg.name, url: `/pg/${pg.slug}` }
+        { name: pg.sector.name, url: `/pg-locations/${sectorUrlSlug}` },
+        { name: pg.name, url: `/pg/${pgUrlSlug}` }
     ])
 
     return (
@@ -205,7 +225,7 @@ export default async function PGDetailPage({ params }: Props) {
                     actions={
                         <>
                             <Button variant="outline" asChild>
-                                <Link href={`/pg-locations/${pg.sector.slug}`}>
+                                <Link href={`/pg-locations/${sectorUrlSlug}`}>
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to {pg.sector.name}
                                 </Link>
@@ -227,7 +247,7 @@ export default async function PGDetailPage({ params }: Props) {
                         <ChevronRight className="h-4 w-4" />
                         <Link href="/pg-locations" className="hover:text-[var(--color-clay)]">Locations</Link>
                         <ChevronRight className="h-4 w-4" />
-                        <Link href={`/pg-locations/${pg.sector.slug}`} className="hover:text-[var(--color-clay)]">{pg.sector.name}</Link>
+                        <Link href={`/pg-locations/${sectorUrlSlug}`} className="hover:text-[var(--color-clay)]">{pg.sector.name}</Link>
                         <ChevronRight className="h-4 w-4" />
                         <span className="text-[var(--color-graphite)]">{pg.name}</span>
                     </nav>
@@ -279,7 +299,7 @@ export default async function PGDetailPage({ params }: Props) {
                             {/* Quick Info */}
                             <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-lg">
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
-                                <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Quick Overview</h2>
+                                    <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Quick Overview of PG in {pg.sector.name}</h2>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="flex items-center gap-3 p-3 rounded-xl border border-[var(--color-border)]/50 bg-[var(--color-surface)]/50">
                                         <div className="w-10 h-10 rounded-lg bg-[var(--color-clay)]/10 flex items-center justify-center">
@@ -324,18 +344,39 @@ export default async function PGDetailPage({ params }: Props) {
                             {pg.description && (
                                 <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-lg">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
-                                    <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">About This PG</h2>
+                                    <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">About This PG in {pg.sector.name}, Noida</h2>
                                     <div className="prose prose-sm max-w-none text-[var(--color-foreground)]">
                                         <p>{pg.description}</p>
                                     </div>
                                 </div>
                             )}
 
+                            <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-lg">
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
+                                <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">
+                                    Why {pg.name} is a Smart PG Choice in {pg.sector.name}, Noida
+                                </h2>
+                                <div className="space-y-3 text-sm leading-relaxed text-[var(--color-muted)]">
+                                    <p>
+                                        {pg.name} is designed for residents searching for an affordable PG in {pg.sector.name},
+                                        Noida with comfort, safety and transparent pricing. The stay includes practical
+                                        facilities like {pg.hasAC ? 'AC rooms, ' : ''}{pg.hasWifi ? 'high-speed WiFi, ' : ''}
+                                        {pg.mealsIncluded ? 'home-style meals, ' : ''}security and easy access to daily needs.
+                                    </p>
+                                    <p>
+                                        Soho Liv also gives residents direct chat and CRM ticket support, so food,
+                                        housekeeping, maintenance or room-related problems can be raised and tracked quickly.
+                                        This makes it a strong option for students and working professionals comparing the
+                                        best PG in Noida and Greater Noida.
+                                    </p>
+                                </div>
+                            </div>
+
                             {/* Amenities */}
                             {amenitiesList.length > 0 && (
                                 <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-lg">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
-                                    <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Amenities & Facilities</h2>
+                                    <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Amenities & Facilities at {pg.sector.name} PG</h2>
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         {amenitiesList.map((amenity, idx) => (
                                             <div
@@ -395,7 +436,7 @@ export default async function PGDetailPage({ params }: Props) {
                             {/* Location */}
                             <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-lg">
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
-                                <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Location</h2>
+                                <h2 className="font-serif text-xl font-bold text-[var(--color-graphite)] mb-4">Location of PG in {pg.sector.name}, Noida</h2>
 
                                 <div className="flex flex-wrap items-center gap-4 mb-4">
                                     <div className="flex items-center gap-2 text-[var(--color-muted)]">
@@ -411,7 +452,7 @@ export default async function PGDetailPage({ params }: Props) {
                                 </div>
 
                                 <Link
-                                    href={`/pg-locations/${pg.sector.slug}`}
+                                    href={`/pg-locations/${sectorUrlSlug}`}
                                     className="inline-flex items-center gap-2 text-[var(--color-clay)] font-medium hover:underline mb-4"
                                 >
                                     <Building2 className="w-4 h-4" />
@@ -480,7 +521,7 @@ export default async function PGDetailPage({ params }: Props) {
                                         {relatedPGs.map((related) => (
                                             <Link
                                                 key={related.id}
-                                                href={`/pg/${related.slug}`}
+                                                href={`/pg/${getPGSeoSlug(related.slug, related.sector.slug)}`}
                                                 className="group relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-lg"
                                             >
                                                 <div className="relative aspect-video bg-[var(--color-limestone)]">
@@ -543,7 +584,7 @@ export default async function PGDetailPage({ params }: Props) {
                                 {/* Enquiry Form */}
                                 <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/24 to-transparent" />
-                                    <h3 className="font-serif text-xl font-semibold text-[var(--color-graphite)] mb-4">Enquire About This PG</h3>
+                                    <h3 className="font-serif text-xl font-semibold text-[var(--color-graphite)] mb-4">Enquire About This PG in {pg.sector.name}</h3>
                                     <FullLeadForm pgSlug={pg.slug} sectorSlug={pg.sector.slug} />
                                 </div>
                             </div>

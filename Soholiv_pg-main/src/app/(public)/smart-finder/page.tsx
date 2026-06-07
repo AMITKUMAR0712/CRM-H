@@ -187,8 +187,8 @@ export default function SmartFinderPage() {
         <div>
             <PageHero
                 kicker="Smart Finder"
-                title="Find your perfect PG—faster"
-                subtitle="Use smart filters to shortlist the right sector, budget, and room type."
+                title="Find the Best PG in Noida Faster"
+                subtitle="Use smart filters to compare Soho Liv PGs in Sector 168, Sector 22 and Sector 51 by budget, room type, AC, WiFi, meals and amenities."
                 actions={
                     <>
                         <Button asChild>

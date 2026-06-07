@@ -10,10 +10,10 @@ import { generateLocalBusinessSchema, generateBreadcrumbSchema } from '@/lib/seo
 import JsonLd from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = generatePageMetadata(
-    'Contact Us - Soho Liv Noida',
-    'Get in touch with Soho Liv. Book a visit, enquire about rooms, or get directions to our premium co-living spaces in Noida Sector 51, 168, and 22. Call or WhatsApp Mr. Jitendra Dixit for support.',
+    'Contact Soho Liv | Book Best PG in Noida Today',
+    'Contact Soho Liv to book an affordable PG in Noida Sector 51, Sector 168 or Sector 22. Call, WhatsApp, raise enquiries and get fast support for Noida and Greater Noida PG rooms.',
     '/contact',
-    ['contact Soho Liv', 'book PG visit', 'Jitendra Dixit contact', 'Noida co-living help']
+    ['contact Soho Liv', 'book PG visit Noida', 'best PG in Noida contact', 'Jitendra Dixit contact', 'Noida co-living help', 'PG in Sector 51 Noida']
 )
 
 async function getSettings() {
@@ -60,7 +60,7 @@ export default async function ContactPage() {
                 <PageHero
                     kicker="Contact"
                     title="Talk to Soho Liv"
-                    subtitle="Questions, pricing, availability, or a site visit—send a message and we'll respond soon."
+                    subtitle="Questions, pricing, availability, site visits or resident support for PGs in Sector 51, Sector 168 and Sector 22 Noida. Call, WhatsApp or send an enquiry."
                     actions={
                         <>
                             <Button asChild>
@@ -82,7 +82,8 @@ export default async function ContactPage() {
                             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/28 to-transparent" />
                             <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-2">Book a Visit</h2>
                             <p className="text-sm text-(--color-muted) mb-6">
-                                Fill out the form below and we&apos;ll get back to you within 24 hours.
+                                Fill out the form below for Noida PG pricing, visit booking, availability or support.
+                                We&apos;ll get back to you as quickly as possible.
                             </p>
                             <FullLeadForm />
                         </div>
@@ -195,7 +196,7 @@ export default async function ContactPage() {
                     <div className="mt-12 relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md text-center">
                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/22 to-transparent" />
                         <h3 className="font-serif text-xl font-semibold text-(--color-graphite)">Want to explore PG options first?</h3>
-                        <p className="mt-2 text-(--color-muted)">Use our Smart Finder to filter and compare PGs based on your preferences.</p>
+                        <p className="mt-2 text-(--color-muted)">Use our Smart Finder to filter and compare affordable PGs in Noida based on budget, sector, room type and amenities.</p>
                         <div className="mt-5 flex flex-wrap justify-center gap-3">
                             <Button asChild>
                                 <Link href="/smart-finder">Find Your PG</Link>

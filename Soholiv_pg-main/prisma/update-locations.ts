@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { OccupancyType, PGApprovalStatus, Prisma, PrismaClient, RoomType } from '@prisma/client'
 import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 
 // Validate environment variables
@@ -113,9 +113,12 @@ async function main() {
                     metroDistance: sectorData.metroDistance,
                     latitude: sectorData.latitude,
                     longitude: sectorData.longitude,
-                    highlights: sectorData.highlights as any,
+                    highlights: sectorData.highlights as Prisma.InputJsonValue,
                 },
-                create: sectorData as any
+                create: {
+                    ...sectorData,
+                    highlights: sectorData.highlights as Prisma.InputJsonValue,
+                }
             })
             sectors[sectorData.slug] = sector.id
         }
@@ -140,8 +143,8 @@ async function main() {
                 address: 'D Block, House No 85/1, Sector 51, Noida',
                 sectorSlug: 'sector-51',
                 monthlyRent: 11000,
-                roomType: 'SINGLE',
-                occupancyType: 'BOYS',
+                roomType: RoomType.SINGLE,
+                occupancyType: OccupancyType.BOYS,
                 mainImage: '/sec51no85.jpeg',
                 photos: ['/sec51no85.jpeg', '/sec51badno85.jpeg', '/sec51bathno85.jpeg'],
             },
@@ -151,8 +154,8 @@ async function main() {
                 address: 'House No 85/14, Sector 51, Noida',
                 sectorSlug: 'sector-51',
                 monthlyRent: 12000,
-                roomType: 'DOUBLE',
-                occupancyType: 'BOYS',
+                roomType: RoomType.DOUBLE,
+                occupancyType: OccupancyType.BOYS,
                 mainImage: '/sec51badno85.jpeg',
                 photos: ['/sec51badno85.jpeg', '/sec51no85.jpeg', '/sec51bathno85.jpeg'],
             },
@@ -162,8 +165,8 @@ async function main() {
                 address: 'House No H77, Sector 51, Noida',
                 sectorSlug: 'sector-51',
                 monthlyRent: 13000,
-                roomType: 'SINGLE',
-                occupancyType: 'CO_LIVING',
+                roomType: RoomType.SINGLE,
+                occupancyType: OccupancyType.CO_LIVING,
                 mainImage: '/sec51no77.jpeg',
                 photos: ['/sec51no77.jpeg', '/sec51pgno77.jpeg', '/sec51bad1no77.jpeg', '/sec51bad2no77.jpeg', '/sec51bad3no77.jpeg', '/sec51bathno77.jpeg'],
             },
@@ -173,8 +176,8 @@ async function main() {
                 address: 'F Block, 71/1, Sector 51, Noida',
                 sectorSlug: 'sector-51',
                 monthlyRent: 10500,
-                roomType: 'DOUBLE',
-                occupancyType: 'BOYS',
+                roomType: RoomType.DOUBLE,
+                occupancyType: OccupancyType.BOYS,
                 mainImage: '/Sector 51 f block 71.jpeg',
                 photos: ['/Sector 51 f block 71.jpeg', '/Sector 51 f block 71-2.jpeg', '/Sector 51 f block 71-3.jpeg', '/Sector 51 f block 71-4.jpeg'],
             },
@@ -184,8 +187,8 @@ async function main() {
                 address: 'Soho 3-i Co-living PG, Sector 168, Noida',
                 sectorSlug: 'sector-168',
                 monthlyRent: 15000,
-                roomType: 'SINGLE',
-                occupancyType: 'CO_LIVING',
+                roomType: RoomType.SINGLE,
+                occupancyType: OccupancyType.CO_LIVING,
                 mainImage: '/sec51pg.jpeg',
                 photos: ['/sec51pg.jpeg', '/sec51pg2.jpeg'],
             },
@@ -195,8 +198,8 @@ async function main() {
                 address: 'House No 10, Block I, Sector 22, Noida',
                 sectorSlug: 'sector-22',
                 monthlyRent: 9500,
-                roomType: 'DOUBLE',
-                occupancyType: 'BOYS',
+                roomType: RoomType.DOUBLE,
+                occupancyType: OccupancyType.BOYS,
                 mainImage: '/ouse no 10 sector 22 block i.jpeg',
                 photos: ['/ouse no 10 sector 22 block i.jpeg', '/ouse no 10 sector 22 block i-1.jpeg', '/ouse no 10 sector 22 block i-3.jpeg', '/ouse no 10 sector 22 block i-4.jpeg'],
             }
@@ -213,8 +216,8 @@ async function main() {
                 address: pgData.address,
                 sectorId: sectors[pgData.sectorSlug],
                 monthlyRent: pgData.monthlyRent,
-                roomType: pgData.roomType as any,
-                occupancyType: pgData.occupancyType as any,
+                roomType: pgData.roomType,
+                occupancyType: pgData.occupancyType,
                 description: `${pgData.name} offers premium co-living near ${pgData.address}. Featuring high-speed WiFi, professional housekeeping, and 24/7 security.`,
                 availableRooms: 5,
                 totalRooms: 20,
@@ -236,11 +239,11 @@ async function main() {
                 const createdPg = await prisma.pG.create({
                     data: {
                         ...pgCreateData,
-                        approvalStatus: 'APPROVED',
+                        approvalStatus: PGApprovalStatus.APPROVED,
                         approvedAt: new Date(),
                         approvedById: superAdmin?.id,
                         createdById: superAdmin?.id,
-                    } as any
+                    }
                 })
 
                 // Add photos for new PG only
@@ -342,15 +345,12 @@ async function main() {
 
         const galleryData = imageFiles.map(img => {
             let sectorSlug = 'sector-51' // default
-            let sectorName = 'Sector 51'
 
             const lowerImg = img.toLowerCase()
             if (lowerImg.includes('sector 22') || lowerImg.includes('sec22') || lowerImg.includes('ouse no 10')) {
                 sectorSlug = 'sector-22'
-                sectorName = 'Sector 22'
             } else if (lowerImg.includes('168')) {
                 sectorSlug = 'sector-168'
-                sectorName = 'Sector 168'
             }
 
             const category = categorizeImage(img)

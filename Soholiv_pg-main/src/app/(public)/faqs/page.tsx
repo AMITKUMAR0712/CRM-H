@@ -9,10 +9,10 @@ import { generateFAQSchema, generateBreadcrumbSchema } from '@/lib/seo/structure
 import JsonLd from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = generatePageMetadata(
-    'Frequently Asked Questions - SoHo Liv PG',
-    'Find answers to common questions about booking, rent, amenities, and living at SoHo Liv PG.',
+    'Noida PG FAQs | Rent, Booking, Food & Soho Liv Support',
+    'Find answers about Soho Liv PG booking, rent, food, amenities, security, CRM ticket support and resident services for Noida Sector 51, Sector 168 and Sector 22 PGs.',
     '/faqs',
-    ['PG FAQs', 'booking help', 'PG rules', 'SoHo Liv support']
+    ['Noida PG FAQs', 'PG booking help Noida', 'PG rent Noida', 'PG food Noida', 'Soho Liv support', 'PG ticket support']
 )
 
 const faqCategories = [

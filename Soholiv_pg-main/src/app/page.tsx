@@ -16,16 +16,20 @@ import { generateLocalBusinessSchema, generateFAQSchema } from '@/lib/seo/struct
 import { generatePageMetadata } from '@/lib/seo/metadata'
 
 export const metadata: Metadata = generatePageMetadata(
-    'Soho Liv | Premium Co-living & PG Accommodation in Noida',
-    'Experience "Budget Luxury" at Soho Liv. Premium PG rooms with AC, WiFi, home-style meals, and 3-tier security in Noida Sector 50, 51, 52, 62 & 76. Book a visit for the best stay in Delhi NCR.',
+    'Best PG in Noida & Greater Noida | Soho Liv Affordable PG',
+    'Soho Liv offers the best PG in Noida and Greater Noida with affordable AC rooms, meals, WiFi, 24/7 security, CRM ticket support, direct chat and fast issue resolution in Sector 168, Sector 22 and Sector 51 Noida.',
     '/',
     [
-        'Soho Liv Noida',
-        'budget luxury PG Noida',
-        'premium co-living Noida',
+        'best PG in Noida',
+        'best PG in Greater Noida',
+        'cheapest PG in Noida',
+        'affordable PG in Noida',
+        'Soho Liv Noida PG',
         'PG near Sector 52 metro',
-        'sector 62 PG for boys',
-        'sector 51 PG for girls',
+        'Sector 168 Noida PG',
+        'Sector 22 Noida PG',
+        'Sector 51 Noida PG',
+        'Noida PG with CRM support',
         'best PG with meals Noida',
     ]
 )
@@ -35,20 +39,20 @@ export default function HomePage() {
 
     const faqSchema = generateFAQSchema([
         {
-            question: 'What is unique about Soho Liv co-living?',
-            answer: 'Soho Liv offers "Budget Luxury"—premium co-living with designer interiors, ultra-high-speed WiFi, home-style meals, and 3-tier security at an affordable price point.',
+            question: 'Why is Soho Liv one of the best PG options in Noida?',
+            answer: 'Soho Liv combines affordable rent, AC rooms, WiFi, home-style meals, 24/7 security, direct chat support and a CRM ticket system so resident issues are tracked and resolved quickly.',
         },
         {
             question: 'Where are Soho Liv properties located?',
-            answer: 'We operate in major educational and IT hubs in Noida, including Sector 50, 51, 52, 62, and 76, ensuring proximity to metro stations.',
+            answer: 'Soho Liv focuses on high-demand PG locations in Noida including Sector 51, Sector 168 and Sector 22, with connectivity to metro stations, offices, colleges and daily markets.',
         },
         {
             question: 'What is the monthly rent for PG in Noida?',
-            answer: 'Our PG rents start from ₹6,000 per month for sharing rooms and go up to ₹15,000 for single occupancy with all amenities included.',
+            answer: 'Our PG rents are kept competitive for Noida and Greater Noida. Shared and private options vary by sector and room type, with transparent pricing and essential amenities included.',
         },
         {
-            question: 'Is food included in the PG rent?',
-            answer: 'Yes, most of our PG accommodations include nutritious meals (breakfast, lunch, and dinner) in the monthly rent.',
+            question: 'Can residents raise tickets for PG problems?',
+            answer: 'Yes. Soho Liv has a proper CRM and resident support flow where users can raise tickets, chat directly and get maintenance or service issues resolved as quickly as possible.',
         },
     ])
 

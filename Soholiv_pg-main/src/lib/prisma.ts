@@ -12,6 +12,8 @@ type AdapterConfig = {
   port: number
   database: string
   connectionLimit: number
+  acquireTimeout: number
+  connectTimeout: number
 }
 
 function getAdapterConfig(): AdapterConfig | null {
@@ -21,6 +23,8 @@ function getAdapterConfig(): AdapterConfig | null {
   const password = process.env.DATABASE_PASSWORD ?? ''
   const database = process.env.DATABASE_DATABASE
   const connectionLimit = Number(process.env.DATABASE_CONNECTION_LIMIT ?? '10')
+  const acquireTimeout = Number(process.env.DATABASE_ACQUIRE_TIMEOUT ?? '3000')
+  const connectTimeout = Number(process.env.DATABASE_CONNECT_TIMEOUT ?? '3000')
 
   if (host && user && database) {
     return {
@@ -30,6 +34,8 @@ function getAdapterConfig(): AdapterConfig | null {
       password,
       database,
       connectionLimit,
+      acquireTimeout,
+      connectTimeout,
     }
   }
 
@@ -47,6 +53,8 @@ function getAdapterConfig(): AdapterConfig | null {
       password: decodeURIComponent(parsed.password || ''),
       database: dbName,
       connectionLimit,
+      acquireTimeout,
+      connectTimeout,
     }
   } catch {
     return null
@@ -62,6 +70,8 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient({
     password: '',
     database: 'soholiv_db',
     connectionLimit: 10,
+    acquireTimeout: 3000,
+    connectTimeout: 3000,
   }),
 })
 

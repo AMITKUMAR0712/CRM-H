@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Phone, Mail, MapPin, MessageCircle, Facebook, Instagram, Linkedin, Youtube } from 'lucide-react'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
+import { getSectorSeoSlug } from '@/lib/seo/slugs'
 
 type FooterLink = { href: string; label: string }
 
@@ -40,9 +41,9 @@ export default async function Footer() {
                 select: { key: true, value: true },
             }),
         ])
-    } catch (err) {
+    } catch {
         // Keep the page alive with fallbacks if the DB is unreachable.
-        console.error('[Footer] Failed to load footer data', err)
+        console.warn('[Footer] Database unavailable; using fallback footer data.')
     }
 
     const settingsMap = new Map(settings.map((s) => [s.key, s.value]))
@@ -71,7 +72,7 @@ export default async function Footer() {
         .filter(Boolean)
         .slice(0, 12) as FooterLink[]
 
-    const sectorLinks: FooterLink[] = sectors.map((s) => ({ href: `/pg-locations/${s.slug}`, label: s.name }))
+    const sectorLinks: FooterLink[] = sectors.map((s) => ({ href: `/pg-locations/${getSectorSeoSlug(s.slug)}`, label: s.name }))
 
     return (
         <footer className="footer-dark-bg text-white">
