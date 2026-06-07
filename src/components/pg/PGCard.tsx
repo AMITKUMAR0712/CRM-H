@@ -1,11 +1,11 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import Image from 'next/image'
 import { Wifi, Snowflake, Utensils, ArrowRight, Users, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, normalizeImageSrc } from '@/lib/utils'
 import { getPGSeoSlug } from '@/lib/seo/slugs'
 
 interface PGCardProps {
@@ -49,23 +49,19 @@ const occupancyLabels: Record<string, string> = {
 
 export default function PGCard({ pg }: PGCardProps) {
     const featuredPhoto = pg.photos?.find(p => p.isFeatured) || pg.photos?.[0]
+    const featuredPhotoSrc = normalizeImageSrc(featuredPhoto?.url)
     const pgUrlSlug = getPGSeoSlug(pg.slug, pg.sector?.slug)
 
     return (
-<<<<<<< HEAD
-        <div className="bg-(--color-surface) rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
-            <Link href={`/pg/${pg.slug}`} className="block">
-=======
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group">
             <Link href={`/pg/${pgUrlSlug}`} className="block">
->>>>>>> a03c204 (Update frontend UI with SEO , content all over website on pager SEO)
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Image */}
                     <div className="relative w-full md:w-48 h-40 bg-[var(--color-limestone)] rounded-xl overflow-hidden flex items-center justify-center">
-                        {featuredPhoto ? (
+                        {featuredPhotoSrc ? (
                             <Image
-                                src={featuredPhoto.url}
-                                alt={featuredPhoto.altText || pg.name}
+                                src={featuredPhotoSrc}
+                                alt={featuredPhoto?.altText || pg.name}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                                 sizes="(max-width: 768px) 100vw, 192px"
@@ -87,11 +83,11 @@ export default function PGCard({ pg }: PGCardProps) {
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
                                     <span>{roomTypeLabels[pg.roomType] || pg.roomType}</span>
-                                    <span>•</span>
+                                    <span aria-hidden="true">&bull;</span>
                                     <span>{occupancyLabels[pg.occupancyType] || pg.occupancyType}</span>
                                     {pg.sector && (
                                         <>
-                                            <span>•</span>
+                                            <span aria-hidden="true">&bull;</span>
                                             <span>{pg.sector.name}</span>
                                         </>
                                     )}

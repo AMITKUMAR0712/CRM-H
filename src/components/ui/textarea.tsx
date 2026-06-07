@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { cn } from "@/lib/utils"
 
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
@@ -8,7 +8,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         return (
             <textarea
                 className={cn(
-                    "flex min-h-[120px] w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) px-4 py-3 text-base text-(--color-graphite) transition-all duration-200 resize-none",
+                    "flex min-h-[120px] w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-base text-[var(--color-graphite)] transition-all duration-200 resize-none",
                     "placeholder:text-[var(--color-muted)]",
                     "focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]",
                     "disabled:cursor-not-allowed disabled:opacity-50",

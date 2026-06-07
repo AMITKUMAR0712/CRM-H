@@ -13,13 +13,13 @@ const buttonVariants = cva(
                 secondary:
                     "bg-[var(--color-olive)] text-white hover:bg-[var(--color-olive)]/95 hover:shadow-md active:scale-[0.98]",
                 outline:
-                    "border-2 border-[var(--color-border)] bg-transparent hover:border-[var(--color-clay)] hover:text-[var(--color-clay)] active:scale-[0.98]",
+                    "border-2 border-[var(--color-border)] bg-[var(--color-surface)]/40 text-[var(--color-graphite)] hover:border-[var(--color-clay)] hover:text-[var(--color-clay)] active:scale-[0.98]",
                 ghost:
                     "hover:bg-[var(--color-limestone)] hover:text-[var(--color-graphite)] active:scale-[0.98]",
                 link:
                     "text-[var(--color-clay)] underline-offset-4 hover:underline",
                 white:
-                    "bg-white text-[var(--color-graphite)] border border-transparent hover:border-[var(--color-border)] shadow-sm hover:shadow-md active:scale-[0.98]",
+                    "bg-[var(--color-surface)] text-[var(--color-graphite)] border border-transparent hover:border-[var(--color-border)] shadow-sm hover:shadow-md active:scale-[0.98]",
             },
             size: {
                 default: "h-11 px-6 py-2",

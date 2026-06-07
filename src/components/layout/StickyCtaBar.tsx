@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Phone, MessageCircle, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -21,11 +21,11 @@ export default function StickyCtaBar({
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="fixed bottom-0 left-0 right-0 z-40 bg-(--color-surface)/95 backdrop-blur-md border-t border-(--color-border) shadow-[0_-8px_30px_rgba(0,0,0,0.18)] p-4 md:hidden"
+            className="fixed bottom-0 left-0 right-0 z-40 border-t border-(--color-border) bg-(--color-surface)/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden"
         >
-            <div className="container-custom flex gap-3">
+            <div className="container-custom flex gap-2">
                 <Button
-                    size="lg"
+                    size="default"
                     className="flex-1"
                     asChild
                 >
@@ -35,7 +35,7 @@ export default function StickyCtaBar({
                     </a>
                 </Button>
                 <Button
-                    size="lg"
+                    size="default"
                     variant="secondary"
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     asChild
@@ -81,7 +81,7 @@ export function FloatingCtaDesktop({
                 transition={{ delay: 0.7 }}
             >
                 <Button
-                    size="lg"
+                    size="default"
                     className="rounded-full shadow-lg hover:shadow-xl transition-shadow"
                     asChild
                 >

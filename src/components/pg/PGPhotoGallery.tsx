@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
+import { normalizeImageSrc } from '@/lib/utils'
 
 interface Photo {
     id: string
@@ -33,16 +34,32 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
         )
     }
 
-    const featuredPhoto = photos.find(p => p.isFeatured) || photos[0]
+    const normalizedPhotos = photos.flatMap((photo) => {
+        const normalizedUrl = normalizeImageSrc(photo.url)
+        return normalizedUrl ? [{ ...photo, normalizedUrl }] : []
+    })
+
+    if (normalizedPhotos.length === 0) {
+        return (
+            <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-limestone)] aspect-video flex items-center justify-center">
+                <div className="text-center text-[var(--color-muted)]">
+                    <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>No photos available</p>
+                </div>
+            </div>
+        )
+    }
+
+    const featuredPhoto = normalizedPhotos.find(p => p.isFeatured) || normalizedPhotos[0]
     const otherPhotos = photos.filter(p => p.id !== featuredPhoto.id).slice(0, 4)
-    const totalPhotos = photos.length
+    const totalPhotos = normalizedPhotos.length
     const remainingCount = totalPhotos - 5
 
     const openLightbox = (index: number) => setLightboxIndex(index)
     const closeLightbox = () => setLightboxIndex(null)
 
     const nextImage = () => {
-        if (lightboxIndex !== null && lightboxIndex < photos.length - 1) {
+        if (lightboxIndex !== null && lightboxIndex < normalizedPhotos.length - 1) {
             setLightboxIndex(lightboxIndex + 1)
         }
     }
@@ -70,7 +87,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                     onClick={() => openLightbox(0)}
                 >
                     <Image
-                        src={featuredPhoto.url}
+                        src={featuredPhoto.normalizedUrl}
                         alt={featuredPhoto.altText || pgName}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -82,8 +99,10 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
 
                 {/* Other Photos - Small Grid */}
                 {otherPhotos.map((photo, idx) => {
+                    const photoSrc = normalizeImageSrc(photo.url)
+                    if (!photoSrc) return null
                     const isLast = idx === otherPhotos.length - 1 && remainingCount > 0
-                    const actualIndex = photos.findIndex(p => p.id === photo.id)
+                    const actualIndex = normalizedPhotos.findIndex(p => p.id === photo.id)
 
                     return (
                         <div
@@ -92,7 +111,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                             onClick={() => openLightbox(actualIndex)}
                         >
                             <Image
-                                src={photo.url}
+                                src={photoSrc}
                                 alt={photo.altText || `${pgName} photo ${idx + 2}`}
                                 fill
                                 className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -123,7 +142,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
 
             {/* Lightbox */}
             <AnimatePresence>
-                {lightboxIndex !== null && photos[lightboxIndex] && (
+                {lightboxIndex !== null && normalizedPhotos[lightboxIndex] && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -154,7 +173,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                         )}
 
                         {/* Next Button */}
-                        {lightboxIndex < photos.length - 1 && (
+                {lightboxIndex < normalizedPhotos.length - 1 && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); nextImage() }}
                                 className="absolute right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 transition z-10"
@@ -174,27 +193,27 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Image
-                                src={photos[lightboxIndex].url}
-                                alt={photos[lightboxIndex].altText || `${pgName} photo`}
+                                src={normalizedPhotos[lightboxIndex].normalizedUrl}
+                                alt={normalizedPhotos[lightboxIndex].altText || `${pgName} photo`}
                                 width={1200}
                                 height={800}
                                 className="object-contain w-full h-auto max-h-[80vh]"
                             />
-                            {photos[lightboxIndex].caption && (
+                            {normalizedPhotos[lightboxIndex].caption && (
                                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                                    <p className="text-white text-center">{photos[lightboxIndex].caption}</p>
+                                    <p className="text-white text-center">{normalizedPhotos[lightboxIndex].caption}</p>
                                 </div>
                             )}
                         </motion.div>
 
                         {/* Counter */}
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-                            {lightboxIndex + 1} / {photos.length}
+                            {lightboxIndex + 1} / {normalizedPhotos.length}
                         </div>
 
                         {/* Thumbnail Strip */}
                         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-2 max-w-[80vw] overflow-x-auto py-2">
-                            {photos.map((photo, idx) => (
+                            {normalizedPhotos.map((photo, idx) => (
                                 <button
                                     key={photo.id}
                                     onClick={(e) => { e.stopPropagation(); setLightboxIndex(idx) }}
@@ -202,7 +221,7 @@ export default function PGPhotoGallery({ photos, pgName }: PGPhotoGalleryProps) 
                                         }`}
                                 >
                                     <Image
-                                        src={photo.url}
+                                        src={photo.normalizedUrl}
                                         alt=""
                                         fill
                                         className="object-cover"

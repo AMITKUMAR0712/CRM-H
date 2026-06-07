@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
@@ -62,7 +62,7 @@ export default function NewTicketPage() {
           <div>
             <label className="text-sm font-medium">Description</label>
             <textarea
-              className="w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-base text-[var(--color-graphite)] focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
               rows={5}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -75,7 +75,7 @@ export default function NewTicketPage() {
             <div>
               <label className="text-sm font-medium">Category</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
+                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-graphite)]"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
@@ -89,7 +89,7 @@ export default function NewTicketPage() {
             <div>
               <label className="text-sm font-medium">Priority</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
+                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-graphite)]"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
