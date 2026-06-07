@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Train, Phone, MessageCircle, ChevronDown, Wifi, Snowflake, Utensils, Car, Dumbbell, Shield, Clock, Building2, MapPin } from 'lucide-react'
+import { Train, Phone, MessageCircle, ChevronDown, Wifi, Snowflake, Utensils, Car, Dumbbell, Shield, Building2, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import PGCard from '@/components/pg/PGCard'
@@ -12,7 +12,7 @@ import prisma from '@/lib/prisma'
 import { generateLocationMetadata } from '@/lib/seo/metadata'
 import { generatePlaceSchema, generateFAQSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
-import Breadcrumbs from '@/components/seo/Breadcrumbs'
+import { getSectorSeoSlug, resolveSectorSlug } from '@/lib/seo/slugs'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -20,8 +20,9 @@ type Props = {
 
 async function getSector(slug: string) {
     try {
+        const resolvedSlug = resolveSectorSlug(slug)
         const sector = await prisma.sector.findFirst({
-            where: { slug, isActive: true },
+            where: { slug: resolvedSlug, isActive: true },
             include: {
                 pgs: {
                     where: { isActive: true, approvalStatus: 'APPROVED' },
@@ -64,7 +65,7 @@ export async function generateStaticParams() {
         })
 
         return sectors.map((sector) => ({
-            slug: sector.slug,
+            slug: getSectorSeoSlug(sector.slug),
         }))
     } catch (err) {
         console.error('[Locations] Failed to build static params', err)
@@ -90,7 +91,14 @@ export default async function SectorPage({ params }: Props) {
         notFound()
     }
 
+<<<<<<< HEAD:src/app/(public)/pg-locations/[slug]/page.tsx
     const highlights = (sector.highlights as string[] | null) || []
+=======
+    const rawHighlights = sector.highlights as unknown
+    const highlights = Array.isArray(rawHighlights)
+        ? rawHighlights.filter((highlight): highlight is string => typeof highlight === 'string')
+        : []
+>>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/pg-locations/[slug]/page.tsx
 
     // Collect unique amenities from all PGs
     const allAmenities = new Set<string>()
@@ -116,19 +124,14 @@ export default async function SectorPage({ params }: Props) {
         })))
         : null
 
-    const breadcrumbItems = [
-        { name: 'Locations', url: '/pg-locations' },
-        { name: sector.name, url: `/pg-locations/${sector.slug}` },
-    ]
-
     return (
         <>
             <JsonLd data={faqSchema ? [placeSchema, faqSchema] : placeSchema} />
             <div className="pb-20 md:pb-0">
                 <PageHero
                     kicker="Location"
-                    title={`PG in ${sector.name}, Noida`}
-                    subtitle={sector.description || `Find your perfect PG in ${sector.name} with excellent metro connectivity and modern amenities.`}
+                    title={`Best PG in ${sector.name}, Noida`}
+                    subtitle={sector.description || `Find affordable Soho Liv PG rooms in ${sector.name}, Noida with AC, food, WiFi, security, direct chat and CRM ticket support.`}
                     align="left"
                     actions={
                         <>
@@ -165,12 +168,32 @@ export default async function SectorPage({ params }: Props) {
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-10">
+                            <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
+                                <h2 className="font-serif text-2xl font-bold text-(--color-graphite)">
+                                    Why Choose Soho Liv PG in {sector.name}, Noida?
+                                </h2>
+                                <div className="mt-4 space-y-3 text-sm leading-relaxed text-(--color-muted)">
+                                    <p>
+                                        Soho Liv is built for people searching for the best PG in {sector.name}, Noida
+                                        with affordable rent, clean rooms, meals, WiFi and dependable security.
+                                        Residents can also raise CRM tickets and chat directly for faster resolution
+                                        of room, food, cleaning or maintenance requests.
+                                    </p>
+                                    <p>
+                                        Whether you need a boys PG, girls PG or co-living PG near Noida offices,
+                                        metro routes and daily markets, our {sector.name} options help you compare
+                                        verified rooms and book a visit quickly.
+                                    </p>
+                                </div>
+                            </div>
+
                             {/* Amenities Section */}
                             {allAmenities.size > 0 && (
                                 <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
                                     <h2 className="font-serif text-xl font-bold text-(--color-graphite) mb-4">
-                                        Amenities Available
+                                        Amenities Available in {sector.name} PGs
                                     </h2>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                         {Array.from(allAmenities).map((amenity) => {
@@ -219,11 +242,11 @@ export default async function SectorPage({ params }: Props) {
                             <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-lg">
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
                                 <h2 className="font-serif text-2xl font-bold text-(--color-graphite)">
-                                    Available PGs in {sector.name}
+                                    Available PGs in {sector.name}, Noida
                                 </h2>
                                 <p className="mt-2 text-sm text-(--color-muted)">
                                     {sector.pgs.length > 0
-                                        ? `${sector.pgs.length} PG${sector.pgs.length > 1 ? 's' : ''} found. Shortlist your options and book a visit anytime.`
+                                        ? `${sector.pgs.length} PG${sector.pgs.length > 1 ? 's' : ''} found in ${sector.name}, Noida. Shortlist affordable options and book a visit anytime.`
                                         : 'No PGs available in this sector yet. Check back soon!'}
                                 </p>
                             </div>
@@ -247,7 +270,7 @@ export default async function SectorPage({ params }: Props) {
                             {sector.faqs.length > 0 && (
                                 <div>
                                     <h2 className="font-serif text-2xl font-bold text-(--color-graphite) mb-6">
-                                        FAQs about {sector.name}
+                                        FAQs about PG in {sector.name}, Noida
                                     </h2>
                                     <div className="space-y-4">
                                         {sector.faqs.map((faq) => (
@@ -296,14 +319,22 @@ export default async function SectorPage({ params }: Props) {
                                 {/* Lead Form */}
                                 <div className="relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md shadow-[0_22px_60px_rgba(0,0,0,0.12)]">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/24 to-transparent" />
-                                    <h3 className="font-serif text-xl font-semibold text-(--color-graphite) mb-4">Enquire Now</h3>
-                                    <FullLeadForm sectorSlug={slug} />
+                                    <h3 className="font-serif text-xl font-semibold text-(--color-graphite) mb-4">Enquire for PG in {sector.name}</h3>
+                                    <FullLeadForm sectorSlug={sector.slug} />
                                 </div>
 
                                 {/* Quick Contact - Desktop */}
                                 <div className="hidden md:block relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-6 shadow-lg">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
+<<<<<<< HEAD:src/app/(public)/pg-locations/[slug]/page.tsx
                                     <h3 className="font-serif text-lg font-semibold mb-4">Need Help?</h3>
+=======
+<<<<<<< HEAD
+                                    <h3 className="font-serif text-lg font-semibold mb-4 text-white">Need Help?</h3>
+=======
+                                    <h3 className="font-serif text-lg font-semibold mb-4">Need PG Help?</h3>
+>>>>>>> a03c204 (Update frontend UI with SEO , content all over website on pager SEO)
+>>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/pg-locations/[slug]/page.tsx
                                     <div className="space-y-3">
                                         <Button variant="secondary" className="w-full bg-white text-(--color-graphite) hover:bg-gray-100" asChild>
                                             <a href="tel:+919876543210" className="flex items-center justify-center gap-2">

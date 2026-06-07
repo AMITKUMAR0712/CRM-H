@@ -23,10 +23,10 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 const headlines = [
-    { main: 'Find Your', accent: 'Perfect PG', sub: 'in Noida' },
-    { main: 'Premium', accent: 'Accommodation', sub: 'for Professionals' },
-    { main: 'Safe &', accent: 'Comfortable', sub: 'Living Spaces' },
-    { main: 'Metro-Connected', accent: 'Modern PGs', sub: 'in Every Sector' },
+    { main: 'Best PG', accent: 'in Noida', sub: '& Greater Noida' },
+    { main: 'Affordable', accent: 'AC PG Rooms', sub: 'with Meals' },
+    { main: 'Sector 168,', accent: '22 & 51', sub: 'Noida PGs' },
+    { main: 'Direct Chat', accent: '& Ticket Support', sub: 'for Residents' },
 ]
 
 type TypewriterPart = { text: string; className?: string }
@@ -471,7 +471,7 @@ export default function Hero() {
     return (
         <section
             ref={sectionRef}
-            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-(--color-alabaster) via-(--color-limestone) to-(--color-alabaster)"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-(--color-alabaster) via-(--color-limestone) to-(--color-alabaster) pt-28 md:pt-32"
         >
             <div className="absolute inset-0 opacity-30">
                 <div
@@ -489,7 +489,7 @@ export default function Hero() {
             <div className="pointer-events-none absolute top-20 left-10 h-90 w-90 rounded-full bg-(--color-olive)/20 blur-3xl" />
             <div className="pointer-events-none absolute bottom-10 right-10 h-105 w-105 rounded-full bg-(--color-clay)/15 blur-3xl" />
 
-            <div className="container-custom relative z-10 text-center py-20">
+            <div className="container-custom relative z-10 text-center pb-20 pt-6 md:pb-24">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -531,7 +531,7 @@ export default function Hero() {
                                 className="relative h-2.5 w-2.5 rounded-full bg-linear-to-br from-(--color-clay) to-(--color-olive) shadow-[0_0_0_3px_rgba(160,120,90,0.16),0_0_18px_rgba(160,120,90,0.35)]"
                                 aria-hidden
                             />
-                            <span className="relative tracking-wide">Premium PG Accommodation</span>
+                            <span className="relative tracking-wide">Best PG in Noida with CRM Support</span>
                         </span>
                     </motion.div>
 
@@ -558,8 +558,9 @@ export default function Hero() {
                         transition={{ delay: 0.4 }}
                         className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10"
                     >
-                        Experience comfort, safety, and community living in Noida&apos;s finest paying guest
-                        accommodations. AC rooms, meals included, 24/7 security.
+                        Soho Liv helps students and professionals find affordable PG rooms in Noida Sector 168,
+                        Sector 22 and Sector 51 with AC, meals, WiFi, 24/7 security and quick support through
+                        direct chat and resident tickets.
                     </motion.p>
 
                     <motion.div

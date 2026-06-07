@@ -7,42 +7,42 @@ const benefits = [
     {
         icon: Shield,
         title: '24/7 Security',
-        description: 'CCTV surveillance and biometric entry for your safety',
+        description: 'CCTV surveillance and verified entry for safe PG living in Noida',
     },
     {
         icon: Wifi,
         title: 'High-Speed WiFi',
-        description: 'Unlimited internet for work and entertainment',
+        description: 'Unlimited internet for office work, study, streaming and daily calls',
     },
     {
         icon: Utensils,
         title: 'Home-cooked Meals',
-        description: 'Nutritious vegetarian meals, 2-3 times daily',
+        description: 'Nutritious meals with affordable Noida PG rent plans',
     },
     {
         icon: Sparkles,
         title: 'Daily Housekeeping',
-        description: 'Clean rooms and common areas every day',
+        description: 'Clean rooms and common areas across Soho Liv PG properties',
     },
     {
         icon: Clock,
-        title: 'Flexible Timings',
-        description: 'Late night entry allowed with prior notice',
+        title: 'Fast Ticket Support',
+        description: 'Raise CRM tickets for maintenance, food, cleaning or room issues',
     },
     {
         icon: Car,
         title: 'Parking Space',
-        description: 'Secure two-wheeler and car parking',
+        description: 'Secure two-wheeler and car parking at selected PG locations',
     },
     {
         icon: Zap,
         title: 'Power Backup',
-        description: '24/7 power backup for uninterrupted living',
+        description: 'Power backup for uninterrupted work, study and living',
     },
     {
         icon: Users,
         title: 'Community Living',
-        description: 'Meet like-minded professionals and students',
+        description: 'Best-fit PG community for students and professionals in Noida',
     },
 ]
 
@@ -60,10 +60,11 @@ export default function BenefitsGrid() {
                         Why Choose Us
                     </span>
                     <h2 className="font-serif text-3xl md:text-4xl font-bold text-[var(--color-graphite)] mb-4">
-                        Everything You Need
+                        Everything You Need in a Noida PG
                     </h2>
                     <p className="text-[var(--color-muted)] max-w-xl mx-auto">
-                        We provide all the amenities for a comfortable and hassle-free living experience.
+                        Soho Liv combines affordable PG rent, AC rooms, food, WiFi, security, direct chat
+                        and CRM ticket support for a smoother stay in Noida and Greater Noida.
                     </p>
                 </motion.div>
 

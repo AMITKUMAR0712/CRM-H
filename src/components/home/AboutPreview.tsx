@@ -8,23 +8,23 @@ import Link from 'next/link'
 const features = [
     {
         icon: Sparkles,
-        title: 'Premium Comfort',
-        description: 'Thoughtfully designed rooms with modern amenities for a comfortable stay.',
+        title: 'Affordable PG Comfort',
+        description: 'Budget luxury PG rooms in Noida with modern furniture, AC options, WiFi and meals.',
     },
     {
         icon: Shield,
-        title: 'Safe & Secure',
-        description: '24/7 security, CCTV surveillance, and verified residents for peace of mind.',
+        title: 'Safe Noida PGs',
+        description: '24/7 security, CCTV surveillance and verified residents across Sector 51, 168 and 22.',
     },
     {
         icon: Users,
-        title: 'Community Living',
-        description: 'A balanced vibe—friendly when you want it, private when you need it.',
+        title: 'Student & Professional Friendly',
+        description: 'Co-living PGs built for working professionals, students and long-stay residents.',
     },
     {
         icon: Clock,
-        title: 'Hassle-Free',
-        description: 'Responsive support and clear policies make daily life smooth.',
+        title: 'CRM Ticket Support',
+        description: 'Raise a ticket, chat directly and get PG service problems tracked quickly.',
     },
 ]
 
@@ -41,19 +41,20 @@ export default function AboutPreview() {
                         transition={{ duration: 0.6 }}
                     >
                         <span className="text-(--color-clay) text-sm font-medium uppercase tracking-widest mb-4 block">
-                            About SOHO PG
+                            About Soho Liv PG
                         </span>
                         <h2 className="font-serif text-3xl md:text-4xl font-bold text-(--color-graphite) mb-6">
-                            A Premium PG Experience in Noida
+                            Best PG Experience in Noida and Greater Noida
                         </h2>
                         <p className="text-muted text-lg mb-6 leading-relaxed">
-                            SOHO PG started with a simple idea: finding a PG shouldn&apos;t be stressful.
-                            We saw people compromise on basics—cleanliness, comfort, and clarity.
-                            So we built spaces where the experience is consistent.
+                            Soho Liv started with a simple idea: finding a PG in Noida shouldn&apos;t be stressful
+                            or overpriced. We focus on Sector 51, Sector 168 and Sector 22 Noida so residents
+                            can stay close to offices, metro routes, colleges and daily markets.
                         </p>
                         <p className="text-muted mb-8">
-                            From onboarding to daily living, our goal is to make your stay calm,
-                            organized, and premium—without the drama.
+                            From onboarding to daily living, our CRM-backed support helps residents raise
+                            tickets, chat directly and get issues solved quickly while enjoying clean rooms,
+                            meals, WiFi, security and some of the most competitive PG rates in Noida.
                         </p>
                         <div className="flex flex-wrap gap-4">
                             <Button asChild>

@@ -4,6 +4,7 @@
  */
 
 import { ORGANIZATION, SITE_CONFIG } from './constants'
+import { getPGSeoSlug } from './slugs'
 
 /**
  * Organization Schema
@@ -38,19 +39,34 @@ export function generateLocalBusinessSchema() {
         '@context': 'https://schema.org',
         '@type': 'LodgingBusiness',
         name: ORGANIZATION.name,
+        description: ORGANIZATION.description,
         image: ORGANIZATION.logo,
         '@id': ORGANIZATION.url,
         url: ORGANIZATION.url,
         telephone: ORGANIZATION.contactPoint.telephone,
-        priceRange: '₹₹',
+        priceRange: '₹',
+        areaServed: [
+            { '@type': 'City', name: 'Noida' },
+            { '@type': 'City', name: 'Greater Noida' },
+            { '@type': 'AdministrativeArea', name: 'Noida Sector 51' },
+            { '@type': 'AdministrativeArea', name: 'Noida Sector 168' },
+            { '@type': 'AdministrativeArea', name: 'Noida Sector 22' },
+        ],
+        amenityFeature: [
+            { '@type': 'LocationFeatureSpecification', name: 'AC PG rooms', value: true },
+            { '@type': 'LocationFeatureSpecification', name: 'High-speed WiFi', value: true },
+            { '@type': 'LocationFeatureSpecification', name: 'Home-style meals', value: true },
+            { '@type': 'LocationFeatureSpecification', name: 'CRM ticket support', value: true },
+            { '@type': 'LocationFeatureSpecification', name: '24/7 security', value: true },
+        ],
         address: {
             '@type': 'PostalAddress',
             ...ORGANIZATION.address,
         },
         geo: {
             '@type': 'GeoCoordinates',
-            latitude: 28.6139,
-            longitude: 77.2090,
+            latitude: 28.5847,
+            longitude: 77.3734,
         },
         openingHoursSpecification: {
             '@type': 'OpeningHoursSpecification',
@@ -99,7 +115,7 @@ export function generateProductSchema(pg: {
     securityDeposit?: number | null
     availableRooms: number
     photos: { url: string }[]
-    sector: { name: string }
+    sector: { name: string; slug?: string }
     reviews?: { rating: number }[]
 }) {
     const avgRating =
@@ -110,13 +126,14 @@ export function generateProductSchema(pg: {
     return {
         '@context': 'https://schema.org',
         '@type': 'Product',
-        name: pg.name,
-        description: pg.description || `PG accommodation in ${pg.sector.name}, Noida`,
+        name: `${pg.name} - PG in ${pg.sector.name}, Noida`,
+        description: pg.description || `Affordable PG accommodation in ${pg.sector.name}, Noida with AC rooms, WiFi, meals, security and CRM ticket support by Soho Liv.`,
         image: pg.photos.length > 0 ? pg.photos.map((p) => p.url) : undefined,
         brand: {
             '@type': 'Brand',
             name: ORGANIZATION.name,
         },
+        category: 'Paying Guest Accommodation',
         offers: {
             '@type': 'Offer',
             price: pg.monthlyRent,
@@ -125,7 +142,7 @@ export function generateProductSchema(pg: {
                 pg.availableRooms > 0
                     ? 'https://schema.org/InStock'
                     : 'https://schema.org/OutOfStock',
-            url: `${SITE_CONFIG.url}/pg/${pg.slug}`,
+            url: `${SITE_CONFIG.url}/pg/${getPGSeoSlug(pg.slug, pg.sector.slug)}`,
             priceValidUntil: new Date(
                 new Date().setFullYear(new Date().getFullYear() + 1)
             ).toISOString(),
@@ -246,8 +263,8 @@ export function generatePlaceSchema(sector: {
     return {
         '@context': 'https://schema.org',
         '@type': 'Place',
-        name: sector.name,
-        description: sector.description || `${sector.name}, Noida`,
+        name: `${sector.name}, Noida`,
+        description: sector.description || `Best PG location in ${sector.name}, Noida for affordable paying guest rooms, co-living, meals, WiFi and fast Soho Liv support.`,
         address: {
             '@type': 'PostalAddress',
             addressLocality: sector.name,

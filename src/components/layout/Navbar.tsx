@@ -39,9 +39,9 @@ export default async function Navbar() {
       orderBy: [{ parentId: 'asc' }, { order: 'asc' }, { createdAt: 'asc' }],
       include: { page: { select: { slug: true } } },
     })
-  } catch (err) {
+  } catch {
     // Avoid taking down the whole page if the DB is temporarily unavailable.
-    console.error('[Navbar] Failed to load menu items', err)
+    console.warn('[Navbar] Database unavailable; using fallback menu.')
     return <NavbarClient headerMenu={FALLBACK_HEADER_MENU} />
   }
 

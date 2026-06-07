@@ -32,8 +32,8 @@ const getHomeBanners = unstable_cache(
         },
         take: 3,
       })
-    } catch (err) {
-      console.error('[HomeBanners] Failed to load banners:', err)
+    } catch {
+      console.warn('[HomeBanners] Database unavailable; rendering without banners.')
       return []
     }
   },

@@ -7,12 +7,13 @@ import prisma from '@/lib/prisma'
 import { generatePageMetadata } from '@/lib/seo/metadata'
 import { generateCollectionPageSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
+import { getSectorSeoSlug } from '@/lib/seo/slugs'
 
 export const metadata: Metadata = generatePageMetadata(
-    'PG Locations in Noida - All Sectors',
-    'Find PG accommodation in popular Noida sectors - 50, 51, 52, 62, 76. Near metro stations with great connectivity. Compare prices and amenities.',
+    'Best PG Locations in Noida & Greater Noida | Sector 168, 22, 51',
+    'Compare Soho Liv PG locations in Noida Sector 168, Sector 22 and Sector 51. Find affordable PG rooms with AC, food, WiFi, security, direct chat and CRM ticket support.',
     '/pg-locations',
-    ['PG locations Noida', 'Noida sectors', 'PG near metro', 'accommodation areas', 'Noida PG sectors']
+    ['PG locations Noida', 'best PG sectors Noida', 'Sector 168 Noida PG', 'Sector 22 Noida PG', 'Sector 51 Noida PG', 'Greater Noida PG locations']
 )
 
 async function getSectors() {
@@ -67,8 +68,8 @@ export default async function LocationsPage() {
 
     // Collection Page Schema
     const collectionSchema = generateCollectionPageSchema(
-        'PG Locations in Noida',
-        'Browse all PG accommodation locations across Noida sectors',
+        'Best PG Locations in Noida and Greater Noida',
+        'Browse Soho Liv PG accommodation across Noida Sector 168, Sector 22 and Sector 51 with affordable rooms, meals, WiFi and resident support.',
         '/pg-locations',
         sectors.length
     )
@@ -79,8 +80,8 @@ export default async function LocationsPage() {
             <div>
                 <PageHero
                     kicker="Locations"
-                    title="PG Locations in Noida"
-                    subtitle="Choose your preferred sector. Explore metro-friendly areas and compare options in seconds."
+                    title="Best PG Locations in Noida"
+                    subtitle="Choose Soho Liv PGs in Sector 168, Sector 22 and Sector 51 Noida. Compare affordable rent, metro access, food, WiFi, security and fast CRM-backed support."
                     actions={
                         <>
                             <Button asChild>
@@ -100,7 +101,7 @@ export default async function LocationsPage() {
                             {sectors.map((sector) => (
                                 <Link
                                     key={sector.slug}
-                                    href={`/pg-locations/${sector.slug}`}
+                                    href={`/pg-locations/${getSectorSeoSlug(sector.slug)}`}
                                     className="group relative block overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_26px_70px_rgba(0,0,0,0.14)]"
                                 >
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-(--color-clay)/30 to-transparent" />
@@ -117,7 +118,7 @@ export default async function LocationsPage() {
                                     </div>
 
                                     <p className="mt-3 line-clamp-2 text-sm text-(--color-muted)">
-                                        {sector.description || `Premium PG accommodations in ${sector.name}, Noida.`}
+                                        {sector.description || `Affordable PG accommodation in ${sector.name}, Noida with AC rooms, food, WiFi, security and resident ticket support.`}
                                     </p>
 
                                     {sector.metroStation && (
@@ -166,7 +167,7 @@ export default async function LocationsPage() {
 
                     {/* CTA */}
                     <div className="mt-12 text-center">
-                        <p className="text-(--color-muted)">Can&apos;t decide? We&apos;ll help you shortlist in minutes.</p>
+                        <p className="text-(--color-muted)">Can&apos;t decide? We&apos;ll help you shortlist the best PG in Noida in minutes.</p>
                         <div className="mt-5 flex flex-wrap justify-center gap-3">
                             <Button asChild>
                                 <Link href="/smart-finder">Shortlist Now</Link>

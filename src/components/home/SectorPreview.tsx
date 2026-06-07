@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { MapPin, Train, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSectors } from '@/lib/hooks'
+import { getSectorSeoSlug } from '@/lib/seo/slugs'
 
 function formatPriceRange(min: number | null, max: number | null) {
     if (!min && !max) return 'Contact for pricing'
@@ -31,7 +32,7 @@ export default function SectorPreview() {
                             Our Locations
                         </span>
                         <h2 className="font-serif text-3xl md:text-4xl font-bold text-[var(--color-graphite)]">
-                            PG in Popular Sectors
+                            Best PG in Sector 168, 22 and 51 Noida
                         </h2>
                     </div>
                     <Button variant="outline" asChild>
@@ -65,7 +66,7 @@ export default function SectorPreview() {
                                 transition={{ delay: index * 0.1 }}
                             >
                                 <Link
-                                    href={`/pg-locations/${sector.slug}`}
+                                    href={`/pg-locations/${getSectorSeoSlug(sector.slug)}`}
                                     className="block p-6 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] card-3d group h-full"
                                 >
                                     <div className="flex items-center gap-2 text-[var(--color-clay)] mb-4">
@@ -74,7 +75,7 @@ export default function SectorPreview() {
                                     </div>
 
                                     <p className="text-[var(--color-muted)] mb-4 line-clamp-2">
-                                        {sector.description || `Premium PG accommodations in ${sector.name}, Noida.`}
+                                        {sector.description || `Affordable Soho Liv PG accommodation in ${sector.name}, Noida with food, WiFi, security and support.`}
                                     </p>
 
                                     {sector.metroStation && (
@@ -101,7 +102,7 @@ export default function SectorPreview() {
                                     </div>
 
                                     <div className="mt-4 flex items-center text-[var(--color-clay)] font-medium text-sm group-hover:gap-2 transition-all">
-                                        Explore Sector
+                                        Explore PGs in {sector.name}
                                         <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </Link>

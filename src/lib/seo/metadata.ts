@@ -4,7 +4,8 @@
  */
 
 import { Metadata } from 'next'
-import { SITE_CONFIG, DEFAULT_KEYWORDS, DEFAULT_OG_IMAGE, AUTHOR } from './constants'
+import { SITE_CONFIG, DEFAULT_KEYWORDS, DEFAULT_OG_IMAGE, AUTHOR, LOCATION_KEYWORDS } from './constants'
+import { getPGSeoSlug, getSectorSeoSlug } from './slugs'
 
 interface MetadataParams {
     title?: string
@@ -107,7 +108,7 @@ export function generatePageMetadata(
     return generateMetadata({
         title,
         description,
-        keywords: [...DEFAULT_KEYWORDS, ...additionalKeywords],
+        keywords: [...DEFAULT_KEYWORDS, ...LOCATION_KEYWORDS, ...additionalKeywords],
         url: `${SITE_CONFIG.url}${path}`,
     })
 }
@@ -128,25 +129,31 @@ export function generatePGMetadata(pg: {
     mealsIncluded: boolean
     photos: { url: string }[]
 }): Metadata {
-    const title = pg.metaTitle || `${pg.name} - PG in ${pg.sector.name}, Noida`
+    const title = pg.metaTitle || `${pg.name} | Best PG in ${pg.sector.name}, Noida`
     const description =
         pg.metaDescription ||
-        `${pg.name} in ${pg.sector.name}, Noida. ${pg.roomType} room, ${pg.hasAC ? 'AC' : 'Non-AC'}, ₹${pg.monthlyRent}/month. ${pg.mealsIncluded ? 'Meals included.' : ''} Book a visit today!`
+        `${pg.name} in ${pg.sector.name}, Noida offers ${pg.roomType.toLowerCase()} ${pg.hasAC ? 'AC' : 'Non-AC'} PG rooms from ₹${pg.monthlyRent}/month with WiFi, ${pg.mealsIncluded ? 'meals, ' : ''}security, CRM ticket support and fast issue resolution. Book a visit today.`
 
     const keywords = [
         ...DEFAULT_KEYWORDS,
+        ...LOCATION_KEYWORDS,
+        `best PG in ${pg.sector.name} Noida`,
         `PG in ${pg.sector.name}`,
+        `PG in ${pg.sector.name} Noida`,
+        `affordable PG in ${pg.sector.name}`,
+        `cheapest PG in ${pg.sector.name} Noida`,
         `${pg.roomType} PG`,
         `${pg.hasAC ? 'AC' : 'Non-AC'} PG`,
         pg.name,
         `PG near ${pg.sector.name}`,
+        `Soho Liv ${pg.sector.name}`,
     ]
 
     return generateMetadata({
         title,
         description,
         keywords,
-        url: `/pg/${pg.slug}`,
+        url: `/pg/${getPGSeoSlug(pg.slug, pg.sector.slug)}`,
         type: 'product',
         image: pg.photos.length > 0 ? pg.photos[0].url : DEFAULT_OG_IMAGE,
     })
@@ -199,15 +206,22 @@ export function generateLocationMetadata(sector: {
     pgCount?: number
 }): Metadata {
     const title =
-        sector.metaTitle || `PG in ${sector.name}, Noida | Best Paying Guest Accommodation`
+        sector.metaTitle || `Best PG in ${sector.name}, Noida | Affordable Soho Liv PG`
     const description =
         sector.metaDescription ||
         sector.description ||
-        `Find the best PG accommodation in ${sector.name}, Noida. ${sector.pgCount || 'Multiple'} verified PG options with AC, WiFi, meals & 24/7 security. ${sector.metroStation ? `Near ${sector.metroStation} Metro.` : ''}`
+        `Find the best PG in ${sector.name}, Noida with Soho Liv. ${sector.pgCount || 'Multiple'} verified PG options with affordable rent, AC rooms, WiFi, meals, 24/7 security, CRM ticket support and fast service. ${sector.metroStation ? `Near ${sector.metroStation} Metro.` : ''}`
 
     const keywords = [
         ...DEFAULT_KEYWORDS,
+        ...LOCATION_KEYWORDS,
+        `best PG in ${sector.name} Noida`,
         `PG in ${sector.name}`,
+        `PG in ${sector.name} Noida`,
+        `affordable PG in ${sector.name} Noida`,
+        `cheapest PG in ${sector.name} Noida`,
+        `boys PG in ${sector.name} Noida`,
+        `girls PG in ${sector.name} Noida`,
         `${sector.name} PG`,
         `paying guest ${sector.name}`,
         `PG near ${sector.name}`,
@@ -218,7 +232,7 @@ export function generateLocationMetadata(sector: {
         title,
         description,
         keywords,
-        url: `/pg-locations/${sector.slug}`,
+        url: `/pg-locations/${getSectorSeoSlug(sector.slug)}`,
     })
 }
 

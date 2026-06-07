@@ -12,10 +12,10 @@ import { generateCollectionPageSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = generatePageMetadata(
-    'Blog - Tips & Guides for PG Living in Noida',
-    'Helpful articles, tips, and guides for finding the best PG accommodation in Noida. Expert advice on PG living, room selection, and student life.',
+    'Noida PG Blog | Best PG, Rent & Co-living Guides',
+    'Read Soho Liv guides for finding the best PG in Noida and Greater Noida, comparing Sector 168, Sector 22 and Sector 51 PGs, rent, food, room types, safety and resident support.',
     '/blog',
-    ['PG blog', 'accommodation tips', 'student life', 'PG guides', 'Noida living tips', 'hostel advice']
+    ['Noida PG blog', 'best PG in Noida guide', 'Greater Noida PG tips', 'Sector 168 PG guide', 'Sector 51 PG guide', 'PG rent Noida', 'hostel advice']
 )
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>

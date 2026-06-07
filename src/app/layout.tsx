@@ -1,11 +1,16 @@
 import type { Metadata } from "next"
 import { Inter, Outfit } from "next/font/google"
+import Script from "next/script"
 import "./globals.css"
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider"
 import Providers from "./providers"
 import JsonLd from "@/components/seo/JsonLd"
 import { generateOrganizationSchema, generateWebsiteSearchSchema } from "@/lib/seo/structured-data"
 import { SITE_CONFIG, DEFAULT_KEYWORDS, LOCATION_KEYWORDS } from "@/lib/seo/constants"
+
+const GOOGLE_ANALYTICS_ID = "G-13BFFLVVFS"
+const GOOGLE_TAG_MANAGER_ID = "GTM-WHNNP9J9"
+const GOOGLE_SITE_VERIFICATION = "lN6LIQPc0x349J3sTrkKCoo-0RltMKsCf7m25ZPZ5t8"
 
 const inter = Inter({
     variable: "--font-sans",
@@ -86,7 +91,7 @@ export const metadata: Metadata = {
         canonical: SITE_CONFIG.url,
     },
     verification: {
-        google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+        google: GOOGLE_SITE_VERIFICATION,
     },
 }
 
@@ -101,9 +106,47 @@ export default function RootLayout({
     return (
         <html lang="en" className={`${inter.variable} ${outfit.variable}`} suppressHydrationWarning>
             <head>
+                <Script
+                    id="google-tag-manager"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                            })(window,document,'script','dataLayer','${GOOGLE_TAG_MANAGER_ID}');
+                        `,
+                    }}
+                />
+                <Script
+                    id="google-analytics-src"
+                    strategy="afterInteractive"
+                    src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`}
+                />
+                <Script
+                    id="google-analytics"
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            window.dataLayer = window.dataLayer || [];
+                            function gtag(){dataLayer.push(arguments);}
+                            gtag('js', new Date());
+                            gtag('config', '${GOOGLE_ANALYTICS_ID}');
+                        `,
+                    }}
+                />
                 <JsonLd data={[organizationSchema, websiteSearchSchema]} />
             </head>
             <body className="antialiased">
+                <noscript>
+                    <iframe
+                        src={`https://www.googletagmanager.com/ns.html?id=${GOOGLE_TAG_MANAGER_ID}`}
+                        height="0"
+                        width="0"
+                        style={{ display: "none", visibility: "hidden" }}
+                    />
+                </noscript>
                 <Providers>
                     <SmoothScrollProvider>{children}</SmoothScrollProvider>
                 </Providers>
