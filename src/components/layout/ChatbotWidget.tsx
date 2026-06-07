@@ -226,21 +226,21 @@ export default function ChatbotWidget({
   }
 
   return (
-    <div className={cn('fixed bottom-6 left-6 z-[60]', className)}>
+    <div className={cn('fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 z-[60] md:bottom-6 md:left-6', className)}>
       {/* Launcher */}
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          'group flex items-center gap-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 shadow-lg',
+          'group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg md:gap-3 md:px-4 md:py-3',
           'hover:-translate-y-0.5 hover:shadow-2xl transition-all',
           open ? 'pointer-events-none opacity-0' : 'opacity-100'
         )}
         aria-label="Open SoholiV PG chatbot"
       >
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--color-clay)] text-white shadow-md">
-          <Bot className="h-5 w-5" />
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--color-clay)] text-white shadow-md md:h-10 md:w-10">
+          <Bot className="h-4 w-4 md:h-5 md:w-5" />
         </span>
-        <div className="leading-tight text-left">
+        <div className="hidden leading-tight text-left md:block">
           <p className="text-sm font-semibold text-[var(--color-graphite)]">SoholiV Assistant</p>
           <p className="text-xs text-[var(--color-muted)]">Ask about PGs • Locations • Rent</p>
         </div>
@@ -255,7 +255,7 @@ export default function ChatbotWidget({
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.25 }}
             className={cn(
-              'w-[min(420px,calc(100vw-48px))] overflow-hidden rounded-3xl border border-[var(--color-border)]',
+              'w-[calc(100vw-2rem)] max-w-[420px] overflow-hidden rounded-3xl border border-[var(--color-border)]',
               'bg-[var(--color-surface)] shadow-2xl'
             )}
             role="dialog"
@@ -286,7 +286,7 @@ export default function ChatbotWidget({
             </div>
 
             {/* Quick actions */}
-            <div className="grid grid-cols-2 gap-3 px-5 py-4">
+            <div className="grid grid-cols-2 gap-2 px-4 py-3 md:gap-3 md:px-5 md:py-4">
               <Button
                 variant="outline"
                 className="justify-start"
@@ -322,7 +322,7 @@ export default function ChatbotWidget({
             </div>
 
             {/* Messages */}
-            <div className="max-h-[360px] space-y-3 overflow-y-auto px-5 pb-4">
+            <div className="max-h-[min(360px,45vh)] space-y-3 overflow-y-auto px-4 pb-4 md:px-5">
               {messages.map((m) => (
                 <div
                   key={m.id}
@@ -362,7 +362,7 @@ export default function ChatbotWidget({
 
             {/* Input */}
             <form
-              className="flex items-center gap-2 border-t border-[var(--color-border)] p-4"
+              className="flex items-center gap-2 border-t border-[var(--color-border)] p-3 md:p-4"
               onSubmit={(e) => {
                 e.preventDefault()
                 send(input)
@@ -373,12 +373,12 @@ export default function ChatbotWidget({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask: 'Sector 62 under 10k'…"
                 className={cn(
-                  'h-11 flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4',
+                  'h-10 flex-1 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] px-3 md:h-11 md:px-4',
                   'text-sm text-[var(--color-graphite)] placeholder:text-[var(--color-muted)]',
                   'focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]'
                 )}
               />
-              <Button type="submit" size="icon" className="h-11 w-11 rounded-2xl">
+              <Button type="submit" size="icon" className="h-10 w-10 rounded-2xl md:h-11 md:w-11">
                 <Send className="h-5 w-5" />
               </Button>
             </form>

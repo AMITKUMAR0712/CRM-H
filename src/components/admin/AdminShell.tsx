@@ -42,7 +42,7 @@ export default function AdminShell({ user, children }: { user: ShellUser; childr
 
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-[260px_1fr]">
-      <aside className="border-r border-(--color-border) bg-white">
+      <aside className="border-r border-(--color-border) bg-(--color-surface)">
         <div className="p-4 border-b border-(--color-border)">
           <div className="font-semibold leading-tight">SOHO PG</div>
           <div className="text-sm text-muted">Admin Panel</div>
@@ -70,7 +70,7 @@ export default function AdminShell({ user, children }: { user: ShellUser; childr
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="h-14 border-b border-(--color-border) bg-white flex items-center justify-between px-4">
+        <header className="h-14 border-b border-(--color-border) bg-(--color-surface) flex items-center justify-between px-4">
           <div className="min-w-0">
             <div className="text-sm font-medium truncate">{user.name}</div>
             <div className="text-xs text-muted truncate">{user.email} • {user.role}</div>

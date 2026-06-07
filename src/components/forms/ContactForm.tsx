@@ -127,7 +127,7 @@ export default function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <select
                     {...register('preferredSector')}
-                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4 text-base"
+                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-base text-[var(--color-graphite)]"
                 >
                     {sectors.map((s) => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -136,7 +136,7 @@ export default function ContactForm() {
 
                 <select
                     {...register('budget')}
-                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-white px-4 text-base"
+                    className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-base text-[var(--color-graphite)]"
                 >
                     {budgets.map((b) => (
                         <option key={b.value} value={b.value}>{b.label}</option>

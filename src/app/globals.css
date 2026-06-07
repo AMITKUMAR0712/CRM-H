@@ -465,3 +465,98 @@ html.dark .text-gradient {
     --spacing-container: 1rem;
   }
 }
+
+/* ============================================
+   Site-wide responsive + dark-mode polish
+   ============================================ */
+* {
+  min-width: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+img {
+  display: block;
+}
+
+input,
+select,
+textarea {
+  color: var(--color-foreground);
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+select option {
+  color: var(--color-foreground);
+  background-color: var(--color-surface);
+}
+
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  --tw-shadow-color: rgba(0, 0, 0, 0.45);
+}
+
+.app-surface {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--color-clay) 12%, transparent), transparent 32rem),
+    var(--color-background);
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --spacing-section: 3.25rem;
+    --spacing-container: max(1rem, env(safe-area-inset-left));
+  }
+
+  body {
+    background: var(--color-background);
+    font-size: 15px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .container-custom {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .section-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  main {
+    border-radius: 0 0 28px 28px;
+  }
+
+  h1 {
+    letter-spacing: -0.04em;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+}

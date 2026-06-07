@@ -324,7 +324,7 @@ export default async function SectorPage({ params }: Props) {
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
                                     <h3 className="font-serif text-lg font-semibold mb-4">Need PG Help?</h3>
                                     <div className="space-y-3">
-                                        <Button variant="secondary" className="w-full bg-white text-(--color-graphite) hover:bg-gray-100" asChild>
+                                        <Button variant="secondary" className="w-full bg-(--color-surface) text-(--color-graphite) hover:bg-(--color-limestone)" asChild>
                                             <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
                                                 <Phone className="w-4 h-4" />
                                                 Call Now

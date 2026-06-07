@@ -64,3 +64,21 @@ export function getWhatsAppLink(phone: string, message?: string): string {
 export function getPhoneLink(phone: string): string {
     return `tel:${phone.replace(/\D/g, '')}`
 }
+
+/**
+ * Normalize stored image paths before passing them to <Image> or <img>.
+ * DB rows may contain Windows-style public paths or filenames with spaces.
+ */
+export function normalizeImageSrc(src?: string | null): string | null {
+    if (!src) return null
+
+    const trimmed = src.trim().replace(/\\/g, '/')
+    if (!trimmed) return null
+
+    if (/^(https?:|data:|blob:)/i.test(trimmed)) {
+        return encodeURI(trimmed)
+    }
+
+    const publicPath = trimmed.startsWith('/') ? trimmed : `/${trimmed.replace(/^public\//, '')}`
+    return encodeURI(publicPath)
+}

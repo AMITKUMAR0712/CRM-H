@@ -217,7 +217,7 @@ export default function SmartFinderPage() {
                             <div className="space-y-3">
                                 <label className="block text-sm font-medium">Category</label>
                                 <select
-                                    className="w-full rounded-xl border border-(--color-border)/70 bg-white px-3 py-2 text-sm"
+                                    className="w-full rounded-xl border border-(--color-border)/70 bg-(--color-surface) px-3 py-2 text-sm text-(--color-graphite)"
                                     value={selectedFilters.category}
                                     onChange={(e) => updateFilter('category', e.target.value)}
                                 >
@@ -248,7 +248,7 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.sector}
                                         onChange={(e) => updateFilter('sector', e.target.value)}
-                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                                     >
                                         {filters.sectors.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                                     </select>
@@ -260,7 +260,7 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.roomType}
                                         onChange={(e) => updateFilter('roomType', e.target.value)}
-                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                                     >
                                         {filters.roomTypes.map((r) => (<option key={r.value} value={r.value}>{r.label}</option>))}
                                     </select>
@@ -272,7 +272,7 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.occupancy}
                                         onChange={(e) => updateFilter('occupancy', e.target.value)}
-                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                                     >
                                         {filters.occupancy.map((o) => (<option key={o.value} value={o.value}>{o.label}</option>))}
                                     </select>
@@ -284,7 +284,7 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.budget}
                                         onChange={(e) => updateFilter('budget', e.target.value)}
-                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                                     >
                                         {filters.budgets.map((b) => (<option key={b.value} value={b.value}>{b.label}</option>))}
                                     </select>
@@ -296,7 +296,7 @@ export default function SmartFinderPage() {
                                     <select
                                         value={selectedFilters.metroDistance}
                                         onChange={(e) => updateFilter('metroDistance', e.target.value)}
-                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-white px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                        className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                                     >
                                         {filters.metroDistance.map((m) => (<option key={m.value} value={m.value}>{m.label}</option>))}
                                     </select>
@@ -375,7 +375,7 @@ export default function SmartFinderPage() {
                         <div className="space-y-6">
                             {pgsLoading ? (
                                 Array.from({ length: 3 }).map((_, i) => (
-                                    <div key={i} className="bg-white rounded-2xl border border-(--color-border) p-6 animate-pulse">
+                                    <div key={i} className="bg-(--color-surface) rounded-2xl border border-(--color-border) p-6 animate-pulse">
                                         <div className="flex flex-col md:flex-row gap-6">
                                             <div className="w-full md:w-48 h-40 bg-gray-200 rounded-xl" />
                                             <div className="flex-1 space-y-4">
@@ -415,7 +415,7 @@ export default function SmartFinderPage() {
                                                 onClick={() => toggleCompare(pg)}
                                                 className={`absolute top-4 left-4 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${isInCompare(pg.id)
                                                         ? 'bg-(--color-clay) text-white'
-                                                        : 'bg-white/90 border border-(--color-border) text-muted hover:border-(--color-clay)'
+                                                        : 'bg-(--color-surface)/90 border border-(--color-border) text-muted hover:border-(--color-clay)'
                                                     }`}
                                                 title={isInCompare(pg.id) ? 'Remove from compare' : 'Add to compare'}
                                             >

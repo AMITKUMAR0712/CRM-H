@@ -32,7 +32,7 @@ export default function FloatingActions({
   }
 
   return (
-    <div className={cn('fixed bottom-6 right-6 z-[60] flex flex-col gap-3', className)}>
+    <div className={cn('fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-4 z-[60] flex flex-col items-end gap-2 md:bottom-6 md:right-6 md:gap-3', className)}>
       <motion.a
         href={getWhatsAppLink(phone, 'Hi! I want to know about available PG rooms in Noida.')}
         target="_blank"
@@ -41,16 +41,16 @@ export default function FloatingActions({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.35 }}
         className={cn(
-          'group flex items-center gap-3 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 shadow-lg',
+          'group flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg md:gap-3 md:px-4 md:py-3',
           'hover:-translate-y-0.5 hover:shadow-2xl transition-all'
         )}
         aria-label="Chat on WhatsApp"
       >
-        <span className="relative grid h-10 w-10 place-items-center rounded-full bg-green-500 text-white shadow-md shadow-green-500/30 glow-whatsapp">
+        <span className="relative grid h-9 w-9 place-items-center rounded-full bg-green-500 text-white shadow-md shadow-green-500/30 glow-whatsapp md:h-10 md:w-10">
           <span className="absolute inset-0 rounded-full bg-green-500/60 animate-ping" />
-          <MessageCircle className="relative h-5 w-5" />
+          <MessageCircle className="relative h-4 w-4 md:h-5 md:w-5" />
         </span>
-        <div className="leading-tight">
+        <div className="hidden leading-tight md:block">
           <p className="text-sm font-semibold text-[var(--color-graphite)]">WhatsApp</p>
           <p className="text-xs text-[var(--color-muted)]">Instant reply • Book visit</p>
         </div>
@@ -69,7 +69,7 @@ export default function FloatingActions({
               size="icon"
               variant="outline"
               className={cn(
-                'h-12 w-12 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg',
+                'h-10 w-10 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg md:h-12 md:w-12',
                 'hover:-translate-y-0.5 hover:shadow-2xl'
               )}
               aria-label="Back to top"
