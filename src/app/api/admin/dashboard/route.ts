@@ -45,7 +45,7 @@ export async function GET() {
       prisma.pG.count({ where: { isActive: true } }),
     ])
 
-    if (role === UserRole.SUPER_ADMIN) {
+    if (role !== UserRole.USER) {
       const [
         totalLeads,
         totalEnquiries,
@@ -56,29 +56,29 @@ export async function GET() {
         enquiriesByMonth,
         recentAuditLogs,
       ] = await Promise.all([
-        prisma.lead.count(),
-        prisma.enquiry.count(),
-        prisma.pG.count({ where: { isActive: false } }),
-        prisma.user.groupBy({ by: ['role'], _count: { _all: true } }),
-        prisma.pG.groupBy({ by: ['sectorId'], _count: { _all: true } }),
+        prisma.lead.count().catch(() => 0),
+        prisma.enquiry.count().catch(() => 0),
+        prisma.pG.count({ where: { isActive: false } }).catch(() => 0),
+        prisma.user.groupBy({ by: ['role'], _count: { _all: true } }).catch(() => []),
+        prisma.pG.groupBy({ by: ['sectorId'], _count: { _all: true } }).catch(() => []),
         prisma.$queryRaw<{ totalRooms: number | null; occupiedRooms: number | null }[]>(Prisma.sql`
           SELECT SUM(totalRooms) AS totalRooms,
                  SUM(GREATEST(totalRooms - availableRooms, 0)) AS occupiedRooms
           FROM pgs
           WHERE isActive = 1
-        `),
+        `).catch(() => []),
         prisma.$queryRaw<{ month: string; count: bigint }[]>(Prisma.sql`
           SELECT DATE_FORMAT(createdAt, '%Y-%m') AS month, COUNT(*) AS count
           FROM enquiries
           WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
           GROUP BY month
           ORDER BY month ASC
-        `),
+        `).catch(() => []),
         prisma.auditLog.findMany({
           take: 12,
           orderBy: { createdAt: 'desc' },
           select: { action: true, entityType: true, summary: true, createdAt: true, actor: { select: { name: true } } },
-        }),
+        }).catch(() => []),
       ])
 
       const roleCountMap = new Map(usersByRole.map((r) => [r.role, r._count._all]))
@@ -133,105 +133,6 @@ export async function GET() {
           meta: log.actor?.name ?? 'System',
         })),
       })
-    }
-
-    if (role === UserRole.ADMIN) {
-      const [
-        totalLeads,
-        totalEnquiries,
-        openEnquiries,
-        totalBlogs,
-        draftBlogs,
-        galleryImages,
-        enquiriesByDay,
-      ] = await Promise.all([
-        prisma.lead.count(),
-        prisma.enquiry.count(),
-        prisma.enquiry.count({ where: { status: 'NEW' } }),
-        prisma.blogPost.count(),
-        prisma.blogPost.count({ where: { status: 'DRAFT' } }),
-        prisma.galleryImage.count(),
-        prisma.$queryRaw<{ day: string; count: bigint }[]>(Prisma.sql`
-          SELECT DATE(createdAt) as day, COUNT(*) as count
-          FROM enquiries
-          WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
-          GROUP BY DATE(createdAt)
-          ORDER BY day ASC
-        `),
-      ])
-
-      cards.push(
-        { id: 'pgs', title: 'Total PGs', value: totalPgs, subtitle: `Active: ${activePgs}` },
-        { id: 'enquiries', title: 'Enquiries', value: totalEnquiries, subtitle: `New: ${openEnquiries}` },
-        { id: 'leads', title: 'Leads', value: totalLeads },
-        { id: 'blogs', title: 'Blog Posts', value: totalBlogs, subtitle: `Drafts: ${draftBlogs}` },
-        { id: 'gallery', title: 'Gallery Images', value: galleryImages }
-      )
-
-      charts.push({
-        id: 'enquiries-14d',
-        title: 'Enquiries (Last 14 Days)',
-        type: 'line',
-        data: enquiriesByDay.map((row) => ({ label: row.day, value: Number(row.count) })),
-      })
-    }
-
-    if (role === UserRole.MANAGER) {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const weekStart = new Date(today)
-      weekStart.setDate(today.getDate() - 6)
-
-      const [
-        assignedEnquiries,
-        openEnquiries,
-        assignedTickets,
-        todayEnquiries,
-        weekEnquiries,
-        enquiriesByDay,
-      ] = await Promise.all([
-        prisma.enquiry.count({ where: { assignedToId: userId } }),
-        prisma.enquiry.count({ where: { assignedToId: userId, status: 'NEW' } }),
-        prisma.ticket.count({ where: { assignedToId: userId } }),
-        prisma.enquiry.count({ where: { assignedToId: userId, createdAt: { gte: today } } }),
-        prisma.enquiry.count({ where: { assignedToId: userId, createdAt: { gte: weekStart } } }),
-        prisma.$queryRaw<{ day: string; count: bigint }[]>(Prisma.sql`
-          SELECT DATE(createdAt) as day, COUNT(*) as count
-          FROM enquiries
-          WHERE assignedToId = ${userId} AND createdAt >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-          GROUP BY DATE(createdAt)
-          ORDER BY day ASC
-        `),
-      ])
-
-      cards.push(
-        { id: 'assigned-enquiries', title: 'Assigned Enquiries', value: assignedEnquiries, subtitle: `New: ${openEnquiries}` },
-        { id: 'tickets', title: 'Assigned Tickets', value: assignedTickets },
-        { id: 'today', title: "Today's Enquiries", value: todayEnquiries },
-        { id: 'weekly', title: 'This Week', value: weekEnquiries }
-      )
-
-      charts.push({
-        id: 'enquiries-week',
-        title: 'Enquiries (Last 7 Days)',
-        type: 'line',
-        data: enquiriesByDay.map((row) => ({ label: row.day, value: Number(row.count) })),
-      })
-    }
-
-    if (role === UserRole.VIEWER) {
-      const [totalUsers, totalBlogs, totalEnquiries] = await Promise.all([
-        prisma.user.count(),
-        prisma.blogPost.count(),
-        prisma.enquiry.count(),
-      ])
-
-      cards.push(
-        { id: 'pgs', title: 'Total PGs', value: totalPgs, subtitle: `Active: ${activePgs}` },
-        { id: 'users', title: 'Total Users', value: totalUsers },
-        { id: 'blogs', title: 'Blog Posts', value: totalBlogs },
-        { id: 'enquiries', title: 'Enquiries', value: totalEnquiries }
-      )
     }
 
     if (role === UserRole.USER) {

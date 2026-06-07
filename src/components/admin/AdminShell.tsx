@@ -4,11 +4,11 @@ import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
+
 
 type ShellUser = {
   id: string
@@ -19,7 +19,7 @@ type ShellUser = {
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', permission: PERMISSIONS.DASHBOARD_VIEW },
-  { href: '/admin/analytics', label: 'Analytics', permission: PERMISSIONS.LOGS_READ },
+  { href: '/admin/analytics', label: 'Analytics', permission: PERMISSIONS.ANALYTICS_VIEW },
   { href: '/admin/audit-logs', label: 'Audit Logs', permission: PERMISSIONS.LOGS_READ },
   { href: '/admin/pgs', label: 'PGs', permission: PERMISSIONS.PG_READ },
   { href: '/admin/locations', label: 'Locations', permission: PERMISSIONS.SECTOR_READ },

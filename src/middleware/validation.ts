@@ -9,7 +9,11 @@ export async function validateBody<T>(
     schema: ZodSchema<T>
 ): Promise<{ data: T } | { error: NextResponse }> {
     try {
-        const body = await request.json()
+        let body = {}
+        const text = await request.text()
+        if (text) {
+            body = JSON.parse(text)
+        }
         const data = schema.parse(body)
         return { data }
     } catch (err) {

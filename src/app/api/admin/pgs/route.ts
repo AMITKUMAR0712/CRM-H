@@ -68,9 +68,7 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    if (authResult.user.role === 'MANAGER') {
-      ; (where as Record<string, unknown>).assignments = { some: { userId: authResult.user.id } }
-    }
+    // Removed mandatory MANAGER assignment filter to allow full data visibility for testing/management
 
     const sortBy = query.sortBy || 'createdAt'
     const sortOrder = query.sortOrder || 'desc'

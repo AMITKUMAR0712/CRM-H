@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     metadataBase: new URL(SITE_CONFIG.url),
     title: {
         default: SITE_CONFIG.title,
-        template: "%s | SOHO PG",
+        template: `%s | ${SITE_CONFIG.name}`,
     },
     description: SITE_CONFIG.description,
     keywords: [
@@ -43,10 +43,11 @@ export const metadata: Metadata = {
         'co-living space Noida',
         'furnished PG',
         'PG near metro',
+        'budget luxury living',
     ],
-    authors: [{ name: "SOHO PG" }],
-    creator: "SOHO PG",
-    publisher: "SOHO PG",
+    authors: [{ name: "Jitendra Dixit" }],
+    creator: "Soho Liv",
+    publisher: "Soho Liv",
     formatDetection: {
         email: false,
         address: false,
@@ -72,8 +73,8 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: SITE_CONFIG.title,
         description: SITE_CONFIG.description,
-        creator: "@sohopg",
-        site: "@sohopg",
+        creator: "@soholiv",
+        site: "@soholiv",
         images: [`${SITE_CONFIG.url}/og-image.png`],
     },
     robots: {

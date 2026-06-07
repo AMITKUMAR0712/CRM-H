@@ -7,15 +7,15 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string }
+type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string; details?: unknown }
 
 export default function NewTicketPage() {
   const router = useRouter()
 
   const [subject, setSubject] = React.useState('')
-  const [message, setMessage] = React.useState('')
-  const [category, setCategory] = React.useState('GENERAL')
-  const [priority, setPriority] = React.useState('NORMAL')
+  const [description, setDescription] = React.useState('')
+  const [category, setCategory] = React.useState('OTHER')
+  const [priority, setPriority] = React.useState('MEDIUM')
 
   const [pending, setPending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -28,7 +28,7 @@ export default function NewTicketPage() {
     const resp = await fetch('/api/user/tickets', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject, message, category, priority }),
+      body: JSON.stringify({ subject, description, category, priority }),
     })
 
     const json = (await resp.json()) as ApiEnvelope<{ id: string }>
@@ -36,7 +36,9 @@ export default function NewTicketPage() {
     setPending(false)
 
     if (!resp.ok || !json.success || !json.data?.id) {
-      setError(json.error || json.message || 'Failed to create ticket')
+      const msg = json.error || json.message || 'Failed to create ticket'
+      const details = json.details ? `: ${JSON.stringify(json.details)}` : ''
+      setError(`${msg}${details}`)
       return
     }
 
@@ -54,17 +56,18 @@ export default function NewTicketPage() {
         <form className="space-y-4" onSubmit={onSubmit}>
           <div>
             <label className="text-sm font-medium">Subject</label>
-            <Input value={subject} onChange={(e) => setSubject(e.target.value)} required />
+            <Input value={subject} onChange={(e) => setSubject(e.target.value)} required placeholder="e.g. WiFi not working" />
           </div>
 
           <div>
-            <label className="text-sm font-medium">Message</label>
+            <label className="text-sm font-medium">Description</label>
             <textarea
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-base text-[var(--color-graphite)] focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20 focus:border-[var(--color-clay)]"
               rows={5}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
+              placeholder="Provide more details about the issue..."
             />
           </div>
 
@@ -72,26 +75,26 @@ export default function NewTicketPage() {
             <div>
               <label className="text-sm font-medium">Category</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-graphite)]"
+                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               >
-                <option value="GENERAL">General</option>
-                <option value="PAYMENT">Payment</option>
-                <option value="BOOKING">Booking</option>
-                <option value="TECHNICAL">Technical</option>
+                <option value="ELECTRICITY">Electricity</option>
+                <option value="FOOD">Food</option>
+                <option value="ROOM">Room</option>
+                <option value="SECURITY">Security</option>
                 <option value="OTHER">Other</option>
               </select>
             </div>
             <div>
               <label className="text-sm font-medium">Priority</label>
               <select
-                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-[var(--color-graphite)]"
+                className="h-12 w-full rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-3"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
                 <option value="LOW">Low</option>
-                <option value="NORMAL">Normal</option>
+                <option value="MEDIUM">Medium</option>
                 <option value="HIGH">High</option>
                 <option value="URGENT">Urgent</option>
               </select>

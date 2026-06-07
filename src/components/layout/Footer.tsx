@@ -12,8 +12,10 @@ const FALLBACK_FOOTER_LINKS: FooterLink[] = [
     { href: '/pg-locations', label: 'Locations' },
     { href: '/smart-finder', label: 'Smart Finder' },
     { href: '/gallery', label: 'Gallery' },
-    { href: '/blog', label: 'Blog' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/privacy', label: 'Privacy Policy' },
+    { href: '/terms', label: 'Terms & Conditions' },
+    { href: '/faqs', label: 'FAQs' },
+    { href: '/contact', label: 'Contact Us' },
 ]
 
 export default async function Footer() {
@@ -49,10 +51,10 @@ export default async function Footer() {
     const siteDescription =
         settingsMap.get('site_description') ||
         'Premium paying guest accommodation in Noida. Experience comfort, safety, and community living at its finest.'
-    const contactPhone = settingsMap.get('contact_phone') || '+919876543210'
+    const contactPhone = settingsMap.get('contact_phone') || '+919871648677'
     const contactEmail = settingsMap.get('contact_email') || 'info@sohopg.com'
     const contactAddress = settingsMap.get('contact_address') || 'A-123, Sector 51, Noida, Uttar Pradesh 201301'
-    const whatsappNumber = (settingsMap.get('whatsapp_number') || settingsMap.get('whatsapp') || '919876543210').replace(/^\+/, '')
+    const whatsappNumber = (settingsMap.get('whatsapp_number') || settingsMap.get('whatsapp') || '919871648677').replace(/^\+/, '')
 
     const socialFacebook = settingsMap.get('facebook_url') || 'https://facebook.com'
     const socialInstagram = settingsMap.get('instagram_url') || 'https://instagram.com'
@@ -73,7 +75,7 @@ export default async function Footer() {
     const sectorLinks: FooterLink[] = sectors.map((s) => ({ href: `/pg-locations/${getSectorSeoSlug(s.slug)}`, label: s.name }))
 
     return (
-        <footer className="bg-(--color-graphite) text-white">
+        <footer className="footer-dark-bg text-white">
             {/* Main Footer */}
             <div className="container-custom section-padding">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -216,14 +218,17 @@ export default async function Footer() {
             <div className="border-t border-white/10">
                 <div className="container-custom py-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <p className="text-gray-400 text-sm">
-                        © {new Date().getFullYear()} SOHO PG. All rights reserved.
+                        © {new Date().getFullYear()} Soho Liv Co-living. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6 text-sm">
                         <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
                             Privacy Policy
                         </Link>
                         <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                            Terms of Service
+                            Terms & Conditions
+                        </Link>
+                        <Link href="/faqs" className="text-gray-400 hover:text-white transition-colors">
+                            FAQs
                         </Link>
                     </div>
                 </div>

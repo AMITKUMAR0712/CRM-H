@@ -6,8 +6,7 @@ import { getServerSession } from 'next-auth'
 import prisma from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
 import { getActiveUserRestriction } from '@/lib/restrictions'
-import { hasPermission, type Permission } from '@/lib/rbac'
-import type { UserRole } from '@prisma/client'
+import { hasPermission, type Permission, type UserRole } from '@/lib/rbac'
 
 export type AdminGuardSession = {
   user: {

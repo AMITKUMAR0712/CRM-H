@@ -166,7 +166,7 @@ export default function FullLeadForm({ sectorSlug, pgSlug, compact = false }: Fu
                         <label className="text-sm font-medium mb-1 block">Preferred Sector</label>
                         <select
                             {...register('preferredSector')}
-                            className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                             defaultValue={sectorSlug}
                         >
                             <option value="">Select a sector</option>
@@ -182,7 +182,7 @@ export default function FullLeadForm({ sectorSlug, pgSlug, compact = false }: Fu
                             <label className="text-sm font-medium mb-1 block">Min Budget</label>
                             <select
                                 {...register('budgetMin')}
-                                className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                    className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                             >
                                 <option value="">Min</option>
                                 <option value="5000">₹5,000</option>
@@ -196,7 +196,7 @@ export default function FullLeadForm({ sectorSlug, pgSlug, compact = false }: Fu
                             <label className="text-sm font-medium mb-1 block">Max Budget</label>
                             <select
                                 {...register('budgetMax')}
-                                className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                    className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                             >
                                 <option value="">Max</option>
                                 <option value="8000">₹8,000</option>
@@ -226,7 +226,7 @@ export default function FullLeadForm({ sectorSlug, pgSlug, compact = false }: Fu
                             <label className="text-sm font-medium mb-1 block">Preferred Visit Slot</label>
                             <select
                                 {...register('visitSlot')}
-                                className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) px-4 text-base text-(--color-graphite) focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
+                                    className="w-full h-12 rounded-lg border border-(--color-border) bg-(--color-surface) text-(--color-graphite) px-4 text-base focus:outline-none focus:ring-2 focus:ring-(--color-clay)/20"
                             >
                                 <option value="">Select a time</option>
                                 <option value="Morning">Morning (9 AM - 12 PM)</option>

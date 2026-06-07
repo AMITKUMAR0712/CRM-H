@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: RouteParams) {
       orderBy: { createdAt: 'asc' },
     })
 
-    return NextResponse.json(success(messages))
+    return NextResponse.json(success({ thread, messages }))
   } catch (err) {
     const { statusCode, message } = handleError(err)
     return NextResponse.json(error(message), { status: statusCode })

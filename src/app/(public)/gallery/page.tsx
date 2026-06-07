@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import PageHero from '@/components/layout/PageHero'
 import { useGallery, useSectors } from '@/lib/hooks'
-import { normalizeImageSrc } from '@/lib/utils'
 
 const albums = [
     { id: 'all', name: 'All Photos' },
@@ -49,15 +48,11 @@ export default function GalleryPage() {
     const filteredImages = activeRoomType
         ? images.filter(img => img.album?.toLowerCase().includes(activeRoomType))
         : images
-    const displayImages = filteredImages.flatMap((image) => {
-        const normalizedUrl = normalizeImageSrc(image.url)
-        return normalizedUrl ? [{ ...image, normalizedUrl }] : []
-    })
 
     const openLightbox = (index: number) => setLightboxIndex(index)
     const closeLightbox = () => setLightboxIndex(null)
     const nextImage = () => {
-        if (lightboxIndex !== null && lightboxIndex < displayImages.length - 1) {
+        if (lightboxIndex !== null && lightboxIndex < filteredImages.length - 1) {
             setLightboxIndex(lightboxIndex + 1)
         }
     }
@@ -109,7 +104,7 @@ export default function GalleryPage() {
                         <select
                             value={activeSector}
                             onChange={(e) => setActiveSector(e.target.value)}
-                            className="h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-graphite)] focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
+                            className="h-10 rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
                         >
                             <option value="">All Sectors</option>
                             {sectors.map((sector) => (
@@ -120,7 +115,7 @@ export default function GalleryPage() {
                         <select
                             value={activeRoomType}
                             onChange={(e) => setActiveRoomType(e.target.value)}
-                            className="h-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm text-[var(--color-graphite)] focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
+                            className="h-10 rounded-lg border border-[var(--color-border)] bg-(--color-surface) text-(--color-graphite) px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-clay)]/20"
                         >
                             {roomTypes.map((type) => (
                                 <option key={type.id} value={type.id}>{type.name}</option>
@@ -138,7 +133,7 @@ export default function GalleryPage() {
                     <div className="text-center py-20 text-red-500">
                         Error loading gallery. Please try again.
                     </div>
-                ) : displayImages.length === 0 ? (
+                ) : filteredImages.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-[var(--color-muted)]">No photos found for this filter.</p>
                         <Button onClick={() => { setActiveAlbum('all'); setActiveSector(''); setActiveRoomType(''); }} className="mt-4">
@@ -152,7 +147,7 @@ export default function GalleryPage() {
                         animate={{ opacity: 1 }}
                         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
                     >
-                        {displayImages.map((image, index) => (
+                        {filteredImages.map((image, index) => (
                             <motion.div
                                 key={image.id}
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -162,7 +157,7 @@ export default function GalleryPage() {
                                 className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
                             >
                                 <Image
-                                    src={image.normalizedUrl}
+                                    src={image.url}
                                     alt={image.altText || 'Gallery image'}
                                     fill
                                     className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -189,20 +184,20 @@ export default function GalleryPage() {
                             <p className="text-gray-300">Schedule a visit to experience our spaces in person.</p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                            <Button variant="secondary" className="bg-[var(--color-surface)] text-[var(--color-graphite)] hover:bg-[var(--color-limestone)]" asChild>
+                            <Button variant="secondary" className="bg-white text-[var(--color-graphite)] hover:bg-gray-100" asChild>
                                 <Link href="/contact" className="flex items-center gap-2">
                                     <Calendar className="w-4 h-4" />
                                     Book a Visit
                                 </Link>
                             </Button>
                             <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white" asChild>
-                                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                <a href="https://wa.me/919871648677" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                     <MessageCircle className="w-4 h-4" />
                                     WhatsApp
                                 </a>
                             </Button>
                             <Button variant="outline" className="border-white text-white hover:bg-white/10" asChild>
-                                <a href="tel:+919876543210" className="flex items-center gap-2">
+                                <a href="tel:+919871648677" className="flex items-center gap-2">
                                     <Phone className="w-4 h-4" />
                                     Call Now
                                 </a>
@@ -214,7 +209,7 @@ export default function GalleryPage() {
 
             {/* Lightbox */}
             <AnimatePresence>
-                {lightboxIndex !== null && displayImages[lightboxIndex] && (
+                {lightboxIndex !== null && filteredImages[lightboxIndex] && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -238,7 +233,7 @@ export default function GalleryPage() {
                             </button>
                         )}
 
-                        {lightboxIndex < displayImages.length - 1 && (
+                        {lightboxIndex < filteredImages.length - 1 && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
                                 className="absolute right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 transition"
@@ -256,21 +251,21 @@ export default function GalleryPage() {
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Image
-                                src={displayImages[lightboxIndex].normalizedUrl}
-                                alt={displayImages[lightboxIndex].altText || 'Gallery image'}
+                                src={filteredImages[lightboxIndex].url}
+                                alt={filteredImages[lightboxIndex].altText || 'Gallery image'}
                                 width={1200}
                                 height={800}
                                 className="object-contain w-full h-auto max-h-[80vh]"
                             />
-                            {displayImages[lightboxIndex].caption && (
+                            {filteredImages[lightboxIndex].caption && (
                                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                                    <p className="text-white text-center">{displayImages[lightboxIndex].caption}</p>
+                                    <p className="text-white text-center">{filteredImages[lightboxIndex].caption}</p>
                                 </div>
                             )}
                         </motion.div>
 
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-                            {lightboxIndex + 1} / {displayImages.length}
+                            {lightboxIndex + 1} / {filteredImages.length}
                         </div>
                     </motion.div>
                 )}

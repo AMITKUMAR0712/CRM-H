@@ -6,14 +6,19 @@ import { useParams } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 type ApiEnvelope<T> = { success: boolean; data?: T; error?: string; message?: string }
 
 type ChatMessage = {
   id: string
-  message: string
+  body: string
   createdAt: string
-  senderRole: string
+  sender: {
+    id: string
+    name: string
+    role: string
+  }
 }
 
 type ChatThreadDetail = {
@@ -66,7 +71,7 @@ export default function ChatThreadPage() {
     const resp = await fetch(`/api/user/chats/${threadId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text }),
+      body: JSON.stringify({ body: text }),
     })
 
     const json = (await resp.json()) as ApiEnvelope<unknown>
@@ -98,21 +103,31 @@ export default function ChatThreadPage() {
       {thread ? (
         <>
           <div>
-            <h1 className="text-2xl font-semibold">Chat</h1>
-            <p className="text-sm text-[var(--color-muted)] mt-1">Status: {thread.status}</p>
+            <h1 className="text-2xl font-semibold">Chat Support</h1>
+            <p className="text-sm text-[var(--color-muted)] mt-1">Status: <span className="font-medium text-[var(--color-clay)]">{thread.status}</span></p>
           </div>
 
-          <Card className="p-4">
-            <div className="space-y-3">
+          <Card className="p-4 bg-[var(--color-surface)] min-h-[400px] flex flex-col">
+            <div className="flex-1 space-y-4">
               {messages.map((m) => (
-                <div key={m.id} className="border-b border-[var(--color-border)] pb-3 last:border-0 last:pb-0">
-                  <div className="text-xs text-[var(--color-muted)]">
-                    {m.senderRole} • {new Date(m.createdAt).toLocaleString()}
+                <div key={m.id} className={cn(
+                  "flex flex-col gap-1",
+                  m.sender.role === 'USER' ? "items-end" : "items-start"
+                )}>
+                  <div className="text-[10px] text-[var(--color-muted)]">
+                    {m.sender.name} • {new Date(m.createdAt).toLocaleString()}
                   </div>
-                  <div className="text-sm mt-1 whitespace-pre-wrap">{m.message}</div>
+                  <div className={cn(
+                    "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                    m.sender.role === 'USER' 
+                      ? "bg-[var(--color-clay)] text-white" 
+                      : "bg-[var(--color-limestone)] text-[var(--color-graphite)]"
+                  )}>
+                    {m.body}
+                  </div>
                 </div>
               ))}
-              {messages.length === 0 ? <div className="text-sm text-[var(--color-muted)]">No messages yet.</div> : null}
+              {messages.length === 0 ? <div className="text-sm text-[var(--color-muted)] text-center py-10">No messages yet. Start the conversation!</div> : null}
             </div>
           </Card>
 

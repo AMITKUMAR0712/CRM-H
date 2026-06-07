@@ -4,13 +4,12 @@ import * as React from 'react'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
 
 type SectorRow = {
   id: string
@@ -31,7 +30,7 @@ export default function AdminLocationsPage() {
   const { data: session } = useSession()
   const role = session?.user?.role as UserRole | undefined
   const canWrite = role ? hasPermission(role, PERMISSIONS.SECTOR_WRITE) : false
-  const canCreate = role === 'SUPER_ADMIN'
+  const canCreate = role ? hasPermission(role, PERMISSIONS.SECTOR_WRITE) : false
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['admin-sectors', search],

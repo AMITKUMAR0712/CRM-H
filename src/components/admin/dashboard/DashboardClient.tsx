@@ -3,7 +3,8 @@
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid } from 'recharts'
-import type { UserRole } from '@prisma/client'
+import { UserRole } from '@/lib/rbac'
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'

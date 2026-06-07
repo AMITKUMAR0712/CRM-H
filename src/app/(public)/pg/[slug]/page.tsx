@@ -14,11 +14,12 @@ import PageHero from '@/components/layout/PageHero'
 import StickyCtaBar from '@/components/layout/StickyCtaBar'
 import PGPhotoGallery from '@/components/pg/PGPhotoGallery'
 import prisma from '@/lib/prisma'
-import { formatPrice, normalizeImageSrc } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils'
+import { generatePGMetadata } from '@/lib/seo/metadata'
+import { generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data'
+import JsonLd from '@/components/seo/JsonLd'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { getPGSeoSlug, getSectorSeoSlug, resolvePGSlug } from '@/lib/seo/slugs'
-import { generatePGMetadata } from '@/lib/seo/metadata'
-import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -86,10 +87,7 @@ async function getRelatedPGs(sectorId: string, currentSlug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
     const pg = await getPG(slug)
-
-    if (!pg) {
-        return { title: 'PG Not Found' }
-    }
+    if (!pg) return { title: 'PG Not Found' }
 
     return generatePGMetadata({
         name: pg.name,
@@ -216,11 +214,7 @@ export default async function PGDetailPage({ params }: Props) {
 
     return (
         <>
-            {/* JSON-LD Schema */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumbSchema]) }}
-            />
+            <JsonLd data={[productSchema, breadcrumbSchema]} />
 
             <div className="pb-20 md:pb-0">
                 <PageHero
@@ -237,7 +231,7 @@ export default async function PGDetailPage({ params }: Props) {
                                 </Link>
                             </Button>
                             <Button asChild>
-                                <a href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`} target="_blank" rel="noopener noreferrer">
+                                <a href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`} target="_blank" rel="noopener noreferrer">
                                     <MessageCircle className="mr-2 h-4 w-4" />
                                     WhatsApp
                                 </a>
@@ -290,8 +284,8 @@ export default async function PGDetailPage({ params }: Props) {
                                         <p className="text-white/80 text-sm">Monthly Rent</p>
                                         <p className="text-3xl font-bold">{formatPrice(pg.monthlyRent)}</p>
                                     </div>
-                                    <Button variant="secondary" className="bg-[var(--color-surface)] text-[var(--color-graphite)] hover:bg-[var(--color-limestone)]" asChild>
-                                        <a href="tel:+919876543210">
+                                    <Button variant="secondary" className="bg-white text-[var(--color-graphite)] hover:bg-gray-100" asChild>
+                                        <a href="tel:+919871648677">
                                             <Phone className="mr-2 h-4 w-4" />
                                             Call Now
                                         </a>
@@ -531,9 +525,9 @@ export default async function PGDetailPage({ params }: Props) {
                                                 className="group relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-alabaster)]/75 backdrop-blur-md transition-all hover:-translate-y-1 hover:shadow-lg"
                                             >
                                                 <div className="relative aspect-video bg-[var(--color-limestone)]">
-                                            {normalizeImageSrc(related.photos[0]?.url) ? (
+                                                    {related.photos[0] ? (
                                                         <Image
-                                                    src={normalizeImageSrc(related.photos[0]?.url)!}
+                                                            src={related.photos[0].url}
                                                             alt={related.name}
                                                             fill
                                                             className="object-cover"
@@ -568,15 +562,15 @@ export default async function PGDetailPage({ params }: Props) {
                                         <p className="text-white/80 text-sm">Security: {formatPrice(pg.securityDeposit)}</p>
                                     )}
                                     <div className="mt-4 space-y-3">
-                                        <Button variant="secondary" className="w-full bg-[var(--color-surface)] text-[var(--color-graphite)] hover:bg-[var(--color-limestone)]" asChild>
-                                            <a href="tel:+919876543210">
+                                        <Button variant="secondary" className="w-full bg-white text-[var(--color-graphite)] hover:bg-gray-100" asChild>
+                                            <a href="tel:+919871648677">
                                                 <Phone className="mr-2 h-4 w-4" />
                                                 Call Now
                                             </a>
                                         </Button>
                                         <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                                             <a
-                                                href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`}
+                                                href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name} in ${pg.sector.name}. Please share more details.`)}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >

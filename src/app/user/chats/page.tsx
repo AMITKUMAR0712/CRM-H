@@ -46,7 +46,11 @@ export default function UserChatsPage() {
     setPending(true)
     setError(null)
 
-    const resp = await fetch('/api/user/chats', { method: 'POST' })
+    const resp = await fetch('/api/user/chats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
     const json = (await resp.json()) as ApiEnvelope<{ id: string }>
 
     setPending(false)

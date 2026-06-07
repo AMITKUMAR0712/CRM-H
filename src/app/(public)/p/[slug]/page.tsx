@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import prisma from '@/lib/prisma'
 import PageRenderer from '@/components/cms/PageRenderer'
@@ -32,6 +32,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CmsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+
+  // Redirect static pages to their direct routes to avoid CMS overrides
+  if (['about', 'privacy', 'terms', 'faqs'].includes(slug)) {
+    redirect(`/${slug}`)
+  }
 
   const page = await prisma.page.findFirst({
     where: { slug, deletedAt: null, isActive: true, status: 'PUBLISHED' },

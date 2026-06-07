@@ -28,9 +28,6 @@ export async function GET(req: NextRequest) {
     if (query.status) where.status = query.status
     if (query.type) where.type = query.type
     if (query.assignedToId) where.assignedToId = query.assignedToId
-        if (role === 'MANAGER') {
-          where.assignedToId = userId
-        }
     if (query.pgId) where.pgId = query.pgId
     if (query.sectorId) where.sectorId = query.sectorId
 

@@ -74,7 +74,7 @@
     /* Dark palette (same token names so existing UI adapts) */
     --color-alabaster: #0B0F14;
     --color-limestone: #0F1622;
-    --color-graphite: #E9E6DE;
+    --color-graphite: #F0EDE5;
     --color-soft-grey: #273142;
 
     --color-surface: #121A27;
@@ -84,17 +84,137 @@
     --color-background-alt: var(--color-limestone);
     --color-foreground: var(--color-graphite);
     --color-border: var(--color-soft-grey);
-    --color-muted: #A5B1C3;
+    --color-muted: #C8D5E8;
 
     /* Boost primary accents for readability */
-    --color-clay: #D38F72;
-    --color-olive: #8E9A78;
+    --color-clay: #E0A080;
+    --color-olive: #A0AE8A;
 
     /* Accents in dark mode (slightly brighter) */
     --color-accent-blue: #60A5FA;
     --color-accent-purple: #A78BFA;
     --color-accent-cyan: #67E8F9;
     --color-accent-orange: #FDBA74;
+  }
+
+  /* Dark mode — make native form elements readable */
+  html.dark select,
+  html.dark input,
+  html.dark textarea {
+    background-color: var(--color-surface);
+    color: var(--color-graphite);
+    border-color: var(--color-soft-grey);
+    color-scheme: dark;
+  }
+
+  html.dark select option {
+    background-color: var(--color-surface);
+    color: var(--color-graphite);
+  }
+
+  /* ═══ COMPREHENSIVE DARK MODE OVERRIDES ═══ */
+
+  /* bg-white → dark surface (for panels, cards, inputs only) */
+  /* Exclude buttons inside clay/graphite sections that intentionally use white */
+  html.dark .bg-white {
+    background-color: var(--color-surface) !important;
+    color: var(--color-graphite);
+  }
+  /* Exception: white buttons inside a colored (clay/graphite) container should STAY white */
+  html.dark [class*="bg-(--color-clay)"] .bg-white,
+  html.dark [class*="bg-clay"] .bg-white,
+  html.dark .footer-dark-bg .bg-white {
+    background-color: #ffffff !important;
+    color: var(--color-clay) !important;
+  }
+  html.dark .bg-white\/70,
+  html.dark .bg-white\/80,
+  html.dark .bg-white\/90,
+  html.dark .bg-white\/95 {
+    background-color: rgba(18, 26, 39, 0.92) !important;
+    color: var(--color-graphite);
+  }
+
+  /* Hover bg-white / gray states */
+  html.dark .hover\:bg-gray-100:hover,
+  html.dark .hover\:bg-white:hover {
+    background-color: var(--color-limestone) !important;
+    color: var(--color-graphite) !important;
+  }
+  html.dark .hover\:bg-gray-200:hover {
+    background-color: var(--color-limestone) !important;
+  }
+
+  /* Gray backgrounds */
+  html.dark .bg-gray-50   { background-color: #0d1219 !important; }
+  html.dark .bg-gray-100  { background-color: var(--color-limestone) !important; }
+  html.dark .bg-gray-200  { background-color: #1a2435 !important; }
+  html.dark .bg-gray-300  { background-color: #1e2d3f !important; }
+
+  /* Gray text — boost visibility */
+  html.dark .text-gray-300 { color: #8A9AB5 !important; }
+  html.dark .text-gray-400 { color: #B0BFCF !important; }
+  html.dark .text-gray-500 { color: #C0CDD8 !important; }
+  html.dark .text-gray-600 { color: #D0DCEA !important; }
+  html.dark .text-gray-700 { color: #E0EAF5 !important; }
+  html.dark .text-gray-800 { color: #EDF2FA !important; }
+  html.dark .text-gray-900 { color: var(--color-graphite) !important; }
+
+  /* Border colors */
+  html.dark .border-gray-200 { border-color: var(--color-soft-grey) !important; }
+  html.dark .border-gray-300 { border-color: var(--color-soft-grey) !important; }
+
+  /* Prose content (blog, CMS) */
+  html.dark .prose { color: var(--color-graphite); }
+  html.dark .prose h1,
+  html.dark .prose h2,
+  html.dark .prose h3,
+  html.dark .prose h4 { color: var(--color-graphite); }
+  html.dark .prose p,
+  html.dark .prose li { color: var(--color-muted); }
+  html.dark .prose a { color: var(--color-clay); }
+  html.dark .prose strong { color: var(--color-graphite); }
+  html.dark .prose code {
+    background-color: var(--color-limestone);
+    color: var(--color-clay);
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+
+  /* Animate-pulse skeleton in dark mode */
+  html.dark .animate-pulse .bg-gray-200,
+  html.dark .animate-pulse .bg-gray-100 {
+    background-color: var(--color-limestone) !important;
+  }
+
+  /* Status / badge colors */
+  html.dark .text-red-500   { color: #FC8181 !important; }
+  html.dark .text-red-600   { color: #FC8181 !important; }
+  html.dark .border-red-500,
+  html.dark .border-red-200 { border-color: #FC8181 !important; }
+  html.dark .bg-red-50      { background-color: rgba(252,129,129,0.08) !important; }
+
+  html.dark .text-green-600  { color: #68D391 !important; }
+  html.dark .border-green-500 { border-color: #68D391 !important; }
+
+  html.dark .text-blue-600   { color: #63B3ED !important; }
+  html.dark .text-amber-500  { color: #F6AD55 !important; }
+  html.dark .text-amber-400  { color: #F6E05E !important; }
+  html.dark .fill-amber-400  { fill: #F6E05E !important; }
+
+  /* White text on dark sections should stay white */
+  html.dark .text-white { color: #fff !important; }
+
+  /* Strong / bold inline text — ensure readability */
+  html.dark strong,
+  html.dark b {
+    color: var(--color-graphite);
+  }
+
+  /* Italic text inside founder section */
+  html.dark em,
+  html.dark .italic {
+    color: #C8D5E8;
   }
 
   body {
@@ -108,9 +228,103 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
-    font-weight: 700; /* Bolder headings for more impact */
+    font-weight: 700;
     line-height: 1.15;
     letter-spacing: -0.025em;
+    color: var(--color-graphite); /* ← Headings always use the theme graphite token */
+  }
+
+  /* ─── FOOTER DARK MODE ─── */
+  /* Footer uses bg-(--color-graphite) which flips to light in dark mode.
+     Force it to always stay deep-dark regardless of theme. */
+  html.dark footer {
+    background-color: #060A0F !important;
+    color: #F0EDE5;
+  }
+  html.dark footer .text-gray-400 {
+    color: #9AABBD !important;
+  }
+  html.dark footer a.text-gray-400,
+  html.dark footer span.text-gray-400 {
+    color: #9AABBD !important;
+  }
+  html.dark footer a.text-gray-400:hover {
+    color: #F0EDE5 !important;
+  }
+
+  /* ─── NAVBAR DARK MODE (unscrolled) ─── */
+  /* The non-scrolled navbar uses bg-(--color-alabaster)/70 which is dark already.
+     Add a subtle border to make it pop against the page background. */
+  html.dark header:not(.navbar-scrolled) {
+    border-bottom-color: rgba(39, 49, 66, 0.7) !important;
+  }
+
+  /* ─── PAGE HERO DARK MODE ─── */
+  /* The grid lines use a hardcoded light rgba — make them visible in dark mode */
+  html.dark .page-hero-grid {
+    opacity: 0.15;
+    background-image:
+      linear-gradient(to right, rgba(240,237,229,0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(240,237,229,0.12) 1px, transparent 1px) !important;
+  }
+
+  /* ─── ERROR / ALERT BOXES DARK MODE ─── */
+  html.dark .bg-red-50 {
+    background-color: rgba(127, 29, 29, 0.25) !important;
+    border-color: rgba(252, 129, 129, 0.4) !important;
+  }
+  html.dark .text-red-700 {
+    color: #FCA5A5 !important;
+  }
+  html.dark .border-red-200 {
+    border-color: rgba(252, 129, 129, 0.35) !important;
+  }
+
+  /* ─── LOGIN PAGE CARD DARK MODE ─── */
+  html.dark .backdrop-blur {
+    background-color: rgba(11, 15, 20, 0.75);
+  }
+
+  /* ─── FOOTER UTILITY ─── */
+  /* Always dark — does not flip in dark mode */
+  .footer-dark-bg {
+    background-color: #1a2030;  /* rich dark slate, visible in both modes */
+  }
+  html.dark .footer-dark-bg {
+    background-color: #060A0F;  /* deeper in dark mode */
+  }
+  /* Footer link colors that stay readable */
+  .footer-dark-bg .text-gray-400 {
+    color: #9AABBD;
+  }
+  .footer-dark-bg a.text-gray-400:hover,
+  .footer-dark-bg .hover\:text-white:hover {
+    color: #ffffff;
+  }
+  /* Ensure headings inside footer stay white in both modes */
+  .footer-dark-bg h1,
+  .footer-dark-bg h2,
+  .footer-dark-bg h3,
+  .footer-dark-bg h4 {
+    color: #ffffff !important;
+  }
+
+  /* ─── ALWAYS-DARK SECTION (Testimonials, Founder, etc.) ─── */
+  /* These sections must ALWAYS be dark — the graphite token flips in dark mode */
+  .section-always-dark {
+    background-color: #1a2030; /* dark slate in light mode */
+    color: #ffffff;
+  }
+  html.dark .section-always-dark {
+    background-color: #070C12; /* near-black in dark mode */
+    color: #ffffff;
+  }
+  /* Ensure headings inside these sections stay white */
+  .section-always-dark h1,
+  .section-always-dark h2,
+  .section-always-dark h3,
+  .section-always-dark h4 {
+    color: #ffffff !important;
   }
 
   ::selection {
@@ -463,100 +677,5 @@ html.dark .text-gradient {
   :root {
     --spacing-section: 4rem;
     --spacing-container: 1rem;
-  }
-}
-
-/* ============================================
-   Site-wide responsive + dark-mode polish
-   ============================================ */
-* {
-  min-width: 0;
-}
-
-html,
-body {
-  min-height: 100%;
-  overflow-x: clip;
-}
-
-img,
-svg,
-video,
-canvas {
-  max-width: 100%;
-}
-
-img {
-  display: block;
-}
-
-input,
-select,
-textarea {
-  color: var(--color-foreground);
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-select option {
-  color: var(--color-foreground);
-  background-color: var(--color-surface);
-}
-
-html.dark .shadow-lg,
-html.dark .shadow-xl,
-html.dark .shadow-2xl {
-  --tw-shadow-color: rgba(0, 0, 0, 0.45);
-}
-
-.app-surface {
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--color-clay) 12%, transparent), transparent 32rem),
-    var(--color-background);
-}
-
-@supports (padding: max(0px)) {
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-}
-
-@media (max-width: 768px) {
-  :root {
-    --spacing-section: 3.25rem;
-    --spacing-container: max(1rem, env(safe-area-inset-left));
-  }
-
-  body {
-    background: var(--color-background);
-    font-size: 15px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .container-custom {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-  }
-
-  .section-padding {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-  }
-
-  main {
-    border-radius: 0 0 28px 28px;
-  }
-
-  h1 {
-    letter-spacing: -0.04em;
-  }
-
-  button,
-  a,
-  input,
-  select,
-  textarea {
-    touch-action: manipulation;
   }
 }

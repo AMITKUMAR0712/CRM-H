@@ -14,7 +14,7 @@ export default function Testimonials() {
     const avgRating = data?.data?.stats?.averageRating || 4.8
 
     return (
-        <section className="section-padding bg-[var(--color-graphite)] text-white">
+        <section className="section-padding section-always-dark text-white">
             <div className="container-custom">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -25,7 +25,7 @@ export default function Testimonials() {
                     <span className="text-[var(--color-clay)] text-sm font-medium uppercase tracking-widest mb-4 block">
                         Testimonials
                     </span>
-                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+                    <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 text-white">
                         What Our Residents Say
                     </h2>
                     <div className="flex items-center justify-center gap-2">
@@ -34,7 +34,7 @@ export default function Testimonials() {
                                 <Star key={i} className="w-5 h-5 fill-[var(--color-clay)] text-[var(--color-clay)]" />
                             ))}
                         </div>
-                        <span className="text-gray-400">{avgRating}/5 on Google Reviews</span>
+                        <span className="text-gray-300">{avgRating}/5 on Google Reviews</span>
                     </div>
                 </motion.div>
 
@@ -86,6 +86,7 @@ export default function Testimonials() {
                 )}
             </div>
         </section>
+
     )
 }
 
@@ -116,9 +117,9 @@ function TestimonialCard({
             transition={{ delay: index * 0.1 }}
             className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
         >
-            <Quote className="w-8 h-8 text-[var(--color-clay)] mb-4 opacity-50" />
+            <Quote className="w-8 h-8 text-[var(--color-clay)] mb-4 opacity-60" />
 
-            <p className="text-gray-300 mb-6 leading-relaxed line-clamp-4">
+            <p className="text-gray-200 mb-6 leading-relaxed line-clamp-4">
                 &ldquo;{text}&rdquo;
             </p>
 
@@ -127,7 +128,7 @@ function TestimonialCard({
                     <Star key={i} className="w-4 h-4 fill-[var(--color-clay)] text-[var(--color-clay)]" />
                 ))}
                 {[...Array(5 - rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-gray-600" />
+                    <Star key={i} className="w-4 h-4 text-white/20" />
                 ))}
             </div>
 
@@ -146,8 +147,8 @@ function TestimonialCard({
                     )}
                 </div>
                 <div>
-                    <p className="font-semibold">{name}</p>
-                    <p className="text-sm text-gray-400">
+                    <p className="font-semibold text-white">{name}</p>
+                    <p className="text-sm text-gray-300">
                         {occupation}{pgName && ` • ${pgName}`}
                     </p>
                 </div>

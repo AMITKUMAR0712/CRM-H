@@ -10,7 +10,6 @@ import prisma from '@/lib/prisma'
 import { generatePageMetadata } from '@/lib/seo/metadata'
 import { generateCollectionPageSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
-import { normalizeImageSrc } from '@/lib/utils'
 
 export const metadata: Metadata = generatePageMetadata(
     'Noida PG Blog | Best PG, Rent & Co-living Guides',
@@ -101,11 +100,6 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
 
     const featuredPost = !search && page === 1 ? posts.find((p) => p.isFeatured) : null
     const regularPosts = featuredPost ? posts.filter((p) => !p.isFeatured) : posts
-    const featuredImageSrc = normalizeImageSrc(featuredPost?.featuredImage)
-    const regularPostsWithImages = regularPosts.map((post) => ({
-        ...post,
-        normalizedFeaturedImage: normalizeImageSrc(post.featuredImage),
-    }))
 
     // Collection Page Schema
     const collectionSchema = generateCollectionPageSchema(
@@ -197,9 +191,9 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/28 to-transparent" />
                                 <div className="grid grid-cols-1 gap-0 lg:grid-cols-2">
                                     <div className="relative aspect-video bg-[var(--color-limestone)]">
-                                        {featuredImageSrc ? (
+                                        {featuredPost.featuredImage ? (
                                             <Image
-                                                src={featuredImageSrc}
+                                                src={featuredPost.featuredImage}
                                                 alt={featuredPost.title}
                                                 fill
                                                 className="object-cover"
@@ -248,7 +242,7 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                     {/* Post Grid */}
                     {regularPosts.length > 0 ? (
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {regularPostsWithImages.map((post) => (
+                            {regularPosts.map((post) => (
                                 <Link
                                     key={post.id}
                                     href={`/blog/${post.slug}`}
@@ -256,9 +250,9 @@ export default async function BlogPage({ searchParams }: { searchParams: SearchP
                                 >
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--color-clay)]/22 to-transparent" />
                                     <div className="relative aspect-video bg-[var(--color-limestone)]">
-                                        {post.normalizedFeaturedImage ? (
+                                        {post.featuredImage ? (
                                             <Image
-                                                src={post.normalizedFeaturedImage}
+                                                src={post.featuredImage}
                                                 alt={post.title}
                                                 fill
                                                 className="object-cover transition-transform duration-500 group-hover:scale-105"

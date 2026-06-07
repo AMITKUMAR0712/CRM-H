@@ -165,14 +165,14 @@ export default function MobileMenu({ isOpen, onClose, links, user = null }: Mobi
                                 </Button>
                                 <div className="grid grid-cols-2 gap-3">
                                     <Button variant="outline" asChild>
-                                        <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
+                                        <a href="tel:+919871648677" className="flex items-center justify-center gap-2">
                                             <Phone className="w-4 h-4" />
                                             Call
                                         </a>
                                     </Button>
                                     <Button variant="secondary" asChild>
                                         <a
-                                            href="https://wa.me/919876543210"
+                                            href="https://wa.me/919871648677"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center justify-center gap-2 glow-whatsapp"

@@ -16,7 +16,7 @@ function parseRange(range: string | null) {
 
 export async function GET(req: NextRequest) {
   try {
-    const authResult = await requirePermission(PERMISSIONS.LOGS_READ)
+    const authResult = await requirePermission(PERMISSIONS.ANALYTICS_VIEW)
     if (authResult instanceof NextResponse) return authResult
 
     const { searchParams } = new URL(req.url)

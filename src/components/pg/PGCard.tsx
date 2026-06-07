@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Wifi, Snowflake, Utensils, ArrowRight, Users, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatPrice, normalizeImageSrc } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils'
 import { getPGSeoSlug } from '@/lib/seo/slugs'
 
 interface PGCardProps {
@@ -49,19 +49,23 @@ const occupancyLabels: Record<string, string> = {
 
 export default function PGCard({ pg }: PGCardProps) {
     const featuredPhoto = pg.photos?.find(p => p.isFeatured) || pg.photos?.[0]
-    const featuredPhotoSrc = normalizeImageSrc(featuredPhoto?.url)
     const pgUrlSlug = getPGSeoSlug(pg.slug, pg.sector?.slug)
 
     return (
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-4 sm:p-6 hover:shadow-lg transition-all duration-300 group">
+<<<<<<< HEAD
+        <div className="bg-(--color-surface) rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
+            <Link href={`/pg/${pg.slug}`} className="block">
+=======
+        <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
             <Link href={`/pg/${pgUrlSlug}`} className="block">
+>>>>>>> a03c204 (Update frontend UI with SEO , content all over website on pager SEO)
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Image */}
                     <div className="relative w-full md:w-48 h-40 bg-[var(--color-limestone)] rounded-xl overflow-hidden flex items-center justify-center">
-                        {featuredPhotoSrc ? (
+                        {featuredPhoto ? (
                             <Image
-                                src={featuredPhotoSrc}
-                                alt={featuredPhoto?.altText || pg.name}
+                                src={featuredPhoto.url}
+                                alt={featuredPhoto.altText || pg.name}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                                 sizes="(max-width: 768px) 100vw, 192px"
@@ -145,13 +149,13 @@ export default function PGCard({ pg }: PGCardProps) {
             {/* Quick Action Buttons - Outside the link to prevent nested links */}
             <div className="mt-4 flex items-center justify-end gap-2 pt-4 border-t border-[var(--color-border)]/50">
                 <Button size="sm" variant="outline" asChild>
-                    <a href={`tel:+919876543210`} onClick={(e) => e.stopPropagation()}>
+                    <a href={`tel:+919871648677`} onClick={(e) => e.stopPropagation()}>
                         Call Now
                     </a>
                 </Button>
                 <Button size="sm" asChild>
                     <a
-                        href={`https://wa.me/919876543210?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name}. Please share more details.`)}`}
+                        href={`https://wa.me/919871648677?text=${encodeURIComponent(`Hi! I'm interested in ${pg.name}. Please share more details.`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}

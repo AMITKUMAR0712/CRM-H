@@ -6,14 +6,13 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import type { UserRole } from '@prisma/client'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import RichTextEditor from '@/components/admin/blog/RichTextEditor'
-import { hasPermission, PERMISSIONS } from '@/lib/rbac'
+import { hasPermission, PERMISSIONS, UserRole } from '@/lib/rbac'
+
 
 const schema = z.object({
   title: z.string().min(5),

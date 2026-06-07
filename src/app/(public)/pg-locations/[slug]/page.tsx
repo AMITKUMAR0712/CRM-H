@@ -320,19 +320,23 @@ export default async function SectorPage({ params }: Props) {
                                 </div>
 
                                 {/* Quick Contact - Desktop */}
-                                <div className="hidden md:block relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-graphite) text-white p-6 shadow-lg">
+                                <div className="hidden md:block relative overflow-hidden rounded-2xl border border-white/10 section-always-dark text-white p-6 shadow-lg">
                                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
+<<<<<<< HEAD
+                                    <h3 className="font-serif text-lg font-semibold mb-4 text-white">Need Help?</h3>
+=======
                                     <h3 className="font-serif text-lg font-semibold mb-4">Need PG Help?</h3>
+>>>>>>> a03c204 (Update frontend UI with SEO , content all over website on pager SEO)
                                     <div className="space-y-3">
-                                        <Button variant="secondary" className="w-full bg-(--color-surface) text-(--color-graphite) hover:bg-(--color-limestone)" asChild>
-                                            <a href="tel:+919876543210" className="flex items-center justify-center gap-2">
+                                        <Button variant="secondary" className="w-full bg-white text-(--color-graphite) hover:bg-gray-100" asChild>
+                                            <a href="tel:+919871648677" className="flex items-center justify-center gap-2">
                                                 <Phone className="w-4 h-4" />
                                                 Call Now
                                             </a>
                                         </Button>
                                         <Button variant="secondary" className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                                             <a
-                                                href="https://wa.me/919876543210"
+                                                href="https://wa.me/919871648677"
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center justify-center gap-2"

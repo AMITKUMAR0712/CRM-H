@@ -1,15 +1,9 @@
 import { Resend } from 'resend'
 
-let resend: Resend | null = null
-
-function getResendClient() {
-    if (!process.env.RESEND_API_KEY) {
-        throw new Error('RESEND_API_KEY is required to send emails')
-    }
-
-    resend ??= new Resend(process.env.RESEND_API_KEY)
-    return resend
-}
+// Initialize Resend client only if API key is provided
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null
 
 interface SendEmailOptions {
     to: string | string[]
@@ -29,8 +23,12 @@ interface EmailResult {
  */
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
     try {
-        const resendClient = getResendClient()
-        const { data, error } = await resendClient.emails.send({
+        if (!resend) {
+            console.warn('Resend API key not configured')
+            return { success: false, error: 'Email service not configured' }
+        }
+
+        const { data, error } = await resend.emails.send({
             from: process.env.EMAIL_FROM || 'SOHO PG <noreply@sohopg.com>',
             to: options.to,
             subject: options.subject,
@@ -156,8 +154,8 @@ export async function sendLeadConfirmation(lead: {
       <div style="margin: 20px 0; padding: 15px; background: #F2F0E9; border-radius: 8px;">
         <p style="margin: 0 0 10px 0; color: #2A2A2A;"><strong>Need immediate assistance?</strong></p>
         <p style="margin: 0; color: #6B705C;">
-          📞 Call us: <a href="tel:+919876543210" style="color: #B07D62;">+91 98765 43210</a><br>
-          💬 WhatsApp: <a href="https://wa.me/919876543210" style="color: #B07D62;">Chat Now</a>
+          📞 Call us: <a href="tel:+919871648677" style="color: #B07D62;">+91 9871648677</a><br>
+          💬 WhatsApp: <a href="https://wa.me/919871648677" style="color: #B07D62;">Chat Now</a>
         </p>
       </div>
       

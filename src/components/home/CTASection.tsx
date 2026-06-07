@@ -37,14 +37,14 @@ export default function CTASection() {
 
                     <div className="flex items-center justify-center gap-8">
                         <a
-                            href="tel:+919876543210"
+                            href="tel:+919871648677"
                             className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
                         >
                             <Phone className="w-5 h-5" />
-                            <span>+91 98765 43210</span>
+                            <span>+91 9871648677</span>
                         </a>
                         <a
-                            href="https://wa.me/919876543210"
+                            href="https://wa.me/919871648677"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 text-white/80 hover:text-white transition-colors glow-whatsapp"

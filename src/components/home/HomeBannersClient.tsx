@@ -5,7 +5,6 @@ import Link from 'next/link'
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { normalizeImageSrc } from '@/lib/utils'
 
 type Banner = {
   id: string
@@ -74,13 +73,13 @@ export default function HomeBannersClient({ banners }: { banners: Banner[] }) {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {banners.map((b) => (
             <Card key={b.id} className="group overflow-hidden rounded-2xl border border-[var(--color-border)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-              {normalizeImageSrc(b.imageUrl) ? (
+              {b.imageUrl ? (
                 <div className="relative w-full overflow-hidden">
                   <div className="aspect-[16/9] w-full bg-[var(--color-muted)]/10">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       alt={b.title}
-                      src={normalizeImageSrc(b.imageUrl) ?? ''}
+                      src={b.imageUrl}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                     />
                   </div>
@@ -97,7 +96,7 @@ export default function HomeBannersClient({ banners }: { banners: Banner[] }) {
                   </div>
 
                   {b.discountType && b.discountValue ? (
-                    <span className="shrink-0 inline-flex items-center rounded-full bg-[var(--color-limestone)] px-2.5 py-1 text-xs font-medium text-[var(--color-graphite)]">
+                    <span className="shrink-0 inline-flex items-center rounded-full bg-[var(--color-limestone)] px-2.5 py-1 text-xs font-medium">
                       {b.discountType === 'PERCENT' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
                     </span>
                   ) : null}

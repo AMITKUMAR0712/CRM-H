@@ -6,7 +6,7 @@ import { X, Check, Minus, Phone, MessageCircle, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Link from 'next/link'
-import { formatPrice, normalizeImageSrc } from '@/lib/utils'
+import { formatPrice } from '@/lib/utils'
 
 interface PGData {
     id: string
@@ -112,10 +112,10 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 z-50 bg-(--color-surface) rounded-t-3xl shadow-2xl max-h-[88vh] flex flex-col"
+                        className="fixed bottom-0 left-0 right-0 z-50 bg-(--color-surface) rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col"
                     >
                         {/* Header */}
-                        <div className="sticky top-0 bg-(--color-surface) border-b border-(--color-border) px-4 py-4 flex flex-wrap items-center justify-between gap-3 sm:px-6">
+                        <div className="sticky top-0 bg-(--color-surface) border-b border-(--color-border) px-6 py-4 flex items-center justify-between">
                             <div>
                                 <h2 className="font-serif text-xl font-bold text-(--color-graphite)">Compare PGs</h2>
                                 <p className="text-sm text-muted">{items.length} PGs selected</p>
@@ -135,7 +135,7 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                         </div>
 
                         {/* Comparison Table - Scrollable */}
-                        <div className="flex-1 overflow-y-auto overflow-x-auto p-4 sm:p-6">
+                        <div className="flex-1 overflow-y-auto overflow-x-auto p-6">
                             <table className="w-full min-w-150">
                                 <thead>
                                     <tr>
@@ -150,9 +150,9 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                                                         <X className="w-3 h-3" />
                                                     </button>
                                                     <div className="relative w-20 h-20 mx-auto rounded-xl overflow-hidden bg-(--color-limestone) mb-3">
-                                                        {normalizeImageSrc(pg.photos?.[0]?.url) ? (
+                                                        {pg.photos?.[0] ? (
                                                             <Image
-                                                                src={normalizeImageSrc(pg.photos?.[0]?.url)!}
+                                                                src={pg.photos[0].url}
                                                                 alt={pg.name}
                                                                 fill
                                                                 className="object-cover"
@@ -192,13 +192,13 @@ export default function CompareDrawer({ isOpen, onClose, items, onRemove, onClea
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
-                                <a href="tel:+919876543210">
+                                <a href="tel:+919871648677">
                                     <Phone className="w-4 h-4 mr-2" />
                                     Call Now
                                 </a>
                             </Button>
                             <Button variant="secondary" className="bg-green-600 hover:bg-green-700 text-white" asChild>
-                                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                                <a href="https://wa.me/919871648677" target="_blank" rel="noopener noreferrer">
                                     <MessageCircle className="w-4 h-4 mr-2" />
                                     WhatsApp
                                 </a>

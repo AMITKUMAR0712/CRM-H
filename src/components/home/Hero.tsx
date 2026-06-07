@@ -584,14 +584,14 @@ export default function Hero() {
                         className="flex items-center justify-center gap-6 mt-8"
                     >
                         <a
-                            href="tel:+919876543210"
+                            href="tel:+919871648677"
                             className="flex items-center gap-2 text-sm text-muted hover:text-(--color-clay) transition-colors"
                         >
                             <Phone className="w-4 h-4" />
-                            +91 98765 43210
+                            +91 9871648677
                         </a>
                         <a
-                            href="https://wa.me/919876543210"
+                            href="https://wa.me/919871648677"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 text-sm text-muted hover:text-green-400 transition-colors glow-whatsapp"

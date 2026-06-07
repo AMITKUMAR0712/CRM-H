@@ -114,11 +114,11 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
 
     const approvalPayload = isApprovalUpdate
       ? {
-          approvalStatus,
-          approvedAt: approvalStatus === 'APPROVED' ? new Date() : approvalStatus === 'PENDING' ? null : existing.approvedAt,
-          approvedById: approvalStatus ? authResult.user.id : existing.approvedById,
-          blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? existing.blockedReason ?? 'Blocked by admin' : null,
-        }
+        approvalStatus,
+        approvedAt: approvalStatus === 'APPROVED' ? new Date() : approvalStatus === 'PENDING' ? null : existing.approvedAt,
+        approvedById: approvalStatus ? authResult.user.id : existing.approvedById,
+        blockedReason: approvalStatus === 'BLOCKED' ? blockedReason ?? existing.blockedReason ?? 'Blocked by admin' : null,
+      }
       : {}
 
     if (categoryIds && !isSuperAdmin) {
@@ -130,9 +130,9 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       ...approvalPayload,
       categories: categoryIds
         ? {
-            deleteMany: {},
-            create: categoryIds.map((categoryId) => ({ categoryId })),
-          }
+          deleteMany: {},
+          create: categoryIds.map((categoryId) => ({ categoryId })),
+        }
         : undefined,
       assignments,
     }

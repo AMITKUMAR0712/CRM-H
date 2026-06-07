@@ -1,15 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ShieldCheck, Sparkles, Users, ArrowRight, Camera, Utensils, Clock, Building, Star, Award, CheckCircle } from 'lucide-react'
+import { 
+    ShieldCheck, Star, 
+    Award, CheckCircle, Target, Compass, Heart, 
+    Layout, Wifi, Utensils, Zap, Coffee, UserCircle, Building 
+} from 'lucide-react'
 
 import prisma from '@/lib/prisma'
-import PageRenderer from '@/components/cms/PageRenderer'
 import PageHero from '@/components/layout/PageHero'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { generatePageMetadata } from '@/lib/seo/metadata'
-import { generateOrganizationSchema } from '@/lib/seo/structured-data'
+import { generateOrganizationSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,10 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
     if (!page) {
         return generatePageMetadata(
-            'About SOHO PG - Premium PG Accommodation in Noida',
-            'Learn about SOHO PG—premium PG living in Noida with a comfort-first, community-first approach. 5+ years of excellence in student and professional accommodation.',
+            'About Soho Liv | Best PG in Noida with CRM Support',
+            'Soho Liv is a trusted affordable PG and co-living brand in Noida and Greater Noida with 500+ rooms, Budget Luxury stays, CRM ticket support, direct chat and fast resident service.',
             '/about',
-            ['about SOHO PG', 'company info', 'our mission', 'PG provider Noida', 'accommodation services']
+            ['about Soho Liv', 'best PG in Noida', 'Jitendra Dixit', 'co-living vision', 'premium PG Noida', 'budget luxury PG', 'Noida PG CRM support']
         )
     }
 
@@ -49,27 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-// Get review stats for trust signals
-async function getReviewStats() {
-    try {
-        const stats = await prisma.review.aggregate({
-            where: { isApproved: true },
-            _avg: { rating: true },
-            _count: true,
-        })
-        return {
-            avgRating: stats._avg.rating ? Math.round(stats._avg.rating * 10) / 10 : 4.8,
-            totalReviews: stats._count || 50,
-        }
-    } catch (err) {
-        console.error('[About] Failed to load review stats', err)
-        return { avgRating: 4.8, totalReviews: 50 }
-    }
-}
-
 export default async function AboutPage() {
-    let page: { title: string; content: unknown } | null = null
-
+    /* CMS content is disabled temporarily to show the new premium design */
+    /*
     try {
         page = await prisma.page.findFirst({
             where: { slug: 'about', deletedAt: null, isActive: true, status: 'PUBLISHED' },
@@ -80,229 +65,216 @@ export default async function AboutPage() {
     }
 
     if (page) return <PageRenderer title={page.title} content={page.content} />
+    */
 
-    const reviewStats = await getReviewStats()
-
-    // Organization Schema
     const organizationSchema = generateOrganizationSchema()
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'About', url: '/about' },
+    ])
 
-    // CMS fallback (so About never 404s)
+    const advantages = [
+        { icon: Layout, title: "Designer Living", desc: "Fully furnished, modern interiors optimized for comfort." },
+        { icon: Wifi, title: "Seamless Connectivity", desc: "Ultra-high-speed Wi-Fi for your work and study marathons." },
+        { icon: Utensils, title: "Ghar Jaisa Khana", desc: "Nutritious, home-style meals prepared with highest hygiene standards." },
+        { icon: ShieldCheck, title: "Uncompromising Safety", desc: "3-tier security system with 24/7 CCTV and professional guards." },
+        { icon: Zap, title: "Total Convenience", desc: "Professional housekeeping and dedicated laundry services." },
+        { icon: Coffee, title: "Vibrant Community", desc: "Common \"Chill Zones\" designed for networking and relaxation." },
+    ]
+
     return (
-        <>
-            <JsonLd data={organizationSchema} />
-            <div>
-                <PageHero
-                    kicker="About SOHO PG"
-                    title="A premium PG experience in Noida"
-                    subtitle="Comfort, cleanliness, and a calm community—built for students and professionals who want a hassle‑free stay."
-                    actions={
-                        <>
-                            <Button asChild>
-                                <Link href="/smart-finder">Use Smart Finder</Link>
-                            </Button>
-                            <Button variant="outline" asChild>
-                                <Link href="/contact">Book a Visit</Link>
-                            </Button>
-                        </>
-                    }
-                />
+        <div className="min-h-screen">
+            <JsonLd data={[organizationSchema, breadcrumbSchema]} />
+            
+            <PageHero
+                kicker="15 Years of Excellence"
+                title="Best PG Living in Noida, Reimagined"
+                subtitle="500+ rooms, affordable Budget Luxury stays, direct chat and CRM ticket support for students and professionals in Noida and Greater Noida."
+                actions={
+                    <>
+                        <Button asChild size="lg">
+                            <Link href="/pg-locations">Find Your Home</Link>
+                        </Button>
+                        <Button variant="outline" asChild size="lg">
+                            <Link href="/contact">Get in Touch</Link>
+                        </Button>
+                    </>
+                }
+            />
 
-                <div className="container-custom pb-14">
-                    {/* Trust Signals */}
-                    <div className="mb-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-6 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)]">
-                            <div className="flex items-center justify-center gap-1 mb-2">
-                                <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
-                                <span className="text-3xl font-bold text-[var(--color-graphite)]">{reviewStats.avgRating}</span>
-                            </div>
-                            <p className="text-sm text-[var(--color-muted)]">Google Rating</p>
-                        </div>
-                        <div className="text-center p-6 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)]">
-                            <div className="text-3xl font-bold text-[var(--color-graphite)] mb-2">{reviewStats.totalReviews}+</div>
-                            <p className="text-sm text-[var(--color-muted)]">Happy Residents</p>
-                        </div>
-                        <div className="text-center p-6 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)]">
-                            <div className="text-3xl font-bold text-[var(--color-graphite)] mb-2">5+</div>
-                            <p className="text-sm text-[var(--color-muted)]">Years Experience</p>
-                        </div>
-                        <div className="text-center p-6 rounded-2xl bg-[var(--color-alabaster)] border border-[var(--color-border)]">
-                            <div className="text-3xl font-bold text-[var(--color-graphite)] mb-2">10+</div>
-                            <p className="text-sm text-[var(--color-muted)]">Locations</p>
-                        </div>
+            <div className="container-custom pb-20 space-y-24">
+                
+                {/* Legacy Section */}
+                <section className="grid lg:grid-cols-2 gap-12 items-center">
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-(--color-limestone) shadow-2xl">
+                         <Image
+                             src="/about1.png"
+                             alt="Soho Liv PG - Our Legacy"
+                             fill
+                             className="object-cover"
+                             sizes="(max-width: 768px) 100vw, 50vw"
+                         />
+                         <div className="absolute bottom-10 left-10 p-8 glass rounded-2xl border border-white/20">
+                            <div className="text-4xl font-bold text-(--color-clay)">15+</div>
+                            <div className="text-sm font-medium uppercase tracking-wider">Years of Mastery</div>
+                         </div>
                     </div>
-
-                    {/* Core Values */}
-                    <div className="grid gap-6 md:grid-cols-3 mb-12">
-                        <Card className="p-6 bg-[var(--color-alabaster)]/75 border-[var(--color-border)]/70 backdrop-blur-md">
-                            <div className="flex items-start gap-4">
-                                <div className="rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-surface)]/70 p-3 backdrop-blur-md">
-                                    <Sparkles className="h-5 w-5 text-[var(--color-clay)]" />
-                                </div>
-                                <div>
-                                    <div className="font-serif text-lg font-semibold text-[var(--color-graphite)]">Designed for comfort</div>
-                                    <p className="mt-1 text-sm text-[var(--color-muted)]">
-                                        Thoughtful interiors, practical amenities, and a quiet environment—so you can focus on work and life.
-                                    </p>
-                                </div>
-                            </div>
-                        </Card>
-
-                        <Card className="p-6 bg-[var(--color-alabaster)]/75 border-[var(--color-border)]/70 backdrop-blur-md">
-                            <div className="flex items-start gap-4">
-                                <div className="rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-surface)]/70 p-3 backdrop-blur-md">
-                                    <ShieldCheck className="h-5 w-5 text-[var(--color-clay)]" />
-                                </div>
-                                <div>
-                                    <div className="font-serif text-lg font-semibold text-[var(--color-graphite)]">Safety & standards</div>
-                                    <p className="mt-1 text-sm text-[var(--color-muted)]">
-                                        Clear rules, responsive support, and high hygiene standards—so your stay feels secure and predictable.
-                                    </p>
-                                </div>
-                            </div>
-                        </Card>
-
-                        <Card className="p-6 bg-[var(--color-alabaster)]/75 border-[var(--color-border)]/70 backdrop-blur-md">
-                            <div className="flex items-start gap-4">
-                                <div className="rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-surface)]/70 p-3 backdrop-blur-md">
-                                    <Users className="h-5 w-5 text-[var(--color-clay)]" />
-                                </div>
-                                <div>
-                                    <div className="font-serif text-lg font-semibold text-[var(--color-graphite)]">Community-first</div>
-                                    <p className="mt-1 text-sm text-[var(--color-muted)]">
-                                        A balanced vibe—friendly when you want it, private when you need it.
-                                    </p>
-                                </div>
-                            </div>
-                        </Card>
-                    </div>
-
-                    {/* Operations Proof */}
-                    <div className="mb-12">
-                        <h2 className="font-serif text-2xl font-semibold text-[var(--color-graphite)] mb-6 text-center">
-                            How We Maintain Excellence
-                        </h2>
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            {[
-                                { icon: Clock, title: 'Daily Housekeeping', desc: 'Rooms and common areas cleaned every day' },
-                                { icon: Utensils, title: 'Hygienic Kitchen', desc: 'FSSAI-compliant food preparation' },
-                                { icon: Camera, title: '24/7 CCTV', desc: 'Complete surveillance coverage' },
-                                { icon: Building, title: 'Regular Maintenance', desc: 'Issues resolved within 24 hours' },
-                            ].map((item) => (
-                                <div key={item.title} className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)]/70 text-center">
-                                    <div className="w-14 h-14 rounded-xl bg-[var(--color-clay)]/10 flex items-center justify-center mx-auto mb-4">
-                                        <item.icon className="h-7 w-7 text-[var(--color-clay)]" />
-                                    </div>
-                                    <h3 className="font-semibold text-[var(--color-graphite)] mb-1">{item.title}</h3>
-                                    <p className="text-sm text-[var(--color-muted)]">{item.desc}</p>
-                                </div>
-                            ))}
+                    <div className="space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--color-clay)/10 text-(--color-clay) text-xs font-bold uppercase tracking-widest">
+                            Our Story
                         </div>
-                    </div>
-
-                    {/* Security Practices */}
-                    <div className="mb-12 relative overflow-hidden rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-graphite)] text-white p-8">
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent" />
-                        <div className="grid md:grid-cols-2 gap-8 items-center">
-                            <div>
-                                <ShieldCheck className="w-12 h-12 text-[var(--color-clay)] mb-4" />
-                                <h2 className="font-serif text-2xl font-semibold mb-4">Your Security is Our Priority</h2>
-                                <p className="text-gray-300 mb-6">
-                                    We take security seriously with multiple layers of protection to ensure your peace of mind.
-                                </p>
-                                <ul className="space-y-3">
-                                    {[
-                                        '24/7 CCTV surveillance at all entry points',
-                                        'Biometric access for residents',
-                                        'Security guards on-site round the clock',
-                                        'Verified residents only - background checks',
-                                        'Emergency contact system',
-                                    ].map((item) => (
-                                        <li key={item} className="flex items-start gap-2">
-                                            <CheckCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-                                            <span className="text-gray-200">{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="relative h-64 md:h-80 rounded-xl overflow-hidden bg-white/5">
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-center">
-                                        <ShieldCheck className="w-16 h-16 text-[var(--color-clay)] mx-auto mb-3 opacity-50" />
-                                        <p className="text-gray-400 text-sm">Security Infrastructure</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Story + What We Focus On */}
-                    <div className="grid gap-6 lg:grid-cols-2 mb-12">
-                        <Card className="p-8 bg-[var(--color-alabaster)]/75 border-[var(--color-border)]/70 backdrop-blur-md">
-                            <div className="font-serif text-2xl font-semibold text-[var(--color-graphite)]">What we focus on</div>
-                            <p className="mt-2 text-[var(--color-muted)]">
-                                We keep the essentials excellent—so daily life is smooth.
+                        <h2 className="font-serif text-4xl font-bold leading-tight">Our Legacy: Affordable PG Living in Noida</h2>
+                        <div className="space-y-4 text-(--color-muted) leading-relaxed">
+                            <p>
+                                Fifteen years ago, <strong>Mr. Jitendra Dixit</strong> recognized a fundamental challenge for the modern Indian migrant: the struggle to find an affordable PG in Noida that offered more than just a roof.
                             </p>
-                            <div className="mt-6 grid gap-3">
-                                {[
-                                    { title: 'Clean rooms & common areas', desc: 'Neat spaces that feel good to come back to.' },
-                                    { title: 'Reliable basics', desc: 'Wi‑Fi ready, power backup support, and well‑maintained utilities.' },
-                                    { title: 'Support that responds', desc: 'Quick help for day‑to‑day issues and requests.' },
-                                    { title: 'Great location choices', desc: 'Popular sectors with metro-friendly connectivity.' },
-                                ].map((it) => (
-                                    <div key={it.title} className="rounded-2xl border border-[var(--color-border)]/70 bg-[var(--color-surface)]/70 p-4 backdrop-blur-md">
-                                        <div className="font-medium text-[var(--color-graphite)]">{it.title}</div>
-                                        <div className="mt-1 text-sm text-[var(--color-muted)]">{it.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-
-                        <Card className="p-8 bg-[var(--color-alabaster)]/75 border-[var(--color-border)]/70 backdrop-blur-md">
-                            <div className="font-serif text-2xl font-semibold text-[var(--color-graphite)]">Our story</div>
-                            <p className="mt-2 text-[var(--color-muted)]">
-                                SOHO PG started with a simple idea: finding a PG shouldn't be stressful.
+                            <p>
+                                He envisioned a sanctuary that combined the warmth of home with the efficiency of modern living. What began as a modest 30-room startup has flourished into Soho Liv, a trusted PG and co-living network managing over 500+ units across Noida, Greater Noida and Delhi NCR.
                             </p>
-                            <div className="mt-6 space-y-4 text-sm text-[var(--color-foreground)]">
-                                <p>
-                                    We saw people compromise on basics—cleanliness, comfort, and clarity. So we built spaces where the experience is consistent.
-                                </p>
-                                <p>
-                                    From onboarding to daily living, our goal is to make your stay calm, organized, and premium—without the drama.
-                                </p>
-                                <p>
-                                    Today, SOHO PG operates across 10+ locations in Noida, serving hundreds of happy residents who value quality living.
-                                </p>
-                            </div>
-
-                            <div className="mt-7 flex flex-wrap gap-3">
-                                <Button asChild>
-                                    <Link href="/contact">
-                                        Talk to Us <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                                <Button variant="outline" asChild>
-                                    <Link href="/gallery">See Gallery</Link>
-                                </Button>
-                            </div>
-                        </Card>
+                            <p>
+                                Today, we stand as the gold standard for <strong>&quot;Budget Luxury,&quot;</strong> proving that premium comfort doesn&apos;t have to come with a premium price tag.
+                            </p>
+                        </div>
                     </div>
+                </section>
 
-                    {/* Policy Badges */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                            { icon: CheckCircle, label: 'Verified Listings' },
-                            { icon: ShieldCheck, label: 'Safe & Secure' },
-                            { icon: Award, label: 'Quality Assured' },
-                            { icon: Star, label: 'Top Rated' },
-                        ].map((badge) => (
-                            <div key={badge.label} className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)]/70">
-                                <badge.icon className="w-6 h-6 text-[var(--color-clay)]" />
-                                <span className="font-medium text-[var(--color-graphite)]">{badge.label}</span>
+                {/* Vision/Mission/Aim */}
+                <section className="grid md:grid-cols-3 gap-8">
+                    {[
+                        { 
+                            title: "Our Vision", 
+                            icon: Compass, 
+                            content: "To be India’s most trusted co-living brand, redefining urban housing as we expand from Delhi NCR to Mumbai, Bangalore, and Kolkata." 
+                        },
+                        { 
+                            title: "Our Mission", 
+                            icon: Target, 
+                            content: "To bridge the gap between affordability and luxury, creating a \"Rehne Layak Mahaul\" through technology, security, and community." 
+                        },
+                        { 
+                            title: "Our Aim", 
+                            icon: Star, 
+                            content: "To provide universal accessibility across all major hubs while maintaining uncompromising standards of hygiene and comfort." 
+                        }
+                    ].map((item, idx) => (
+                        <div key={idx} className="relative group p-8 rounded-2xl border border-(--color-border)/70 bg-(--color-surface) backdrop-blur-md transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl">
+                            <div className="w-12 h-12 rounded-xl bg-(--color-clay)/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <item.icon className="w-6 h-6 text-(--color-clay)" />
                             </div>
+                            <h3 className="font-serif text-xl font-bold mb-4">{item.title}</h3>
+                            <p className="text-sm text-(--color-muted) leading-relaxed">{item.content}</p>
+                        </div>
+                    ))}
+                </section>
+
+                {/* Advantages */}
+                <section className="space-y-12">
+                    <div className="text-center space-y-4 max-w-2xl mx-auto">
+                        <h2 className="font-serif text-4xl font-bold">The Soho Liv Advantage</h2>
+                        <p className="text-(--color-muted)">We don&apos;t just offer a place to stay; we curate a lifestyle designed for the ambitious student and the driven professional.</p>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {advantages.map((item, idx) => (
+                            <Card key={idx} className="p-6 bg-(--color-surface)/50 border-(--color-border)/70 backdrop-blur-md flex gap-5">
+                                <div className="p-3 rounded-xl bg-(--color-surface) border border-(--color-border)/50 text-(--color-clay) h-fit shadow-sm">
+                                    <item.icon className="w-5 h-5" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-(--color-graphite)">{item.title}</h4>
+                                    <p className="text-xs text-(--color-muted) leading-relaxed">{item.desc}</p>
+                                </div>
+                            </Card>
                         ))}
                     </div>
-                </div>
+                </section>
+
+                {/* Founder */}
+                <section className="relative overflow-hidden rounded-3xl border border-white/10 section-always-dark text-white p-10 lg:p-16">
+                    <div className="absolute top-0 right-0 w-1/2 h-full bg-linear-to-l from-(--color-clay)/10 to-transparent pointer-events-none" />
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div className="space-y-8">
+                             <div className="space-y-4">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-(--color-clay)/20 text-(--color-clay) text-xs font-bold uppercase tracking-widest">
+                                    Our Leader
+                                </div>
+                                <h2 className="font-serif text-4xl font-bold text-white">Meet Our Founder: Mr. Jitendra Dixit</h2>
+                                <p className="text-gray-200 leading-relaxed italic text-lg">
+                                    &quot;Treat every resident like family&quot;
+                                </p>
+                             </div>
+                             <div className="space-y-4 text-gray-300 leading-relaxed">
+                                <p>
+                                    With over 15 years of mastery in real estate and hospitality, Mr. Jitendra Dixit remains the heartbeat of Soho Liv. His philosophy is woven into the fabric of our operations.
+                                </p>
+                                <p>
+                                    From his hands-on leadership to his commitment to quality, Mr. Dixit continues to drive Soho Liv toward its goal of becoming a national leader in co-living.
+                                </p>
+                             </div>
+                             <div className="flex items-center gap-6 pt-4 border-t border-white/10">
+                                <div className="flex gap-1 text-(--color-clay)">
+                                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-current" />)}
+                                </div>
+                                <span className="text-sm font-medium tracking-wide text-white">Visionary Excellence</span>
+                             </div>
+                        </div>
+                        <div className="relative aspect-square max-w-md mx-auto lg:ml-auto w-full rounded-2xl overflow-hidden shadow-2xl">
+                             <Image
+                                 src="/about2.png"
+                                 alt="Mr. Jitendra Dixit - Founder, Soho Liv"
+                                 fill
+                                 className="object-cover"
+                                 sizes="(max-width: 768px) 100vw, 400px"
+                             />
+                             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                        </div>
+                    </div>
+                </section>
+
+                {/* Team Section */}
+                <section className="text-center space-y-12">
+                    <div className="space-y-4 max-w-2xl mx-auto">
+                        <Heart className="w-10 h-10 text-(--color-clay) mx-auto mb-4" />
+                        <h2 className="font-serif text-4xl font-bold">The Powerhouse Behind the Brand</h2>
+                        <p className="text-(--color-muted)">
+                            Our success is built on the dedication of our elite team. From our proactive Property Managers to our meticulous Maintenance crews, every member is trained to deliver hospitality that exceeds expectations.
+                        </p>
+                    </div>
+                    <div className="p-10 rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 backdrop-blur-md">
+                        <div className="max-w-3xl mx-auto text-lg leading-relaxed text-(--color-graphite)">
+                             At Soho Liv, our team is our backbone, ensuring every <strong>&quot;Soho Liv-er&quot;</strong> feels safe, pampered, and truly at home.
+                        </div>
+                        <div className="mt-10 flex flex-wrap justify-center gap-4">
+                             {[
+                                { icon: Award, label: "Trained Staff" },
+                                { icon: ShieldCheck, label: "Proactive Support" },
+                                { icon: CheckCircle, label: "Quality Service" }
+                             ].map((badge, i) => (
+                                <div key={i} className="flex items-center gap-2 px-5 py-2 rounded-xl bg-(--color-surface) border border-(--color-border)/50 text-sm font-semibold">
+                                    <badge.icon className="w-4 h-4 text-(--color-clay)" />
+                                    {badge.label}
+                                </div>
+                             ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* CTA */}
+                <section className="text-center pb-20">
+                     <div className="p-12 rounded-3xl bg-(--color-clay) text-white shadow-2xl space-y-8 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+                        <h2 className="font-serif text-3xl font-bold relative z-10">Experience the Soho Liv Advantage Today</h2>
+                        <div className="flex flex-wrap justify-center gap-4 relative z-10">
+                            <Button size="lg" variant="secondary" asChild className="bg-white text-(--color-clay) hover:bg-gray-100">
+                                <Link href="/smart-finder">Find Your PG</Link>
+                            </Button>
+                            <Button size="lg" variant="outline" asChild className="border-white text-white hover:bg-white/10">
+                                <Link href="/contact">Talk to Us</Link>
+                            </Button>
+                        </div>
+                     </div>
+                </section>
+
             </div>
-        </>
+        </div>
     )
 }

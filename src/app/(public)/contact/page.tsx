@@ -1,12 +1,12 @@
 import { Metadata } from 'next'
-import { MapPin, Phone, Mail, Clock, MessageCircle, ChevronDown } from 'lucide-react'
+import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import FullLeadForm from '@/components/forms/FullLeadForm'
 import PageHero from '@/components/layout/PageHero'
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import { generatePageMetadata } from '@/lib/seo/metadata'
-import { generateLocalBusinessSchema } from '@/lib/seo/structured-data'
+import { generateLocalBusinessSchema, generateBreadcrumbSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = generatePageMetadata(
@@ -34,40 +34,28 @@ async function getSettings() {
     }
 }
 
-async function getFAQs() {
-    try {
-        const faqs = await prisma.fAQ.findMany({
-            where: { isActive: true, sectorId: null },
-            orderBy: { order: 'asc' },
-            take: 5,
-        })
-        return faqs
-    } catch (err) {
-        console.error('[Contact] Failed to load FAQs', err)
-        return []
-    }
-}
 
 export default async function ContactPage() {
-    const [settings, faqs] = await Promise.all([
-        getSettings(),
-        getFAQs(),
-    ])
+    const settings = await getSettings()
 
-    const phone = settings.contact_phone || '+919876543210'
-    const email = settings.contact_email || 'info@sohopg.com'
-    const address = settings.contact_address || 'A-123, Sector 51, Noida, Uttar Pradesh 201301'
-    const whatsapp = settings.whatsapp_number || '919876543210'
+    const phone = settings.contact_phone || '+91 9871648677'
+    const email = settings.contact_email || 'soholivpg@gmail.com'
+    const address = settings.contact_address || 'D 85/14, Sector 51, Noida, Uttar Pradesh 201301'
+    const whatsapp = settings.whatsapp_number || '919871648677'
 
     const [addressLine1, ...rest] = address.split(',')
     const addressLine2 = rest.join(',').trim()
 
-    // LocalBusiness Schema
+    // Structured Data
     const localBusinessSchema = generateLocalBusinessSchema()
+    const breadcrumbSchema = generateBreadcrumbSchema([
+        { name: 'Home', url: '/' },
+        { name: 'Contact', url: '/contact' },
+    ])
 
     return (
         <>
-            <JsonLd data={localBusinessSchema} />
+            <JsonLd data={[localBusinessSchema, breadcrumbSchema]} />
             <div>
                 <PageHero
                     kicker="Contact"
@@ -203,30 +191,6 @@ export default async function ContactPage() {
                         </div>
                     </div>
 
-                    {/* FAQs */}
-                    {faqs.length > 0 && (
-                        <div className="mt-12">
-                            <h2 className="font-serif text-2xl font-semibold text-(--color-graphite) mb-6">
-                                Frequently Asked Questions
-                            </h2>
-                            <div className="space-y-4">
-                                {faqs.map((faq) => (
-                                    <details
-                                        key={faq.id}
-                                        className="group rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 overflow-hidden"
-                                    >
-                                        <summary className="flex cursor-pointer items-center justify-between p-5 font-medium text-(--color-graphite) hover:bg-(--color-surface)/50">
-                                            {faq.question}
-                                            <ChevronDown className="h-5 w-5 transition-transform group-open:rotate-180" />
-                                        </summary>
-                                        <div className="px-5 pb-5 text-sm text-(--color-muted)">
-                                            {faq.answer}
-                                        </div>
-                                    </details>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {/* CTA */}
                     <div className="mt-12 relative overflow-hidden rounded-2xl border border-(--color-border)/70 bg-(--color-alabaster)/75 p-8 backdrop-blur-md text-center">

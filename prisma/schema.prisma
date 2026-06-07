@@ -31,59 +31,59 @@ model Sector {
 }
 
 model PG {
-  id              String         @id @default(cuid())
+  id              String           @id @default(cuid())
   name            String
-  slug            String         @unique
+  slug            String           @unique
   sectorId        String
-  createdById     String?
-  address         String         @db.Text
+  address         String           @db.Text
   latitude        Float?
   longitude       Float?
-  description     String?        @db.Text
+  description     String?          @db.Text
   roomType        RoomType
   occupancyType   OccupancyType
   monthlyRent     Int
   securityDeposit Int?
-  totalRooms      Int            @default(0)
-  availableRooms  Int            @default(0)
-  isAvailable     Boolean        @default(true)
+  totalRooms      Int              @default(0)
+  availableRooms  Int              @default(0)
+  isAvailable     Boolean          @default(true)
+  hasAC           Boolean          @default(false)
+  hasWifi         Boolean          @default(true)
+  hasParking      Boolean          @default(false)
+  hasGym          Boolean          @default(false)
+  hasPowerBackup  Boolean          @default(true)
+  hasLaundry      Boolean          @default(false)
+  hasTV           Boolean          @default(false)
+  hasFridge       Boolean          @default(false)
+  mealsIncluded   Boolean          @default(false)
+  mealsPerDay     Int?             @default(0)
+  gateClosingTime String?
+  noticePeriod    Int?             @default(30)
+  metaTitle       String?          @db.VarChar(60)
+  metaDescription String?          @db.VarChar(160)
+  isFeatured      Boolean          @default(false)
+  isActive        Boolean          @default(true)
+  viewCount       Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   approvalStatus  PGApprovalStatus @default(APPROVED)
   approvedAt      DateTime?
   approvedById    String?
-  blockedReason   String?        @db.Text
-  hasAC           Boolean        @default(false)
-  hasWifi         Boolean        @default(true)
-  hasParking      Boolean        @default(false)
-  hasGym          Boolean        @default(false)
-  hasPowerBackup  Boolean        @default(true)
-  hasLaundry      Boolean        @default(false)
-  hasTV           Boolean        @default(false)
-  hasFridge       Boolean        @default(false)
-  mealsIncluded   Boolean        @default(false)
-  mealsPerDay     Int?           @default(0)
-  gateClosingTime String?
-  noticePeriod    Int?           @default(30)
-  metaTitle       String?        @db.VarChar(60)
-  metaDescription String?        @db.VarChar(160)
-  isFeatured      Boolean        @default(false)
-  isActive        Boolean        @default(true)
-  viewCount       Int            @default(0)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  blockedReason   String?          @db.Text
+  createdById     String?
   bannerTargets   BannerTarget[]
   chatThreads     ChatThread[]
   enquiries       Enquiry[]
   leads           Lead[]
   notifications   Notification[]
   amenities       PGAmenity[]
-  sector          Sector         @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  assignments     PgAssignment[]
+  categories      PgCategory[]
+  approvedBy      User?            @relation("pg_approved_by", fields: [approvedById], references: [id])
+  createdBy       User?            @relation("pg_created_by", fields: [createdById], references: [id])
+  sector          Sector           @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   photos          Photo[]
   reviews         Review[]
   tickets         Ticket[]
-  categories      PgCategory[]
-  approvedBy      User?          @relation("pg_approved_by", fields: [approvedById], references: [id])
-  createdBy       User?          @relation("pg_created_by", fields: [createdById], references: [id])
-  assignments     PgAssignment[]
 
   @@index([slug])
   @@index([sectorId])
@@ -93,6 +93,7 @@ model PG {
   @@index([monthlyRent])
   @@index([isActive])
   @@index([isFeatured])
+  @@index([approvedById], map: "pgs_approvedById_fkey")
   @@map("pgs")
 }
 
@@ -324,12 +325,12 @@ model User {
   pagesCreated        Page[]               @relation("page_created_by")
   pagesUpdated        Page[]               @relation("page_updated_by")
   passwordResetTokens PasswordResetToken[]
+  pgAssignments       PgAssignment[]
+  approvedPgs         PG[]                 @relation("pg_approved_by")
+  createdPgs          PG[]                 @relation("pg_created_by")
   ticketMessages      TicketMessage[]      @relation("ticket_message_author")
   ticketsAssigned     Ticket[]             @relation("ticket_assigned_to")
   tickets             Ticket[]             @relation("ticket_user")
-  approvedPgs         PG[]                 @relation("pg_approved_by")
-  createdPgs          PG[]                 @relation("pg_created_by")
-  pgAssignments       PgAssignment[]
   restrictionsCreated UserRestriction[]    @relation("restriction_created_by")
   restrictionsRevoked UserRestriction[]    @relation("restriction_revoked_by")
   restrictions        UserRestriction[]
@@ -750,21 +751,21 @@ model Notification {
 }
 
 model GalleryImage {
-  id           String   @id @default(cuid())
-  url          String   @db.Text
-  altText      String?  @db.VarChar(255)
-  caption      String?  @db.VarChar(255)
+  id           String    @id @default(cuid())
+  url          String    @db.Text
+  altText      String?   @db.VarChar(255)
+  caption      String?   @db.VarChar(255)
   album        String
   sectorSlug   String?
   pgId         String?
-  roomType     RoomType?
+  displayOrder Int       @default(0)
+  isFeatured   Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  availability String?   @db.VarChar(60)
   floor        Int?
-  availability String?  @db.VarChar(60)
-  displayOrder Int      @default(0)
-  isFeatured   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  roomType     RoomType?
 
   @@index([album])
   @@index([sectorSlug])
@@ -793,8 +794,8 @@ model PgCategory {
   pgId       String
   categoryId String
   createdAt  DateTime      @default(now())
-  pg         PG            @relation(fields: [pgId], references: [id], onDelete: Cascade)
   category   SmartCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pg         PG            @relation(fields: [pgId], references: [id], onDelete: Cascade)
 
   @@unique([pgId, categoryId])
   @@index([pgId])

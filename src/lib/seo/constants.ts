@@ -4,73 +4,91 @@
  */
 
 export const SITE_CONFIG = {
-    name: 'SOHO PG',
-    title: 'SOHO PG | Premium PG Accommodation in Noida',
-    description: 'Find your perfect paying guest accommodation in Noida. Premium PG rooms with AC, WiFi, meals & 24/7 security in Sector 50, 51, 52, 62 & 76.',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://sohopg.com',
+    name: 'Soho Liv',
+    title: 'Best PG in Noida & Greater Noida | Soho Liv Budget Luxury PG',
+    description: 'Book the best PG in Noida and Greater Noida with Soho Liv. Affordable AC PG rooms, meals, WiFi, 24/7 security, CRM ticket support and fast service in Sector 168, Sector 22 and Sector 51 Noida.',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://soholiv.com',
     locale: 'en_IN',
     type: 'website',
 } as const
 
 export const ORGANIZATION = {
-    name: 'SOHO PG',
-    legalName: 'SOHO PG Accommodation Services',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://sohopg.com',
-    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://sohopg.com'}/logo.png`,
-    foundingDate: '2020',
-    description: 'Premium paying guest accommodation provider in Noida',
+    name: 'Soho Liv',
+    legalName: 'Soho Liv Co-living',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://soholiv.com',
+    logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://soholiv.com'}/logo.png`,
+    foundingDate: '2008',
+    description: 'The gold standard for affordable "Budget Luxury" PG and co-living in Noida, Greater Noida and Delhi NCR. Managing 500+ premium units with CRM ticket support, direct chat, fast issue resolution, security, comfort and transparent pricing.',
     address: {
-        streetAddress: 'Sector 62',
+        streetAddress: 'D 85/14, near Sector 52 Metro Station, Hoshiyarpur',
         addressLocality: 'Noida',
         addressRegion: 'Uttar Pradesh',
         postalCode: '201301',
         addressCountry: 'IN',
     },
     contactPoint: {
-        telephone: '+91-9876543210',
+        telephone: '+91-9871648677',
         contactType: 'customer service',
         areaServed: 'IN',
         availableLanguage: ['English', 'Hindi'],
     },
     sameAs: [
-        'https://www.facebook.com/sohopg',
-        'https://www.instagram.com/sohopg',
-        'https://twitter.com/sohopg',
+        'https://www.facebook.com/soholiv',
+        'https://www.instagram.com/soholiv',
+        'https://twitter.com/soholiv',
     ],
 } as const
 
 export const SOCIAL_HANDLES = {
-    twitter: '@sohopg',
-    facebook: 'sohopg',
-    instagram: 'sohopg',
+    twitter: '@soholiv',
+    facebook: 'soholiv',
+    instagram: 'soholiv',
 } as const
 
 export const DEFAULT_KEYWORDS = [
+    'Soho Liv PG',
     'PG in Noida',
+    'best PG in Noida',
+    'best PG in Greater Noida',
+    'Noida PG',
+    'Greater Noida PG',
     'paying guest Noida',
+    'best paying guest in Noida',
+    'premium co-living Noida',
+    'affordable PG in Noida',
+    'cheapest PG in Noida',
+    'budget PG in Noida',
+    'budget luxury PG',
     'PG near me',
-    'best PG Noida',
-    'PG accommodation',
     'boys PG Noida',
     'girls PG Noida',
-    'co-living Noida',
-    'affordable PG Noida',
-    'PG with food',
+    'co living PG Noida',
+    'furnished rooms Noida',
+    'PG with food Noida',
+    'PG with WiFi Noida',
+    'AC PG in Noida',
+    'PG with CRM support',
+    'PG with ticket support',
 ] as const
 
 export const LOCATION_KEYWORDS = [
-    'Sector 50',
-    'Sector 51',
-    'Sector 52',
-    'Sector 62',
-    'Sector 76',
+    'PG in Sector 51 Noida',
+    'best PG in Sector 51 Noida',
+    'PG in Sector 168 Noida',
+    'best PG in Sector 168 Noida',
+    'PG in Sector 22 Noida',
+    'best PG in Sector 22 Noida',
+    'Noida Expressway',
+    'PG near Noida Expressway',
     'Noida Extension',
-    'Greater Noida',
+    'PG near Sector 52 Metro',
+    'PG near Sector 142 Metro',
+    'PG near Noida City Centre',
 ] as const
 
 export const DEFAULT_OG_IMAGE = `${SITE_CONFIG.url}/og-image.png`
 
 export const AUTHOR = {
-    name: 'SOHO PG',
+    name: 'Jitendra Dixit',
     url: SITE_CONFIG.url,
 } as const
