@@ -1,7 +1,15 @@
 import { Resend } from 'resend'
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resend: Resend | null = null
+
+function getResendClient() {
+    if (!process.env.RESEND_API_KEY) {
+        throw new Error('RESEND_API_KEY is required to send emails')
+    }
+
+    resend ??= new Resend(process.env.RESEND_API_KEY)
+    return resend
+}
 
 interface SendEmailOptions {
     to: string | string[]
@@ -21,7 +29,8 @@ interface EmailResult {
  */
 export async function sendEmail(options: SendEmailOptions): Promise<EmailResult> {
     try {
-        const { data, error } = await resend.emails.send({
+        const resendClient = getResendClient()
+        const { data, error } = await resendClient.emails.send({
             from: process.env.EMAIL_FROM || 'SOHO PG <noreply@sohopg.com>',
             to: options.to,
             subject: options.subject,

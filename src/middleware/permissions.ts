@@ -3,6 +3,8 @@ import { UserRole } from '@prisma/client'
 import { requireAuth, AuthSession } from '@/middleware/auth'
 import { Permission, hasPermission } from '@/lib/rbac'
 
+export { requireSuperAdmin } from '@/middleware/auth'
+
 export async function requirePermission(
   permission: Permission
 ): Promise<AuthSession | NextResponse> {

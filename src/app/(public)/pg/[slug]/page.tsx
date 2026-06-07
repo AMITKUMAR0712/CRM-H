@@ -17,6 +17,8 @@ import prisma from '@/lib/prisma'
 import { formatPrice } from '@/lib/utils'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { getPGSeoSlug, getSectorSeoSlug, resolvePGSlug } from '@/lib/seo/slugs'
+import { generatePGMetadata } from '@/lib/seo/metadata'
+import { generateBreadcrumbSchema, generateProductSchema } from '@/lib/seo/structured-data'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -85,21 +87,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
     const pg = await getPG(slug)
 
-<<<<<<< HEAD:src/app/(public)/pg/[slug]/page.tsx
     if (!pg) {
         return { title: 'PG Not Found' }
     }
 
-    return {
-        title: pg.metaTitle || `${pg.name} - PG in ${pg.sector.name}, Noida`,
-        description: pg.metaDescription || `${pg.name} in ${pg.sector.name}, Noida. ${pg.roomType} room, ${pg.hasAC ? 'AC' : 'Non-AC'}, ₹${pg.monthlyRent}/month. ${pg.mealsIncluded ? 'Meals included.' : ''} Book a visit today!`,
-        openGraph: {
-            title: `${pg.name} - PG in ${pg.sector.name}`,
-            description: pg.description || `Premium PG accommodation in ${pg.sector.name}, Noida.`,
-            images: pg.photos.length > 0 ? [{ url: pg.photos[0].url }] : undefined,
-        },
-    }
-=======
     return generatePGMetadata({
         name: pg.name,
         description: pg.description,
@@ -113,7 +104,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         mealsIncluded: pg.mealsIncluded,
         photos: pg.photos.map((photo) => ({ url: photo.url })),
     })
->>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/pg/[slug]/page.tsx
 }
 
 export async function generateStaticParams() {
@@ -204,27 +194,6 @@ export default async function PGDetailPage({ params }: Props) {
         }
     })
 
-<<<<<<< HEAD:src/app/(public)/pg/[slug]/page.tsx
-    // JSON-LD Schema
-    const productSchema = {
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: pg.name,
-        description: pg.description || `PG accommodation in ${pg.sector.name}, Noida`,
-        image: pg.photos.length > 0 ? pg.photos[0].url : undefined,
-        offers: {
-            '@type': 'Offer',
-            price: pg.monthlyRent,
-            priceCurrency: 'INR',
-            availability: pg.availableRooms > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        },
-        aggregateRating: avgRating ? {
-            '@type': 'AggregateRating',
-            ratingValue: avgRating,
-            reviewCount: pg.reviews.length,
-        } : undefined,
-    }
-=======
     // Structured Data
     const productSchema = generateProductSchema({
         name: pg.name,
@@ -244,14 +213,13 @@ export default async function PGDetailPage({ params }: Props) {
         { name: pg.sector.name, url: `/pg-locations/${sectorUrlSlug}` },
         { name: pg.name, url: `/pg/${pgUrlSlug}` }
     ])
->>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/pg/[slug]/page.tsx
 
     return (
         <>
             {/* JSON-LD Schema */}
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify([productSchema, breadcrumbSchema]) }}
             />
 
             <div className="pb-20 md:pb-0">

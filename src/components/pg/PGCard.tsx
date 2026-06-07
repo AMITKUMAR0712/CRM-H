@@ -52,17 +52,8 @@ export default function PGCard({ pg }: PGCardProps) {
     const pgUrlSlug = getPGSeoSlug(pg.slug, pg.sector?.slug)
 
     return (
-<<<<<<< HEAD:src/components/pg/PGCard.tsx
-        <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
-=======
-<<<<<<< HEAD
-        <div className="bg-(--color-surface) rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
->>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/components/pg/PGCard.tsx
-            <Link href={`/pg/${pg.slug}`} className="block">
-=======
         <div className="bg-white rounded-2xl border border-[var(--color-border)] p-6 hover:shadow-lg transition-all duration-300 group">
             <Link href={`/pg/${pgUrlSlug}`} className="block">
->>>>>>> a03c204 (Update frontend UI with SEO , content all over website on pager SEO)
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Image */}
                     <div className="relative w-full md:w-48 h-40 bg-[var(--color-limestone)] rounded-xl overflow-hidden flex items-center justify-center">

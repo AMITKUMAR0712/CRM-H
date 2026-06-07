@@ -10,17 +10,10 @@ import { generateLocalBusinessSchema } from '@/lib/seo/structured-data'
 import JsonLd from '@/components/seo/JsonLd'
 
 export const metadata: Metadata = generatePageMetadata(
-<<<<<<< HEAD:src/app/(public)/contact/page.tsx
-    'Contact Us - SOHO PG Noida',
-    'Get in touch with SOHO PG. Book a visit, enquire about rooms, or get directions to our PG accommodations in Noida. Call us or WhatsApp for instant response.',
-    '/contact',
-    ['contact SOHO PG', 'book PG visit', 'PG enquiry', 'PG contact Noida', 'accommodation contact']
-=======
     'Contact Soho Liv | Book Best PG in Noida Today',
     'Contact Soho Liv to book an affordable PG in Noida Sector 51, Sector 168 or Sector 22. Call, WhatsApp, raise enquiries and get fast support for Noida and Greater Noida PG rooms.',
     '/contact',
     ['contact Soho Liv', 'book PG visit Noida', 'best PG in Noida contact', 'Jitendra Dixit contact', 'Noida co-living help', 'PG in Sector 51 Noida']
->>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/contact/page.tsx
 )
 
 async function getSettings() {
@@ -78,13 +71,8 @@ export default async function ContactPage() {
             <div>
                 <PageHero
                     kicker="Contact"
-<<<<<<< HEAD:src/app/(public)/contact/page.tsx
-                    title="Talk to SOHO PG"
-                    subtitle="Questions, pricing, availability, or a site visit—send a message and we'll respond soon."
-=======
                     title="Talk to Soho Liv"
                     subtitle="Questions, pricing, availability, site visits or resident support for PGs in Sector 51, Sector 168 and Sector 22 Noida. Call, WhatsApp or send an enquiry."
->>>>>>> 6b5cdb4 (Update frontend UI with SEO , content all over website on pager SEO):Soholiv_pg-main/src/app/(public)/contact/page.tsx
                     actions={
                         <>
                             <Button asChild>
